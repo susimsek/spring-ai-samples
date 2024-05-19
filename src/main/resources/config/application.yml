@@ -1,0 +1,63 @@
+server:
+  port: 8080
+  forward-headers-strategy: framework
+spring:
+  application:
+    name: spring-ai-samples
+  main:
+    allow-bean-definition-overriding: true
+  output:
+    ansi:
+      enabled: always
+  profiles:
+    active: local
+  web:
+    locale: en
+  messages:
+    basename: i18n/messages
+    fallback-to-system-locale: false
+  mvc:
+    problemdetails:
+      enabled: true
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+    deserialization:
+      fail-on-unknown-properties: false
+    default-property-inclusion: non_null
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  health:
+    readiness-state:
+      enabled: true
+    liveness-state:
+      enabled: true
+  endpoint:
+    shutdown:
+      enabled: true
+    health:
+      probes:
+        enabled: true
+  info:
+    env:
+      enabled: true
+
+
+endpoints:
+  shutdown:
+    enabled: true
+
+springdoc:
+  cache:
+    disabled: true
+
+logging:
+  level:
+    ROOT: INFO
+    io.github.susimsek.springaisamples: INFO
+  pattern:
+    level: '%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]'

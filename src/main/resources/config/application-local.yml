@@ -1,0 +1,30 @@
+server:
+  port: 8071
+spring:
+  mvc:
+    problemdetails:
+      enabled: true
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+    deserialization:
+      fail-on-unknown-properties: false
+    default-property-inclusion: non_null
+  ai:
+   openai:
+     api-key: ${OPENAI_API_KEY}
+     chat:
+       options:
+         model: gpt-3.5-turbo
+
+management:
+  tracing:
+    enabled: false
+
+logging:
+  level:
+    ROOT: DEBUG
+    org.hibernate.SQL: DEBUG
+    io.github.susimsek.springaisamples: DEBUG
+  pattern:
+    level: '%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]'
