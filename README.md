@@ -13,7 +13,7 @@ Its goal is to apply to the AI domain Spring ecosystem design principles such as
 * Java 17
 * Kotlin
 * Maven 3.x
-* AI
+* Open AI
 
 
 ## Build
