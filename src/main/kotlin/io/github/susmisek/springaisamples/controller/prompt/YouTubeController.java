@@ -1,0 +1,66 @@
+package io.github.susmisek.springaisamples.controller.prompt;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import java.util.Map;
+import lombok.RequiredArgsConstructor;
+import org.springframework.ai.chat.ChatClient;
+import org.springframework.ai.chat.prompt.Prompt;
+import org.springframework.ai.chat.prompt.PromptTemplate;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequiredArgsConstructor
+@Tag(name = "ai", description = "Spring AI Sample Rest Apis")
+@RequestMapping("/api/ai/youtube")
+public class YouTubeController {
+
+    private final ChatClient chatClient;
+
+    @Value("classpath:/prompts/youtube.st")
+    private Resource ytPromptResource;
+
+    private static final String YOUTUBE_MESSAGE_TEMPLATE = """
+            List 10 of the most popular YouTubers in {genre} along with their current subscriber counts.
+            If you don't know the answer, just say "I don't know".
+        """;
+
+    @Operation(summary = "Find popular YouTubers (Step One)",
+        description = "Lists 10 of the most popular YouTubers")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Successful response",
+            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = String.class))})})
+    @GetMapping("/popular-step-one")
+    public ResponseEntity<String> findPopularYouTubersStepOne(
+        @RequestParam(value = "genre", defaultValue = "tech") String genre) {
+        PromptTemplate promptTemplate = new PromptTemplate(YOUTUBE_MESSAGE_TEMPLATE);
+        Prompt prompt = promptTemplate.create(Map.of("genre", genre));
+        var response = chatClient.call(prompt).getResult().getOutput().getContent();
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "Find popular YouTubers",
+        description = "Lists 10 of the most popular YouTubers using a prompt template from a resource file.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Successful response",
+            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = String.class))})})
+    @GetMapping("/popular")
+    public ResponseEntity<String> findPopularYouTubers(
+        @RequestParam(value = "genre", defaultValue = "tech") String genre) {
+        PromptTemplate promptTemplate = new PromptTemplate(ytPromptResource);
+        Prompt prompt = promptTemplate.create(Map.of("genre", genre));
+        var response = chatClient.call(prompt).getResult().getOutput().getContent();
+        return ResponseEntity.ok(response);
+    }
+
+}
