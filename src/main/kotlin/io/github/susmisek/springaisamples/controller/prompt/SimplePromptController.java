@@ -2,6 +2,7 @@ package io.github.susmisek.springaisamples.controller.prompt;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -24,7 +25,9 @@ public class SimplePromptController {
         description = "Returns information about how long the Java programming language has been around.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successful response",
-            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = String.class))})})
+            content = @Content(mediaType = "text/plain", schema = @Schema(implementation = String.class),
+                examples = @ExampleObject(value = "Java has been around since 1995."))),
+        @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content)})
     @GetMapping("/api/ai/simple-prompt")
     public ResponseEntity<String> simple() {
         String response = chatClient.call(

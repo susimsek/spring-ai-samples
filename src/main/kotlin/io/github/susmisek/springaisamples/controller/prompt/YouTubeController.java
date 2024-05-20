@@ -1,7 +1,9 @@
 package io.github.susmisek.springaisamples.controller.prompt;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -39,9 +41,12 @@ public class YouTubeController {
         description = "Lists 10 of the most popular YouTubers")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successful response",
-            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = String.class))})})
+            content = @Content(mediaType = "text/plain", schema = @Schema(implementation = String.class),
+                examples = @ExampleObject(value = "John Doe, Jane Smith, Alice Johnson"))),
+        @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content)})
     @GetMapping("/popular-step-one")
     public ResponseEntity<String> findPopularYouTubersStepOne(
+        @Parameter(description = "The genre of YouTube content", example = "tech")
         @RequestParam(value = "genre", defaultValue = "tech") String genre) {
         PromptTemplate promptTemplate = new PromptTemplate(YOUTUBE_MESSAGE_TEMPLATE);
         Prompt prompt = promptTemplate.create(Map.of("genre", genre));
@@ -53,9 +58,12 @@ public class YouTubeController {
         description = "Lists 10 of the most popular YouTubers using a prompt template from a resource file.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successful response",
-            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = String.class))})})
+            content = @Content(mediaType = "text/plain", schema = @Schema(implementation = String.class),
+                examples = @ExampleObject(value = "John Doe, Jane Smith, Alice Johnson"))),
+        @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content)})
     @GetMapping("/popular")
     public ResponseEntity<String> findPopularYouTubers(
+        @Parameter(description = "The genre of YouTube content", example = "tech")
         @RequestParam(value = "genre", defaultValue = "tech") String genre) {
         PromptTemplate promptTemplate = new PromptTemplate(ytPromptResource);
         Prompt prompt = promptTemplate.create(Map.of("genre", genre));
