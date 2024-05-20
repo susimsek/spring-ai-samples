@@ -2,12 +2,11 @@ package io.github.susmisek.springaisamples
 
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
-import javax.annotation.processing.Generated
 
 @SpringBootApplication
 class SpringAiSamplesApplication
 
-@Generated
+@io.github.susmisek.springaisamples.annotation.Generated
 fun main(args: Array<String>) {
     runApplication<SpringAiSamplesApplication>(*args)
 }
