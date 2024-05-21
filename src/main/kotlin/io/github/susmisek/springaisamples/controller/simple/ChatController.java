@@ -10,6 +10,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.chat.ChatClient;
+import org.springframework.http.MediaType;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -26,9 +28,11 @@ public class ChatController {
         description = "Generates a response from the chat client based on the provided message.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successful response",
-            content = {@Content(mediaType = "text/plain", schema = @Schema(implementation = String.class),
+            content = {@Content(mediaType = MediaType.TEXT_PLAIN_VALUE, schema = @Schema(implementation = String.class),
                     examples = {@ExampleObject(value = "Here is a response for the provided message.")})}),
-        @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content)})
+        @ApiResponse(responseCode = "500", description = "Internal server error",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                schema = @Schema(implementation = ProblemDetail.class)))})
     @GetMapping("/api/ai/chat/generate")
     public ResponseEntity<String> generate(
         @Parameter(description = "Message", example = "Tell me a dad joke about dogs")

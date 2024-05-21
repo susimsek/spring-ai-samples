@@ -15,6 +15,8 @@ import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
+import org.springframework.http.MediaType;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -41,9 +43,11 @@ public class YouTubeController {
         description = "Lists 10 of the most popular YouTubers")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successful response",
-            content = @Content(mediaType = "text/plain", schema = @Schema(implementation = String.class),
+            content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE, schema = @Schema(implementation = String.class),
                 examples = @ExampleObject(value = "John Doe, Jane Smith, Alice Johnson"))),
-        @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content)})
+        @ApiResponse(responseCode = "500", description = "Internal server error",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                schema = @Schema(implementation = ProblemDetail.class)))})
     @GetMapping("/popular-step-one")
     public ResponseEntity<String> findPopularYouTubersStepOne(
         @Parameter(description = "The genre of YouTube content", example = "tech")
@@ -58,9 +62,11 @@ public class YouTubeController {
         description = "Lists 10 of the most popular YouTubers using a prompt template from a resource file.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successful response",
-            content = @Content(mediaType = "text/plain", schema = @Schema(implementation = String.class),
+            content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE, schema = @Schema(implementation = String.class),
                 examples = @ExampleObject(value = "John Doe, Jane Smith, Alice Johnson"))),
-        @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content)})
+        @ApiResponse(responseCode = "500", description = "Internal server error",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                schema = @Schema(implementation = ProblemDetail.class)))})
     @GetMapping("/popular")
     public ResponseEntity<String> findPopularYouTubers(
         @Parameter(description = "The genre of YouTube content", example = "tech")

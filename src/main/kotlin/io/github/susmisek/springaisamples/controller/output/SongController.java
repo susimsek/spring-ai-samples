@@ -19,6 +19,8 @@ import org.springframework.ai.chat.ChatClient;
 import org.springframework.ai.chat.ChatResponse;
 import org.springframework.ai.parser.ListOutputParser;
 import org.springframework.core.convert.support.DefaultConversionService;
+import org.springframework.http.MediaType;
+import org.springframework.http.ProblemDetail;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -41,11 +43,15 @@ public class SongController {
         description = "Returns a list of top 10 songs by the specified artist.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successful operation",
-            content = @Content(mediaType = "application/json",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                 array = @ArraySchema(schema = @Schema(implementation = String.class)),
                 examples = @ExampleObject(value = "[\"Song 1\",\"Song 2\",\"Song 3\"]"))),
-        @ApiResponse(responseCode = "400", description = "Invalid input", content = @Content),
-        @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content)
+        @ApiResponse(responseCode = "400", description = "Invalid input",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                schema = @Schema(implementation = ProblemDetail.class))),
+        @ApiResponse(responseCode = "500", description = "Internal server error",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                schema = @Schema(implementation = ProblemDetail.class)))
     })
     @GetMapping("/api/ai/songs-as-list")
     public List<String> getSongsByArtistAsList(
@@ -61,11 +67,15 @@ public class SongController {
         description = "Returns a string containing the top 10 songs by the specified artist.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successful operation",
-            content = @Content(mediaType = "text/plain",
+            content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE,
                 schema = @Schema(implementation = String.class),
                     examples = @ExampleObject(value = "Song 1, Song 2, Song 3"))),
-        @ApiResponse(responseCode = "400", description = "Invalid input", content = @Content),
-        @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content)
+        @ApiResponse(responseCode = "400", description = "Invalid input",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                schema = @Schema(implementation = ProblemDetail.class))),
+        @ApiResponse(responseCode = "500", description = "Internal server error",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                schema = @Schema(implementation = ProblemDetail.class)))
     })
     @GetMapping("/api/ai/songs")
     public String getSongsByArtist(

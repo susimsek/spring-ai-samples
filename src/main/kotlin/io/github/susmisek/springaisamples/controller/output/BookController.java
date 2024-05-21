@@ -20,6 +20,8 @@ import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.parser.BeanOutputParser;
 import org.springframework.ai.parser.MapOutputParser;
+import org.springframework.http.MediaType;
+import org.springframework.http.ProblemDetail;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -50,9 +52,11 @@ public class BookController {
     @Operation(summary = "Get books by Craig Walls", description = "Generate a list of books written by Craig Walls.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successfully retrieved list of books",
-            content = @Content(mediaType = "text/plain", schema = @Schema(implementation = String.class),
+            content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE, schema = @Schema(implementation = String.class),
                 examples = @ExampleObject(value = "Book 1, Book 2, Book 3"))),
-        @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content)
+        @ApiResponse(responseCode = "500", description = "Internal server error",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                schema = @Schema(implementation = ProblemDetail.class)))
     })
     @GetMapping("/craig")
     public String getBooksByCraig() {
@@ -66,9 +70,13 @@ public class BookController {
         description = "Generate a list of books written by the specified author.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successfully retrieved list of books",
-            content = @Content(mediaType = "application/json", schema = @Schema(implementation = Author.class))),
-        @ApiResponse(responseCode = "400", description = "Invalid author name", content = @Content),
-        @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content)
+            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Author.class))),
+        @ApiResponse(responseCode = "400", description = "Invalid author name",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                schema = @Schema(implementation = ProblemDetail.class))),
+        @ApiResponse(responseCode = "500", description = "Internal server error",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                schema = @Schema(implementation = ProblemDetail.class)))
     })
     @GetMapping("/by-author")
     public Author getBooksByAuthor(
@@ -85,10 +93,14 @@ public class BookController {
         description = "Generate a list of links for the specified author, including social network links.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successfully retrieved author links",
-            content = @Content(mediaType = "application/json", schema = @Schema(implementation = Map.class),
+            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Map.class),
                 examples = @ExampleObject(value = "{\"John Doe\": {\"github\": \"http://www.example.com\", \"twitter\": \"@example\"}}"))),
-        @ApiResponse(responseCode = "400", description = "Invalid author name", content = @Content),
-        @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content)
+        @ApiResponse(responseCode = "400", description = "Invalid author name",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                schema = @Schema(implementation = ProblemDetail.class))),
+        @ApiResponse(responseCode = "500", description = "Internal server error",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                schema = @Schema(implementation = ProblemDetail.class)))
     })
     @GetMapping("/author/{author}")
     public Map<String, Object> getAuthorLinks(@PathVariable String author) {

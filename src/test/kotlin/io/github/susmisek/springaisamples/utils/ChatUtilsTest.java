@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import io.github.susmisek.springaisamples.model.Author;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
@@ -62,5 +61,10 @@ class ChatUtilsTest {
 
         // Then
         assertEquals(expectedMap, actualMap);
+    }
+
+    record Author(
+        String author,
+        List<String> books) {
     }
 }
