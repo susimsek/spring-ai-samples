@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.constraints.NotBlank;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.chat.ChatClient;
@@ -18,6 +19,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -27,6 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @Tag(name = "ai", description = "Spring AI Sample Rest Apis")
 @RequestMapping("/api/ai/youtube")
+@Validated
 public class YouTubeController {
 
     private final ChatClient chatClient;
@@ -51,7 +54,8 @@ public class YouTubeController {
     @GetMapping("/popular-step-one")
     public ResponseEntity<String> findPopularYouTubersStepOne(
         @Parameter(description = "The genre of YouTube content", example = "tech")
-        @RequestParam(value = "genre", defaultValue = "tech") String genre) {
+        @RequestParam(value = "genre", defaultValue = "tech")
+        @NotBlank(message = "Genre must not be blank") String genre) {
         PromptTemplate promptTemplate = new PromptTemplate(YOUTUBE_MESSAGE_TEMPLATE);
         Prompt prompt = promptTemplate.create(Map.of("genre", genre));
         var response = chatClient.call(prompt).getResult().getOutput().getContent();
@@ -70,11 +74,11 @@ public class YouTubeController {
     @GetMapping("/popular")
     public ResponseEntity<String> findPopularYouTubers(
         @Parameter(description = "The genre of YouTube content", example = "tech")
-        @RequestParam(value = "genre", defaultValue = "tech") String genre) {
+        @RequestParam(value = "genre", defaultValue = "tech")
+        @NotBlank(message = "Genre must not be blank") String genre) {
         PromptTemplate promptTemplate = new PromptTemplate(ytPromptResource);
         Prompt prompt = promptTemplate.create(Map.of("genre", genre));
         var response = chatClient.call(prompt).getResult().getOutput().getContent();
         return ResponseEntity.ok(response);
     }
-
 }

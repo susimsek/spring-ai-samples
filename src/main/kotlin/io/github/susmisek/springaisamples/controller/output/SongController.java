@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.constraints.NotBlank;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +22,7 @@ import org.springframework.ai.parser.ListOutputParser;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -28,6 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @Tag(name = "ai", description = "Spring AI Sample Rest Apis")
+@Validated
 public class SongController {
 
     private final ChatClient chatClient;
@@ -56,7 +59,8 @@ public class SongController {
     @GetMapping("/api/ai/songs-as-list")
     public List<String> getSongsByArtistAsList(
         @Parameter(description = "Name of the artist", example = "Taylor Swift")
-        @RequestParam(value = ARTIST, defaultValue = DEFAULT_ARTIST) String artist) {
+        @RequestParam(value = ARTIST, defaultValue = DEFAULT_ARTIST)
+        @NotBlank(message = "Artist name must not be blank") String artist) {
         ListOutputParser outputParser = new ListOutputParser(new DefaultConversionService());
         Map<String, Object> model = Map.of(ARTIST, artist, FORMAT, outputParser.getFormat());
         ChatResponse response = chatClient.call(ChatUtils.buildPrompt(SONGS_MESSAGE_TEMPLATE, model));
@@ -69,7 +73,7 @@ public class SongController {
         @ApiResponse(responseCode = "200", description = "Successful operation",
             content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE,
                 schema = @Schema(implementation = String.class),
-                    examples = @ExampleObject(value = "Song 1, Song 2, Song 3"))),
+                examples = @ExampleObject(value = "Song 1, Song 2, Song 3"))),
         @ApiResponse(responseCode = "400", description = "Invalid input",
             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                 schema = @Schema(implementation = ProblemDetail.class))),
@@ -80,11 +84,11 @@ public class SongController {
     @GetMapping("/api/ai/songs")
     public String getSongsByArtist(
         @Parameter(description = "Name of the artist", example = "Taylor Swift")
-        @RequestParam(value = ARTIST, defaultValue = DEFAULT_ARTIST) String artist) {
+        @RequestParam(value = ARTIST, defaultValue = DEFAULT_ARTIST)
+        @NotBlank(message = "Artist name must not be blank") String artist) {
         String message = SONGS_MESSAGE_TEMPLATE.replace("{format}", "");
         Map<String, Object> model = Map.of(ARTIST, artist);
         ChatResponse response = chatClient.call(ChatUtils.buildPrompt(message, model));
         return response.getResult().getOutput().getContent();
     }
-
 }
