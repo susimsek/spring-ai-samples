@@ -1,5 +1,8 @@
 package io.github.susmisek.springaisamples.controller.output;
 
+import static io.github.susmisek.springaisamples.utils.ChatUtils.FORMAT;
+
+import io.github.susmisek.springaisamples.utils.ChatUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -14,8 +17,6 @@ import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.chat.ChatClient;
 import org.springframework.ai.chat.ChatResponse;
-import org.springframework.ai.chat.prompt.Prompt;
-import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.parser.ListOutputParser;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,7 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class SongController {
 
     private final ChatClient chatClient;
-
+    private static final String ARTIST = "artist";
     private static final String DEFAULT_ARTIST = "Taylor Swift";
     private static final String SONGS_MESSAGE_TEMPLATE = """
         Please give me a list of top 10 songs for the artist {artist}.
@@ -49,13 +50,10 @@ public class SongController {
     @GetMapping("/api/ai/songs-as-list")
     public List<String> getSongsByArtistAsList(
         @Parameter(description = "Name of the artist", example = "Taylor Swift")
-        @RequestParam(value = "artist", defaultValue = DEFAULT_ARTIST) String artist) {
+        @RequestParam(value = ARTIST, defaultValue = DEFAULT_ARTIST) String artist) {
         ListOutputParser outputParser = new ListOutputParser(new DefaultConversionService());
-        PromptTemplate promptTemplate =
-            new PromptTemplate(SONGS_MESSAGE_TEMPLATE,
-                Map.of("artist", artist, "format", outputParser.getFormat()));
-        Prompt prompt = promptTemplate.create();
-        ChatResponse response = chatClient.call(prompt);
+        Map<String, Object> model = Map.of(ARTIST, artist, FORMAT, outputParser.getFormat());
+        ChatResponse response = chatClient.call(ChatUtils.buildPrompt(SONGS_MESSAGE_TEMPLATE, model));
         return outputParser.parse(response.getResult().getOutput().getContent());
     }
 
@@ -72,11 +70,10 @@ public class SongController {
     @GetMapping("/api/ai/songs")
     public String getSongsByArtist(
         @Parameter(description = "Name of the artist", example = "Taylor Swift")
-        @RequestParam(value = "artist", defaultValue = DEFAULT_ARTIST) String artist) {
+        @RequestParam(value = ARTIST, defaultValue = DEFAULT_ARTIST) String artist) {
         String message = SONGS_MESSAGE_TEMPLATE.replace("{format}", "");
-        PromptTemplate promptTemplate = new PromptTemplate(message, Map.of("artist", artist));
-        Prompt prompt = promptTemplate.create();
-        ChatResponse response = chatClient.call(prompt);
+        Map<String, Object> model = Map.of(ARTIST, artist);
+        ChatResponse response = chatClient.call(ChatUtils.buildPrompt(message, model));
         return response.getResult().getOutput().getContent();
     }
 

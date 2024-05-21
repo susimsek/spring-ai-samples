@@ -1,6 +1,9 @@
 package io.github.susmisek.springaisamples.controller.output;
 
+import static io.github.susmisek.springaisamples.utils.ChatUtils.FORMAT;
+
 import io.github.susmisek.springaisamples.model.Author;
+import io.github.susmisek.springaisamples.utils.ChatUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -30,9 +33,18 @@ import org.springframework.web.bind.annotation.RestController;
 public class BookController {
 
     private final ChatClient chatClient;
+    private static final String AUTHOR = "author";
     private static final String DEFAULT_AUTHOR = "Ken Kousen";
-    private static final String BOOK_MESSAGE_TEMPLATE = "Generate a list of books written by the author {author}.";
-    private static final String LINKS_MESSAGE_TEMPLATE = "Generate a list of links for the author {author}.";
+    private static final String BOOK_MESSAGE_TEMPLATE = """
+            Generate a list of books written by the author {author}. If you aren't positive that a book
+            belongs to this author please don't include it.
+            {format}
+            """;
+    private static final String LINKS_MESSAGE_TEMPLATE = """
+            Generate a list of books written by the author {author}. If you aren't positive that a book
+            belongs to this author please don't include it.
+            {format}
+            """;
 
 
     @Operation(summary = "Get books by Craig Walls", description = "Generate a list of books written by Craig Walls.")
@@ -44,7 +56,9 @@ public class BookController {
     })
     @GetMapping("/craig")
     public String getBooksByCraig() {
-        return chatClient.call(buildPrompt(BOOK_MESSAGE_TEMPLATE, "Craig Walls"))
+        String message = BOOK_MESSAGE_TEMPLATE.replace("{format}", "");
+        Map<String, Object> model = Map.of(AUTHOR, "Craig Walls");
+        return chatClient.call(ChatUtils.buildPrompt(message, model))
             .getResult().getOutput().getContent();
     }
 
@@ -59,20 +73,12 @@ public class BookController {
     @GetMapping("/by-author")
     public Author getBooksByAuthor(
         @Parameter(description = "Name of the author", example = "Craig Walls")
-        @RequestParam(value = "author", defaultValue = DEFAULT_AUTHOR) String author) {
-        String promptMessage = """
-            Generate a list of books written by the author {author}. If you aren't positive that a book
-            belongs to this author please don't include it.
-            {format}
-            """;
-
+        @RequestParam(value = AUTHOR, defaultValue = DEFAULT_AUTHOR) String author) {
         var outputParser = new BeanOutputParser<>(Author.class);
         String format = outputParser.getFormat();
-        PromptTemplate promptTemplate = new PromptTemplate(promptMessage,
-            Map.of("author", author, "format", format));
-        Prompt prompt = promptTemplate.create();
-        Generation generation = chatClient.call(prompt).getResult();
-        return parseResponse(generation, Author.class);
+        Map<String, Object> model = Map.of(AUTHOR, author, FORMAT, format);
+        Generation generation = chatClient.call(ChatUtils.buildPrompt(BOOK_MESSAGE_TEMPLATE, model)).getResult();
+        return ChatUtils.parseResponse(generation, outputParser);
     }
 
     @Operation(summary = "Get author links",
@@ -90,18 +96,9 @@ public class BookController {
         String format = outputParser.getFormat();
 
         PromptTemplate promptTemplate = new PromptTemplate(LINKS_MESSAGE_TEMPLATE,
-            Map.of("author", author, "format", format));
+            Map.of(AUTHOR, author, FORMAT, format));
         Prompt prompt = promptTemplate.create();
         Generation generation = chatClient.call(prompt).getResult();
-        return outputParser.parse(generation.getOutput().getContent());
+        return ChatUtils.parseResponse(generation, outputParser);
     }
-
-    private Prompt buildPrompt(String template, String author) {
-        return new PromptTemplate(template, Map.of("author", author)).create();
-    }
-
-    private <T> T parseResponse(Generation generation, Class<T> responseType) {
-        return new BeanOutputParser<>(responseType).parse(generation.getOutput().getContent());
-    }
-
 }
