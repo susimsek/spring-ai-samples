@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: spring-ai-samples
+  web:
+    locale: en
+  messages:
+    fallback-to-system-locale: false
+  main:
+    allow-bean-definition-overriding: true
+  output:
+    ansi:
+      enabled: always
+server:
+  port: 10344
+  address: localhost
