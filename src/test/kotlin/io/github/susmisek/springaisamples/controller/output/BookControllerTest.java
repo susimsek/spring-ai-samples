@@ -5,6 +5,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -64,6 +65,14 @@ class BookControllerTest {
             .andExpect(MockMvcResultMatchers.jsonPath("$.author", is(author))) // Burada $.name yerine $.author kullanıldı
             .andExpect(MockMvcResultMatchers.jsonPath("$.books", hasSize(3)))
             .andExpect(MockMvcResultMatchers.jsonPath("$.books", contains("Book 1", "Book 2", "Book 3")));
+    }
+
+    @Test
+    void testGetBooksByAuthor_WithInvalidAuthorName_ShouldReturnBadRequest() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/ai/books/by-author")
+                .param("author", "1"))
+            .andExpect(MockMvcResultMatchers.status().isBadRequest())
+            .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON));
     }
 
     @Test

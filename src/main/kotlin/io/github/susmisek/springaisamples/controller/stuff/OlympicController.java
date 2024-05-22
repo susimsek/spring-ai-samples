@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
@@ -58,7 +59,9 @@ public class OlympicController {
         @Parameter(description = "Message to be sent to the chat client",
             example = "What sports are being included in the 2024 Summer Olympics?")
         @RequestParam(value = "message", defaultValue = "What sports are being included in the 2024 Summer Olympics?")
-        @NotBlank(message = "Message cannot be blank") String message,
+        @NotBlank(message = "Message cannot be blank")
+        @Size(min = 2, max = 100, message = "Message size must be between 2 and 100 characters")
+        String message,
         @Parameter(description = "Flag to indicate if additional context should be included",
             example = "false", in = ParameterIn.QUERY)
         @RequestParam(value = "stuffit", defaultValue = "false")

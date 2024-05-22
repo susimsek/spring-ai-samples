@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.chat.ChatClient;
 import org.springframework.http.MediaType;
@@ -40,7 +41,9 @@ public class ChatController {
     public ResponseEntity<String> generate(
         @Parameter(description = "Message", example = "Tell me a dad joke about dogs")
         @RequestParam(value = "message", defaultValue = "Tell me a dad joke about dogs")
-        @NotBlank(message = "Message cannot be blank") String message) {
+        @NotBlank(message = "Message cannot be blank")
+        @Size(min = 2, max = 255, message = "Message size must be between 2 and 255 characters")
+        String message) {
         var response = chatClient.call(message);
         return ResponseEntity.ok(response);
     }

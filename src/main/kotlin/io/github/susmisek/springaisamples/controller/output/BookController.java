@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.chat.ChatClient;
@@ -86,7 +87,9 @@ public class BookController {
     public Author getBooksByAuthor(
         @Parameter(description = "Name of the author", example = "Craig Walls")
         @RequestParam(value = AUTHOR, defaultValue = DEFAULT_AUTHOR)
-        @NotBlank(message = "Author name must not be blank") String author) {
+        @NotBlank(message = "Author name must not be blank")
+        @Size(min = 2, max = 50, message = "Author name must be between 2 and 50 characters")
+        String author) {
         var outputParser = new BeanOutputParser<>(Author.class);
         String format = outputParser.getFormat();
         Map<String, Object> model = Map.of(AUTHOR, author, FORMAT, format);
@@ -110,7 +113,10 @@ public class BookController {
     })
     @GetMapping("/author/{author}")
     public Map<String, Object> getAuthorLinks(
-        @PathVariable @NotBlank(message = "Author name must not be blank") String author) {
+        @PathVariable
+        @NotBlank(message = "Author name must not be blank")
+        @Size(min = 2, max = 50, message = "Author name must be between 2 and 50 characters")
+        String author) {
         MapOutputParser outputParser = new MapOutputParser();
         String format = outputParser.getFormat();
 

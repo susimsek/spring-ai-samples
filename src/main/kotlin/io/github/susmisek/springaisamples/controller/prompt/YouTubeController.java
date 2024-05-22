@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.chat.ChatClient;
@@ -55,7 +56,9 @@ public class YouTubeController {
     public ResponseEntity<String> findPopularYouTubersStepOne(
         @Parameter(description = "The genre of YouTube content", example = "tech")
         @RequestParam(value = "genre", defaultValue = "tech")
-        @NotBlank(message = "Genre must not be blank") String genre) {
+        @NotBlank(message = "Genre must not be blank")
+        @Size(min = 2, max = 50, message = "Genre must be between 2 and 50 characters")
+        String genre) {
         PromptTemplate promptTemplate = new PromptTemplate(YOUTUBE_MESSAGE_TEMPLATE);
         Prompt prompt = promptTemplate.create(Map.of("genre", genre));
         var response = chatClient.call(prompt).getResult().getOutput().getContent();
@@ -75,7 +78,9 @@ public class YouTubeController {
     public ResponseEntity<String> findPopularYouTubers(
         @Parameter(description = "The genre of YouTube content", example = "tech")
         @RequestParam(value = "genre", defaultValue = "tech")
-        @NotBlank(message = "Genre must not be blank") String genre) {
+        @NotBlank(message = "Genre must not be blank")
+        @Size(min = 2, max = 50, message = "Genre must be between 2 and 50 characters")
+        String genre) {
         PromptTemplate promptTemplate = new PromptTemplate(ytPromptResource);
         Prompt prompt = promptTemplate.create(Map.of("genre", genre));
         var response = chatClient.call(prompt).getResult().getOutput().getContent();

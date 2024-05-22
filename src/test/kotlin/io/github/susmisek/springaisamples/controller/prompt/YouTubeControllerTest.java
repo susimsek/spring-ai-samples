@@ -47,6 +47,14 @@ class YouTubeControllerTest {
     }
 
     @Test
+    void whenGenreIsTooShort_thenBadRequest() throws Exception {
+        mockMvc.perform(get("/api/ai/youtube/popular-step-one")
+                .param("genre", "a"))
+            .andExpect(status().isBadRequest())
+            .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON));
+    }
+
+    @Test
     void testFindPopularYouTubers() throws Exception {
         String expectedResponse = "List 10 of the most popular YouTubers in tech along with their current subscriber counts. If you don't know the answer, just say \"I don't know\".";
         ChatResponse chatResponse = new ChatResponse(List.of(new Generation(expectedResponse)));

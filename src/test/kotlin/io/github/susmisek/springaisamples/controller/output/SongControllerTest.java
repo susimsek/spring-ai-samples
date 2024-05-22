@@ -4,6 +4,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 
 import java.util.Arrays;
 import java.util.List;
@@ -49,6 +50,14 @@ class SongControllerTest {
             .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(MockMvcResultMatchers.jsonPath("$", hasSize(1)))
             .andExpect(MockMvcResultMatchers.jsonPath("$[0]", is("output")));
+    }
+
+    @Test
+    void testGetSongsByArtist_WithShortArtistName_ShouldReturnBadRequest() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/ai/songs")
+                .param("artist", "A"))
+            .andExpect(MockMvcResultMatchers.status().isBadRequest())
+            .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON));;
     }
 
     @Test

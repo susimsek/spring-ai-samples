@@ -20,6 +20,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 @WebMvcTest(OlympicController.class)
 class OlympicControllerTest {
@@ -78,5 +80,14 @@ class OlympicControllerTest {
             .andExpect(status().isOk())
             .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_PLAIN))
             .andExpect(content().string("Test Response"));
+    }
+
+    @Test
+    void testGet2024OlympicSports_WithShortMessage_ShouldReturnBadRequest() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/ai/olympics/2024")
+                .param("message", "a")
+                .param("stuffit", "true"))
+            .andExpect(MockMvcResultMatchers.status().isBadRequest())
+            .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON));
     }
 }

@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
@@ -60,7 +61,9 @@ public class SongController {
     public List<String> getSongsByArtistAsList(
         @Parameter(description = "Name of the artist", example = "Taylor Swift")
         @RequestParam(value = ARTIST, defaultValue = DEFAULT_ARTIST)
-        @NotBlank(message = "Artist name must not be blank") String artist) {
+        @NotBlank(message = "Artist name must not be blank")
+        @Size(min = 2, max = 50, message = "Artist name must be between 2 and 50 characters")
+        String artist) {
         ListOutputParser outputParser = new ListOutputParser(new DefaultConversionService());
         Map<String, Object> model = Map.of(ARTIST, artist, FORMAT, outputParser.getFormat());
         ChatResponse response = chatClient.call(ChatUtils.buildPrompt(SONGS_MESSAGE_TEMPLATE, model));
@@ -85,7 +88,9 @@ public class SongController {
     public String getSongsByArtist(
         @Parameter(description = "Name of the artist", example = "Taylor Swift")
         @RequestParam(value = ARTIST, defaultValue = DEFAULT_ARTIST)
-        @NotBlank(message = "Artist name must not be blank") String artist) {
+        @NotBlank(message = "Artist name must not be blank")
+        @Size(min = 2, max = 50, message = "Artist name must be between 2 and 50 characters")
+        String artist) {
         String message = SONGS_MESSAGE_TEMPLATE.replace("{format}", "");
         Map<String, Object> model = Map.of(ARTIST, artist);
         ChatResponse response = chatClient.call(ChatUtils.buildPrompt(message, model));
