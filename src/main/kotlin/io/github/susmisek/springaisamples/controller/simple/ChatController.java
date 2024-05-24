@@ -41,8 +41,8 @@ public class ChatController {
     public ResponseEntity<String> generate(
         @Parameter(description = "Message", example = "Tell me a dad joke about dogs")
         @RequestParam(value = "message", defaultValue = "Tell me a dad joke about dogs")
-        @NotBlank(message = "Message cannot be blank")
-        @Size(min = 2, max = 255, message = "Message size must be between 2 and 255 characters")
+        @NotBlank(message = "{validation.not_blank}")
+        @Size(min = 2, max = 255, message = "{validation.size}")
         String message) {
         var response = chatClient.call(message);
         return ResponseEntity.ok(response);

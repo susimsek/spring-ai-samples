@@ -59,13 +59,13 @@ public class OlympicController {
         @Parameter(description = "Message to be sent to the chat client",
             example = "What sports are being included in the 2024 Summer Olympics?")
         @RequestParam(value = "message", defaultValue = "What sports are being included in the 2024 Summer Olympics?")
-        @NotBlank(message = "Message cannot be blank")
-        @Size(min = 2, max = 100, message = "Message size must be between 2 and 100 characters")
+        @NotBlank(message = "{validation.not_blank}")
+        @Size(min = 2, max = 100, message = "{validation.size}")
         String message,
         @Parameter(description = "Flag to indicate if additional context should be included",
             example = "false", in = ParameterIn.QUERY)
         @RequestParam(value = "stuffit", defaultValue = "false")
-        @NotNull(message = "Stuffit cannot be null") boolean stuffit
+        @NotNull(message = "{validation.not_null}") boolean stuffit
     ) {
         PromptTemplate promptTemplate = new PromptTemplate(olympicSportsResource);
         Map<String, Object> map = new HashMap<>();

@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import java.util.List;
 import java.util.Map;
@@ -37,6 +38,7 @@ public class SongController {
     private final ChatClient chatClient;
     private static final String ARTIST = "artist";
     private static final String DEFAULT_ARTIST = "Taylor Swift";
+    private static final String ARTIST_PATTERN = "^[a-zA-Z0-9_@-]*$";
     private static final String SONGS_MESSAGE_TEMPLATE = """
         Please give me a list of top 10 songs for the artist {artist}.
         If you don't know the answer, just say "I don't know".
@@ -61,8 +63,9 @@ public class SongController {
     public List<String> getSongsByArtistAsList(
         @Parameter(description = "Name of the artist", example = "Taylor Swift")
         @RequestParam(value = ARTIST, defaultValue = DEFAULT_ARTIST)
-        @NotBlank(message = "Artist name must not be blank")
-        @Size(min = 2, max = 50, message = "Artist name must be between 2 and 50 characters")
+        @NotBlank(message = "{validation.not_blank}")
+        @Size(min = 2, max = 50, message = "{validation.size}")
+        @Pattern(regexp = ARTIST_PATTERN, message = "{validation.pattern.artist}")
         String artist) {
         ListOutputParser outputParser = new ListOutputParser(new DefaultConversionService());
         Map<String, Object> model = Map.of(ARTIST, artist, FORMAT, outputParser.getFormat());
@@ -88,8 +91,9 @@ public class SongController {
     public String getSongsByArtist(
         @Parameter(description = "Name of the artist", example = "Taylor Swift")
         @RequestParam(value = ARTIST, defaultValue = DEFAULT_ARTIST)
-        @NotBlank(message = "Artist name must not be blank")
-        @Size(min = 2, max = 50, message = "Artist name must be between 2 and 50 characters")
+        @NotBlank(message = "{validation.not_blank}")
+        @Size(min = 2, max = 50, message = "{validation.size}")
+        @Pattern(regexp = ARTIST_PATTERN, message = "{validation.pattern.artist}")
         String artist) {
         String message = SONGS_MESSAGE_TEMPLATE.replace("{format}", "");
         Map<String, Object> model = Map.of(ARTIST, artist);

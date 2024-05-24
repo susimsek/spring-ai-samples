@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
@@ -41,6 +42,7 @@ public class BookController {
     private final ChatClient chatClient;
     private static final String AUTHOR = "author";
     private static final String DEFAULT_AUTHOR = "Ken Kousen";
+    private static final String AUTHOR_REGEX = "^[A-Za-z\\s'-]+$";
     private static final String BOOK_MESSAGE_TEMPLATE = """
             Generate a list of books written by the author {author}. If you aren't positive that a book
             belongs to this author please don't include it.
@@ -87,8 +89,9 @@ public class BookController {
     public Author getBooksByAuthor(
         @Parameter(description = "Name of the author", example = "Craig Walls")
         @RequestParam(value = AUTHOR, defaultValue = DEFAULT_AUTHOR)
-        @NotBlank(message = "Author name must not be blank")
-        @Size(min = 2, max = 50, message = "Author name must be between 2 and 50 characters")
+        @NotBlank(message = "{validation.not_blank}")
+        @Size(min = 2, max = 50, message = "{validation.size}")
+        @Pattern(regexp = AUTHOR_REGEX, message = "{validation.pattern.author}")
         String author) {
         var outputParser = new BeanOutputParser<>(Author.class);
         String format = outputParser.getFormat();
@@ -114,8 +117,9 @@ public class BookController {
     @GetMapping("/author/{author}")
     public Map<String, Object> getAuthorLinks(
         @PathVariable
-        @NotBlank(message = "Author name must not be blank")
-        @Size(min = 2, max = 50, message = "Author name must be between 2 and 50 characters")
+        @NotBlank(message = "{validation.not_blank}")
+        @Size(min = 2, max = 60, message = "{validation.size}")
+        @Pattern(regexp = AUTHOR_REGEX, message = "{validation.pattern.author}")
         String author) {
         MapOutputParser outputParser = new MapOutputParser();
         String format = outputParser.getFormat();

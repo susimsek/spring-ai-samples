@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Path;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 
@@ -44,9 +45,17 @@ public record Violation(
     public Violation(ConstraintViolation<?> violation) {
         this(
             null,
-            violation.getPropertyPath().toString(),
+            getField(violation.getPropertyPath()),
             violation.getInvalidValue(),
             violation.getMessage()
         );
+    }
+
+    private static String getField(Path propertyPath) {
+        String fieldName = null;
+        for (Path.Node node : propertyPath) {
+            fieldName = node.getName();
+        }
+        return fieldName;
     }
 }

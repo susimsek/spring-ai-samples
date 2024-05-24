@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +39,7 @@ public class YouTubeController {
     @Value("classpath:/prompts/youtube.st")
     private Resource ytPromptResource;
 
+    private static final String GENRE_PATTERN = "^[-a-zA-Z0-9_ ]*$";
     private static final String YOUTUBE_MESSAGE_TEMPLATE = """
             List 10 of the most popular YouTubers in {genre} along with their current subscriber counts.
             If you don't know the answer, just say "I don't know".
@@ -56,8 +58,9 @@ public class YouTubeController {
     public ResponseEntity<String> findPopularYouTubersStepOne(
         @Parameter(description = "The genre of YouTube content", example = "tech")
         @RequestParam(value = "genre", defaultValue = "tech")
-        @NotBlank(message = "Genre must not be blank")
-        @Size(min = 2, max = 50, message = "Genre must be between 2 and 50 characters")
+        @NotBlank(message = "{validation.not_blank}")
+        @Size(min = 2, max = 50, message = "{validation.size}")
+        @Pattern(regexp = GENRE_PATTERN, message = "{validation.pattern.genre}")
         String genre) {
         PromptTemplate promptTemplate = new PromptTemplate(YOUTUBE_MESSAGE_TEMPLATE);
         Prompt prompt = promptTemplate.create(Map.of("genre", genre));
@@ -80,6 +83,7 @@ public class YouTubeController {
         @RequestParam(value = "genre", defaultValue = "tech")
         @NotBlank(message = "Genre must not be blank")
         @Size(min = 2, max = 50, message = "Genre must be between 2 and 50 characters")
+        @Pattern(regexp = GENRE_PATTERN, message = "{validation.pattern.genre}")
         String genre) {
         PromptTemplate promptTemplate = new PromptTemplate(ytPromptResource);
         Prompt prompt = promptTemplate.create(Map.of("genre", genre));

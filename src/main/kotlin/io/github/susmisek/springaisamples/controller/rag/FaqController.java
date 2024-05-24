@@ -60,8 +60,8 @@ public class FaqController {
     public ResponseEntity<String> faq(
         @Parameter(description = "The question you want to ask.",
             example = "How can I buy tickets for the Olympic Games Paris 2024", required = true)
-        @NotBlank(message = "Question cannot be blank")
-        @Size(min = 5, max = 255, message = "Question must be between 5 and 255 characters")
+        @NotBlank(message = "{validation.not_blank}")
+        @Size(min = 5, max = 255, message = "{validation.size}")
         @RequestParam(value = "message",
         defaultValue = "How can I buy tickets for the Olympic Games Paris 2024") String message) {
         List<String> contentList = searchSimilarDocuments(message);
