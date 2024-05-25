@@ -10,5 +10,6 @@ public final class ErrorConstants {
     public static final String MEDIA_TYPE_NOT_SUPPORTED = "error.mediaType.notSupported";
     public static final String REQUEST_METHOD_NOT_SUPPORTED = "error.requestMethod.notSupported";
     public static final String VALIDATION_ERROR = "error.validation";
+    public static final String NO_HANDLER_FOUND = "error.noHandlerFound";
     public static final String INTERNAL_SERVER_ERROR = "error.internalServerError";
 }

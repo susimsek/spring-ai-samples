@@ -24,6 +24,7 @@ import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.servlet.NoHandlerFoundException;
 
 @ExtendWith(MockitoExtension.class)
 class GlobalExceptionHandlerTest {
@@ -115,6 +116,24 @@ class GlobalExceptionHandlerTest {
         assertNotNull(problemDetail);
         assertEquals("Validation error occurred.", problemDetail.getDetail());
     }
+
+    @Test
+    void handleNoHandlerFoundException() {
+        NoHandlerFoundException ex = new NoHandlerFoundException("GET", "/non-existent", new HttpHeaders());
+        WebRequest request = mock(WebRequest.class);
+
+        when(messageSource.getMessage(anyString())).thenReturn("No handler found for the requested URL.");
+
+        ResponseEntity<Object> response = exceptionHandler.handleNoHandlerFoundException(
+            ex, new HttpHeaders(), HttpStatus.NOT_FOUND, request);
+
+        assertNotNull(response);
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        var problemDetail =((ProblemDetail) response.getBody());
+        assertNotNull(problemDetail);
+        assertEquals("No handler found for the requested URL.", problemDetail.getDetail());
+    }
+
 
     @Test
     void handleAllExceptions() {

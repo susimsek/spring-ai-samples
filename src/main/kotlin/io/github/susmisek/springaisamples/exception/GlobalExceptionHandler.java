@@ -21,6 +21,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 @RestControllerAdvice
@@ -36,9 +37,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         @NonNull HttpHeaders headers,
         @NonNull HttpStatusCode status,
         @NonNull WebRequest request) {
-        String errorMessage = messageSource.getMessage(ErrorConstants.MEDIA_TYPE_NOT_ACCEPTABLE);
-        ProblemDetail problem = ProblemDetail.forStatusAndDetail(status, errorMessage);
-        return handleExceptionInternal(ex, problem, headers, status, request);
+        return createProblemDetailResponse(ex, status, ErrorConstants.MEDIA_TYPE_NOT_ACCEPTABLE, headers, request);
     }
 
     @Override
@@ -47,9 +46,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         @NonNull HttpHeaders headers,
         @NonNull HttpStatusCode status,
         @NonNull WebRequest request) {
-        String errorMessage = messageSource.getMessage(ErrorConstants.MEDIA_TYPE_NOT_SUPPORTED);
-        ProblemDetail problem = ProblemDetail.forStatusAndDetail(status, errorMessage);
-        return handleExceptionInternal(ex, problem, headers, status, request);
+        return createProblemDetailResponse(ex, status, ErrorConstants.MEDIA_TYPE_NOT_SUPPORTED, headers, request);
     }
 
     @Override
@@ -57,10 +54,8 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         @NonNull HttpRequestMethodNotSupportedException ex,
         @NonNull HttpHeaders headers,
         @NonNull HttpStatusCode status,
-        @NonNull WebRequest webRequest) {
-        String errorMessage = messageSource.getMessage(ErrorConstants.REQUEST_METHOD_NOT_SUPPORTED);
-        ProblemDetail problem = ProblemDetail.forStatusAndDetail(status, errorMessage);
-        return handleExceptionInternal(ex, problem, headers, status, webRequest);
+        @NonNull WebRequest request) {
+        return createProblemDetailResponse(ex, status, ErrorConstants.REQUEST_METHOD_NOT_SUPPORTED, headers, request);
     }
 
     @Override
@@ -68,7 +63,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         @NonNull MethodArgumentNotValidException ex,
         @NonNull HttpHeaders headers,
         @NonNull HttpStatusCode status,
-        @NonNull WebRequest webRequest) {
+        @NonNull WebRequest request) {
         List<Violation> violations = Stream.concat(
             ex.getFieldErrors().stream().map(Violation::new),
             ex.getGlobalErrors().stream().map(Violation::new)
@@ -77,28 +72,37 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         String errorMessage = messageSource.getMessage(ErrorConstants.VALIDATION_ERROR);
         ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, errorMessage);
         problem.setProperty(PROBLEM_VIOLATION_KEY, violations);
-        return handleExceptionInternal(ex, problem, headers, status, webRequest);
+        return handleExceptionInternal(ex, problem, headers, status, request);
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
     protected ResponseEntity<Object> handleConstraintViolationException(
         @NonNull ConstraintViolationException ex,
-        @NonNull WebRequest webRequest) {
+        @NonNull WebRequest request) {
         List<Violation> violations = ex.getConstraintViolations().stream().map(Violation::new).toList();
 
         String errorMessage = messageSource.getMessage(ErrorConstants.VALIDATION_ERROR);
         ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, errorMessage);
         problem.setProperty(PROBLEM_VIOLATION_KEY, violations);
-        return handleExceptionInternal(ex, problem, new HttpHeaders(), HttpStatus.BAD_REQUEST, webRequest);
+        return handleExceptionInternal(ex, problem, new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleNoHandlerFoundException(
+        @NonNull NoHandlerFoundException ex,
+        @NonNull HttpHeaders headers,
+        @NonNull HttpStatusCode status,
+        @NonNull WebRequest request) {
+        return createProblemDetailResponse(ex, HttpStatus.NOT_FOUND,
+            ErrorConstants.NO_HANDLER_FOUND, headers, request);
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Object> handleAllExceptions(
         @NonNull Exception ex,
-        @NonNull WebRequest webRequest) {
-        String errorMessage = messageSource.getMessage(ErrorConstants.INTERNAL_SERVER_ERROR);
-        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, errorMessage);
-        return handleExceptionInternal(ex, problem, new HttpHeaders(),  HttpStatus.INTERNAL_SERVER_ERROR, webRequest);
+        @NonNull WebRequest request) {
+        return createProblemDetailResponse(ex, HttpStatus.INTERNAL_SERVER_ERROR,
+            ErrorConstants.INTERNAL_SERVER_ERROR, new HttpHeaders(), request);
     }
 
     @Override
@@ -110,5 +114,16 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         @NonNull WebRequest request) {
         log.error("An exception occurred, which will cause a {} response", status, ex);
         return super.handleExceptionInternal(ex, body, headers, status, request);
+    }
+
+    private ResponseEntity<Object> createProblemDetailResponse(
+        Exception ex,
+        HttpStatusCode status,
+        String messageKey,
+        HttpHeaders headers,
+        WebRequest request) {
+        String errorMessage = messageSource.getMessage(messageKey);
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(status, errorMessage);
+        return handleExceptionInternal(ex, problem, headers, status, request);
     }
 }
