@@ -116,4 +116,22 @@ class NamedParameterMessageSourceTest {
         String actualMessage = messageSource.getMessageWithNamedArgs(code, params);
         assertEquals(expectedMessage, actualMessage);
     }
+
+    @Test
+    void testGetMessageWithNamedArgs_MissingArgs() {
+        String code = "hello.message";
+        String message = "Hello, {name}!";
+        Map<String, String> args = new HashMap<>();
+        String result = messageSource.getMessageWithNamedArgs(code, args, Locale.ENGLISH);
+        assertEquals(message, result);
+    }
+
+    @Test
+    void testGetMessageWithNamedArgs_NoArgs() {
+        String code = "hello.message";
+        String message = "Hello, World!";
+        messageSource.addNamedParameter("name", "World");
+        String result = messageSource.getMessageWithNamedArgs(code, null, Locale.ENGLISH);
+        assertEquals(message, result);
+    }
 }
