@@ -4,6 +4,7 @@ spring:
   web:
     locale: en
   messages:
+    basename: i18n/messages
     fallback-to-system-locale: false
   main:
     allow-bean-definition-overriding: true
