@@ -97,10 +97,13 @@ class LocaleConfigTest {
     }
 
     @Test
-    void testMessageSource_DefaultSettings() {
+    void testMessageSource_NullSettings() {
         // Given
         LocaleConfig localeConfig = new LocaleConfig();
         MessageSourceProperties properties = new MessageSourceProperties();
+        properties.setEncoding(null);
+        properties.setBasename(null);
+        properties.setCacheDuration(null);
 
         // When
         ResourceBundleMessageSource messageSource = (ResourceBundleMessageSource) localeConfig.messageSource(properties);
