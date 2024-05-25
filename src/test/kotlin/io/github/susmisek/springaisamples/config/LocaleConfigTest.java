@@ -95,4 +95,17 @@ class LocaleConfigTest {
         // Then
         assertNotNull(messageSource);
     }
+
+    @Test
+    void testMessageSource_DefaultSettings() {
+        // Given
+        LocaleConfig localeConfig = new LocaleConfig();
+        MessageSourceProperties properties = new MessageSourceProperties();
+
+        // When
+        ResourceBundleMessageSource messageSource = (ResourceBundleMessageSource) localeConfig.messageSource(properties);
+
+        // Then
+        assertNotNull(messageSource);
+    }
 }
