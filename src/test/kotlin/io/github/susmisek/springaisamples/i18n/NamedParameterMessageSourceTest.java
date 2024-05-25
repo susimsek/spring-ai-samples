@@ -1,12 +1,18 @@
 package io.github.susmisek.springaisamples.i18n;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.context.support.ResourceBundleMessageSource;
 
 class NamedParameterMessageSourceTest {
 
@@ -172,5 +178,57 @@ class NamedParameterMessageSourceTest {
 
         // Then
         assertEquals(message, result);
+    }
+
+    @Test
+    void testGetMessageInternalWithNullMessage() {
+        ResourceBundleMessageSource mockMessageSource = new ResourceBundleMessageSource() {
+            @Override
+            protected String getMessageInternal(String code, Object[] args, Locale locale) {
+                return null;
+            }
+        };
+
+        NamedParameterMessageSource customMessageSource = new NamedParameterMessageSource();
+        customMessageSource.setParentMessageSource(mockMessageSource);
+        String result = customMessageSource.getMessageInternal("test.message", null, Locale.ENGLISH);
+        assertNull(result);
+    }
+
+    @Test
+    void testGetMessageWithEmptyNamedParameters() {
+        messageSource.setNamedParameters(new ConcurrentHashMap<>());
+        String result = messageSource.getMessageInternal("test.message", null, Locale.ENGLISH);
+        assertEquals("This is {param1}", result);
+    }
+
+    @Test
+    void testMessageWithNamedParametersEmpty() {
+        Map<String, String> emptyParams = new ConcurrentHashMap<>();
+        messageSource.setNamedParameters(emptyParams);
+        String result = messageSource.getMessageInternal("test.message", null, Locale.ENGLISH);
+        assertEquals("This is {param1}", result);
+    }
+
+    @Test
+    void testMessageWithoutNamedParameters() {
+        String result = messageSource.getMessageInternal("simple.message", null, Locale.ENGLISH);
+        assertEquals("This is a simple message", result);
+    }
+
+    @Test
+    void testMessageWithNoNamedParametersInMap() {
+        String result = messageSource.getMessageInternal("test.message", null, Locale.ENGLISH);
+        assertEquals("This is {param1}", result);
+    }
+
+    @Test
+    void testNamedParameterPattern() {
+        Pattern pattern = Pattern.compile("\\{([a-zA-Z0-9]+)}");
+        Matcher matcher = pattern.matcher("This is {param1} and {param2}");
+        assertTrue(matcher.find());
+        assertEquals("param1", matcher.group(1));
+        assertTrue(matcher.find());
+        assertEquals("param2", matcher.group(1));
     }
 }
