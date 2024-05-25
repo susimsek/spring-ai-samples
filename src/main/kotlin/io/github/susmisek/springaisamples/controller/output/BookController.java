@@ -89,9 +89,9 @@ public class BookController {
     public Author getBooksByAuthor(
         @Parameter(description = "Name of the author", example = "Craig Walls")
         @RequestParam(value = AUTHOR, defaultValue = DEFAULT_AUTHOR)
-        @NotBlank(message = "{validation.not_blank}")
-        @Size(min = 2, max = 50, message = "{validation.size}")
-        @Pattern(regexp = AUTHOR_REGEX, message = "{validation.pattern.author}")
+        @NotBlank(message = "{validation.field.notBlank}")
+        @Size(min = 2, max = 50, message = "{validation.field.size}")
+        @Pattern(regexp = AUTHOR_REGEX, message = "{validation.author.pattern}")
         String author) {
         var outputParser = new BeanOutputParser<>(Author.class);
         String format = outputParser.getFormat();
@@ -117,9 +117,9 @@ public class BookController {
     @GetMapping("/author/{author}")
     public Map<String, Object> getAuthorLinks(
         @PathVariable
-        @NotBlank(message = "{validation.not_blank}")
-        @Size(min = 2, max = 60, message = "{validation.size}")
-        @Pattern(regexp = AUTHOR_REGEX, message = "{validation.pattern.author}")
+        @NotBlank(message = "{validation.field.notBlank}")
+        @Size(min = 2, max = 60, message = "{validation.field.size}")
+        @Pattern(regexp = AUTHOR_REGEX, message = "{validation.author.pattern}")
         String author) {
         MapOutputParser outputParser = new MapOutputParser();
         String format = outputParser.getFormat();

@@ -58,9 +58,9 @@ public class YouTubeController {
     public ResponseEntity<String> findPopularYouTubersStepOne(
         @Parameter(description = "The genre of YouTube content", example = "tech")
         @RequestParam(value = "genre", defaultValue = "tech")
-        @NotBlank(message = "{validation.not_blank}")
-        @Size(min = 2, max = 50, message = "{validation.size}")
-        @Pattern(regexp = GENRE_PATTERN, message = "{validation.pattern.genre}")
+        @NotBlank(message = "{validation.field.notBlank}")
+        @Size(min = 2, max = 50, message = "{validation.field.size}")
+        @Pattern(regexp = GENRE_PATTERN, message = "{validation.genre.pattern}")
         String genre) {
         PromptTemplate promptTemplate = new PromptTemplate(YOUTUBE_MESSAGE_TEMPLATE);
         Prompt prompt = promptTemplate.create(Map.of("genre", genre));
@@ -83,7 +83,7 @@ public class YouTubeController {
         @RequestParam(value = "genre", defaultValue = "tech")
         @NotBlank(message = "Genre must not be blank")
         @Size(min = 2, max = 50, message = "Genre must be between 2 and 50 characters")
-        @Pattern(regexp = GENRE_PATTERN, message = "{validation.pattern.genre}")
+        @Pattern(regexp = GENRE_PATTERN, message = "{validation.genre.pattern}")
         String genre) {
         PromptTemplate promptTemplate = new PromptTemplate(ytPromptResource);
         Prompt prompt = promptTemplate.create(Map.of("genre", genre));

@@ -63,9 +63,9 @@ public class SongController {
     public List<String> getSongsByArtistAsList(
         @Parameter(description = "Name of the artist", example = "Taylor Swift")
         @RequestParam(value = ARTIST, defaultValue = DEFAULT_ARTIST)
-        @NotBlank(message = "{validation.not_blank}")
-        @Size(min = 2, max = 50, message = "{validation.size}")
-        @Pattern(regexp = ARTIST_PATTERN, message = "{validation.pattern.artist}")
+        @NotBlank(message = "{validation.field.notBlank}")
+        @Size(min = 2, max = 50, message = "{validation.field.size}")
+        @Pattern(regexp = ARTIST_PATTERN, message = "{validation.artist.pattern}")
         String artist) {
         ListOutputParser outputParser = new ListOutputParser(new DefaultConversionService());
         Map<String, Object> model = Map.of(ARTIST, artist, FORMAT, outputParser.getFormat());
@@ -91,9 +91,9 @@ public class SongController {
     public String getSongsByArtist(
         @Parameter(description = "Name of the artist", example = "Taylor Swift")
         @RequestParam(value = ARTIST, defaultValue = DEFAULT_ARTIST)
-        @NotBlank(message = "{validation.not_blank}")
-        @Size(min = 2, max = 50, message = "{validation.size}")
-        @Pattern(regexp = ARTIST_PATTERN, message = "{validation.pattern.artist}")
+        @NotBlank(message = "{validation.field.notBlank}")
+        @Size(min = 2, max = 50, message = "{validation.field.size}")
+        @Pattern(regexp = ARTIST_PATTERN, message = "{validation.artist.pattern}")
         String artist) {
         String message = SONGS_MESSAGE_TEMPLATE.replace("{format}", "");
         Map<String, Object> model = Map.of(ARTIST, artist);
