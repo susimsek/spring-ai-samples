@@ -1,21 +1,20 @@
 package io.github.susmisek.springaisamples.exception;
 
-import static io.github.susmisek.springaisamples.exception.ErrorConstants.ERR_INTERNAL_SERVER;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
+import io.github.susmisek.springaisamples.i18n.ParameterMessageSource;
 import jakarta.validation.ConstraintViolationException;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
@@ -26,113 +25,108 @@ import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.context.request.WebRequest;
 
+@ExtendWith(MockitoExtension.class)
 class GlobalExceptionHandlerTest {
 
-    private GlobalExceptionHandler exceptionHandler;
+    @Mock
+    private ParameterMessageSource messageSource;
 
-    @BeforeEach
-    void setUp() {
-        exceptionHandler = new GlobalExceptionHandler();
-    }
+    @InjectMocks
+    private GlobalExceptionHandler exceptionHandler;
 
     @Test
     void handleHttpMediaTypeNotAcceptable() {
-        HttpMediaTypeNotAcceptableException ex = new HttpMediaTypeNotAcceptableException("Not Acceptable");
+        HttpMediaTypeNotAcceptableException ex = new HttpMediaTypeNotAcceptableException("message");
         HttpHeaders headers = new HttpHeaders();
         WebRequest request = mock(WebRequest.class);
-        ResponseEntity<Object> responseEntity = exceptionHandler.handleHttpMediaTypeNotAcceptable(ex, headers, HttpStatus.NOT_ACCEPTABLE, request);
-        assertNotNull(responseEntity);
-        assertEquals(HttpStatus.NOT_ACCEPTABLE, responseEntity.getStatusCode());
-        assertNotNull(responseEntity.getBody());
+
+        when(messageSource.getMessage(anyString())).thenReturn("Requested media type is not acceptable.");
+
+        ResponseEntity<Object> response = exceptionHandler.handleHttpMediaTypeNotAcceptable(ex, headers, HttpStatus.NOT_ACCEPTABLE, request);
+        assertNotNull(response);
+        assertEquals(HttpStatus.NOT_ACCEPTABLE, response.getStatusCode());
+        var problemDetail =((ProblemDetail) response.getBody());
+        assertNotNull(problemDetail);
+        assertEquals("Requested media type is not acceptable.", problemDetail.getDetail());
     }
 
     @Test
-    void handleHttpMediaTypeNotSupported() {
-        List<MediaType> supportedMediaTypes = Arrays.asList(MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML);
-        HttpMediaTypeNotSupportedException ex = new HttpMediaTypeNotSupportedException(MediaType.TEXT_PLAIN, supportedMediaTypes);
+    void handleHttpMediaTypeNotSupportedException() {
+        HttpMediaTypeNotSupportedException ex = new HttpMediaTypeNotSupportedException("message",
+            Collections.singletonList(MediaType.APPLICATION_JSON));
         HttpHeaders headers = new HttpHeaders();
         WebRequest request = mock(WebRequest.class);
-        ResponseEntity<Object> responseEntity = exceptionHandler.handleHttpMediaTypeNotSupported(ex, headers, HttpStatus.UNSUPPORTED_MEDIA_TYPE, request);
-        assertNotNull(responseEntity);
-        assertEquals(HttpStatus.UNSUPPORTED_MEDIA_TYPE, responseEntity.getStatusCode());
-        assertNotNull(responseEntity.getBody());
+
+        when(messageSource.getMessage(anyString())).thenReturn("Requested media type is not supported.");
+
+        ResponseEntity<Object> response = exceptionHandler.handleHttpMediaTypeNotSupported(
+            ex, headers, HttpStatus.UNSUPPORTED_MEDIA_TYPE, request);
+        assertNotNull(response);
+        assertEquals(HttpStatus.UNSUPPORTED_MEDIA_TYPE, response.getStatusCode());
+        var problemDetail =((ProblemDetail) response.getBody());
+        assertNotNull(problemDetail);
+        assertEquals("Requested media type is not supported.", problemDetail.getDetail());
     }
 
     @Test
-    void handleHttpRequestMethodNotSupported_WithSupportedMethods() {
-        // Test case for handling HttpRequestMethodNotSupportedException with supported methods
-        List<String> supportedMethods = Arrays.asList("GET", "POST");
-        HttpRequestMethodNotSupportedException ex = new HttpRequestMethodNotSupportedException("Method Not Allowed", supportedMethods);
+    void handleHttpRequestMethodNotSupportedException() {
+        HttpRequestMethodNotSupportedException ex = new HttpRequestMethodNotSupportedException("message");
         HttpHeaders headers = new HttpHeaders();
-        headers.setAllow(Set.of(HttpMethod.GET));
         WebRequest request = mock(WebRequest.class);
-        ResponseEntity<Object> responseEntity = exceptionHandler.handleHttpRequestMethodNotSupported(ex, headers, HttpStatus.METHOD_NOT_ALLOWED, request);
-        assertEquals(HttpStatus.METHOD_NOT_ALLOWED, responseEntity.getStatusCode());
-        assertNotNull(responseEntity.getBody());
-        assertFalse(responseEntity.getHeaders().get(HttpHeaders.ALLOW).isEmpty());
-    }
 
-    @Test
-    void handleHttpRequestMethodNotSupported_WithoutSupportedMethods() {
-        HttpRequestMethodNotSupportedException ex = new HttpRequestMethodNotSupportedException("Method Not Allowed", Collections.emptyList());
-        HttpHeaders headers = new HttpHeaders();
-        WebRequest request = mock(WebRequest.class);
-        ResponseEntity<Object> responseEntity = exceptionHandler.handleHttpRequestMethodNotSupported(ex, headers, HttpStatus.METHOD_NOT_ALLOWED, request);
-        assertNotNull(responseEntity);
-        assertEquals(HttpStatus.METHOD_NOT_ALLOWED, responseEntity.getStatusCode());
-        assertNotNull(responseEntity.getBody());
-        assertNull(responseEntity.getHeaders().get(HttpHeaders.ALLOW));
-    }
+        when(messageSource.getMessage(anyString())).thenReturn("Requested HTTP method is not supported.");
 
-    @Test
-    void handleHttpMediaTypeNotSupported_EmptySupportedMediaTypes() {
-        HttpMediaTypeNotSupportedException ex = new HttpMediaTypeNotSupportedException(MediaType.TEXT_PLAIN, Collections.emptyList());
-        HttpHeaders headers = new HttpHeaders();
-        WebRequest request = mock(WebRequest.class);
-        ResponseEntity<Object> responseEntity = exceptionHandler.handleHttpMediaTypeNotSupported(ex, headers, HttpStatus.UNSUPPORTED_MEDIA_TYPE, request);
-        assertNotNull(responseEntity);
-        assertEquals(HttpStatus.UNSUPPORTED_MEDIA_TYPE, responseEntity.getStatusCode());
-        assertNotNull(responseEntity.getBody());
-    }
-
-    @Test
-    void handleHttpRequestMethodNotSupported_NullSupportedMethods() {
-        HttpRequestMethodNotSupportedException ex = new HttpRequestMethodNotSupportedException("Method Not Allowed", null);
-        HttpHeaders headers = new HttpHeaders();
-        WebRequest request = mock(WebRequest.class);
-        ResponseEntity<Object> responseEntity = exceptionHandler.handleHttpRequestMethodNotSupported(ex, headers, HttpStatus.METHOD_NOT_ALLOWED, request);
-        assertEquals(HttpStatus.METHOD_NOT_ALLOWED, responseEntity.getStatusCode());
-        assertNotNull(responseEntity.getBody());
-        assertNull(responseEntity.getHeaders().get(HttpHeaders.ALLOW));
+        ResponseEntity<Object> response = exceptionHandler.handleHttpRequestMethodNotSupported(ex, headers, HttpStatus.METHOD_NOT_ALLOWED, request);
+        assertNotNull(response);
+        assertEquals(HttpStatus.METHOD_NOT_ALLOWED, response.getStatusCode());
+        var problemDetail =((ProblemDetail) response.getBody());
+        assertNotNull(problemDetail);
+        assertEquals("Requested HTTP method is not supported.", problemDetail.getDetail());
     }
 
     @Test
     void handleMethodArgumentNotValid() {
         MethodArgumentNotValidException ex = mock(MethodArgumentNotValidException.class);
+
         HttpHeaders headers = new HttpHeaders();
         WebRequest request = mock(WebRequest.class);
-        ResponseEntity<Object> responseEntity = exceptionHandler.handleMethodArgumentNotValid(ex, headers, HttpStatus.BAD_REQUEST, request);
-        assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
-        assertNotNull(responseEntity.getBody());
-        assertEquals(ErrorConstants.ERR_VALIDATION, ((ProblemDetail) responseEntity.getBody()).getDetail());
+
+        when(messageSource.getMessage(anyString())).thenReturn("Validation error occurred.");
+
+        ResponseEntity<Object> response = exceptionHandler.handleMethodArgumentNotValid(ex, headers, HttpStatus.BAD_REQUEST, request);
+        assertNotNull(response);
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        var problemDetail =((ProblemDetail) response.getBody());
+        assertNotNull(problemDetail);
+        assertEquals("Validation error occurred.", problemDetail.getDetail());
     }
 
     @Test
     void handleConstraintViolationException() {
         ConstraintViolationException ex = mock(ConstraintViolationException.class);
         WebRequest request = mock(WebRequest.class);
-        ResponseEntity<Object> responseEntity = exceptionHandler.handleConstraintViolationException(ex, request);
-        assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
-        assertNotNull(responseEntity.getBody());
-        assertEquals(ErrorConstants.ERR_VALIDATION, ((ProblemDetail) responseEntity.getBody()).getDetail());
+
+        when(messageSource.getMessage(anyString())).thenReturn("Validation error occurred.");
+
+        ResponseEntity<Object> response = exceptionHandler.handleConstraintViolationException(ex, request);
+        assertNotNull(response);
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        var problemDetail =((ProblemDetail) response.getBody());
+        assertNotNull(problemDetail);
+        assertEquals("Validation error occurred.", problemDetail.getDetail());
     }
 
     @Test
-    void handleAll() {
-        Exception ex = new Exception("internal error");
+    void handleAllExceptions() {
+        Exception ex = new Exception("message");
         WebRequest request = mock(WebRequest.class);
-        ResponseEntity<Object> responseEntity = exceptionHandler.handleAll(ex, request);
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
-        assertEquals(ERR_INTERNAL_SERVER, ((ProblemDetail) responseEntity.getBody()).getDetail());
+
+        when(messageSource.getMessage(anyString())).thenReturn("An unexpected condition was encountered on the server.");
+
+        ResponseEntity<Object> response = exceptionHandler.handleAllExceptions(ex, request);
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+        var problemDetail =((ProblemDetail) response.getBody());
+        assertNotNull(problemDetail);
+        assertEquals("An unexpected condition was encountered on the server.", problemDetail.getDetail());
     }
 }

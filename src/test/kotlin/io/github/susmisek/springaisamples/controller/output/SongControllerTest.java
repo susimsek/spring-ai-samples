@@ -6,7 +6,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 
-import java.util.Arrays;
+import io.github.susmisek.springaisamples.config.LocaleConfig;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.ai.chat.ChatClient;
@@ -16,12 +16,14 @@ import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 @WebMvcTest(SongController.class)
+@Import(LocaleConfig.class)
 class SongControllerTest {
 
     @Autowired
@@ -34,7 +36,6 @@ class SongControllerTest {
     void whenGetSongsByArtistAsList_thenReturnJsonArray() throws Exception {
         // Given
         String artist = "Taylor Swift";
-        List<String> songs = Arrays.asList("Song 1", "Song 2", "Song 3");
         Generation generation = new Generation("output");
         ChatResponse chatResponse = new ChatResponse(List.of(generation));
 

@@ -90,4 +90,30 @@ class NamedParameterMessageSourceTest {
         assertEquals(1, namedParameters.size());
         assertEquals("John", namedParameters.get("name"));
     }
+
+    @Test
+    void testGetMessageWithNamedParametersAndLocale() {
+        String code = "error.validation";
+        Map<String, String> params = new HashMap<>();
+        params.put("field", "username");
+        params.put("error", "must not be empty");
+        String expectedMessageEn = "Validation error on field 'username': must not be empty";
+        String actualMessageEn = messageSource.getMessageWithNamedArgs(code, params, Locale.ENGLISH);
+        assertEquals(expectedMessageEn, actualMessageEn);
+
+        String expectedMessageTr = "Alan 'username' için doğrulama hatası: must not be empty";
+        String actualMessageTr = messageSource.getMessageWithNamedArgs(code, params, new Locale("TR","tr"));
+        assertEquals(expectedMessageTr, actualMessageTr);
+    }
+
+    @Test
+    void testGetMessageWithNamedParameters() {
+        String code = "error.validation";
+        Map<String, String> params = new HashMap<>();
+        params.put("field", "username");
+        params.put("error", "must not be empty");
+        String expectedMessage = "Validation error on field 'username': must not be empty";
+        String actualMessage = messageSource.getMessageWithNamedArgs(code, params);
+        assertEquals(expectedMessage, actualMessage);
+    }
 }

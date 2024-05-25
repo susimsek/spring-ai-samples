@@ -3,11 +3,13 @@ package io.github.susmisek.springaisamples.exception;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ElementKind;
 import jakarta.validation.Path;
 import jakarta.validation.metadata.ConstraintDescriptor;
 import java.util.Iterator;
-import jakarta.validation.ConstraintViolation;
 import org.junit.jupiter.api.Test;
+import org.springframework.lang.NonNull;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 
@@ -162,14 +164,82 @@ class ViolationTest {
     // Dummy Path implementation for testing purposes
     private record TestPath(String propertyPath) implements Path {
 
+        @NonNull
         @Override
         public Iterator<Node> iterator() {
-            return null;
+            return new TestPathIterator(propertyPath);
         }
 
         @Override
         public String toString() {
             return propertyPath;
+        }
+    }
+
+    public static class TestPathIterator implements Iterator<Path.Node> {
+        private final String fieldName;
+        private boolean hasNext;
+
+        public TestPathIterator(String fieldName) {
+            this.fieldName = fieldName;
+            this.hasNext = true;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return hasNext;
+        }
+
+        @Override
+        public Path.Node next() {
+            if (!hasNext()) {
+                throw new IllegalStateException("Iterator has no more elements");
+            }
+            hasNext = false;
+            return new TestNode(fieldName);
+        }
+
+        @Override
+        public void remove() {
+            throw new UnsupportedOperationException("Remove operation is not supported");
+        }
+    }
+
+    public static class TestNode implements Path.Node {
+        private final String fieldName;
+
+        public TestNode(String fieldName) {
+            this.fieldName = fieldName;
+        }
+
+        @Override
+        public String getName() {
+            return fieldName;
+        }
+
+        @Override
+        public boolean isInIterable() {
+            return false;
+        }
+
+        @Override
+        public Integer getIndex() {
+            return null;
+        }
+
+        @Override
+        public String getKey() {
+            return null;
+        }
+
+        @Override
+        public ElementKind getKind() {
+            return null;
+        }
+
+        @Override
+        public <T extends Path.Node> T as(Class<T> aClass) {
+            return null;
         }
     }
 }

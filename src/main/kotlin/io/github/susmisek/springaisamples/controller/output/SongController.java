@@ -38,7 +38,7 @@ public class SongController {
     private final ChatClient chatClient;
     private static final String ARTIST = "artist";
     private static final String DEFAULT_ARTIST = "Taylor Swift";
-    private static final String ARTIST_PATTERN = "^[a-zA-Z0-9_@-]*$";
+    private static final String ARTIST_PATTERN = "^[a-zA-Z0-9_@\\s-]*$";
     private static final String SONGS_MESSAGE_TEMPLATE = """
         Please give me a list of top 10 songs for the artist {artist}.
         If you don't know the answer, just say "I don't know".

@@ -28,7 +28,7 @@ public class NamedParameterMessageSource extends ResourceBundleMessageSource imp
     private final Map<String, String> namedParameters = new ConcurrentHashMap<>();
 
     // Regular expression pattern to match named parameters in message strings
-    private final Pattern namedPattern = Pattern.compile("\\{([a-zA-Z0-9]+)}");
+    private static final Pattern NAMED_PATTERN = Pattern.compile("\\{([a-zA-Z0-9]+)}");
 
     /**
      * Checks if the given message contains named parameters.
@@ -37,7 +37,7 @@ public class NamedParameterMessageSource extends ResourceBundleMessageSource imp
      * @return {@code true} if named parameters are found, {@code false} otherwise
      */
     private boolean hasNamedParameters(String msg) {
-        return namedPattern.matcher(msg).find();
+        return NAMED_PATTERN.matcher(msg).find();
     }
 
     /**
@@ -47,7 +47,7 @@ public class NamedParameterMessageSource extends ResourceBundleMessageSource imp
      * @return the processed message with replaced named parameters
      */
     private String replaceNamedParameters(String msg) {
-        Matcher matcher = namedPattern.matcher(msg);
+        Matcher matcher = NAMED_PATTERN.matcher(msg);
         StringBuilder result = new StringBuilder();
         while (matcher.find()) {
             String paramName = matcher.group(1);
@@ -88,9 +88,7 @@ public class NamedParameterMessageSource extends ResourceBundleMessageSource imp
     @Override
     protected String getMessageInternal(String code, Object[] args, Locale locale) {
         String message = super.getMessageInternal(code, args, locale);
-        if (message != null
-            && !CollectionUtils.isEmpty(namedParameters)
-            && hasNamedParameters(message)) {
+        if (message != null && !CollectionUtils.isEmpty(namedParameters) && hasNamedParameters(message)) {
             message = replaceNamedParameters(message);
         }
         return message;
@@ -105,6 +103,34 @@ public class NamedParameterMessageSource extends ResourceBundleMessageSource imp
      */
     @Override
     public String getMessage(String code, @Nullable Object... args) {
-        return super.getMessage(code, args, LocaleContextHolder.getLocale());
+        return getMessageInternal(code, args, LocaleContextHolder.getLocale());
+    }
+
+    /**
+     * Retrieves a message with the given code and replaces named parameters in the message before returning it.
+     *
+     * @param code the code of the message to retrieve
+     * @param args the arguments to be used for the message retrieval
+     * @return the processed message with replaced named parameters
+     */
+    @Override
+    public String getMessageWithNamedArgs(String code, Map<String, String> args) {
+        return getMessageWithNamedArgs(code, args, LocaleContextHolder.getLocale());
+    }
+
+    /**
+     * Retrieves a message with the given code and replaces named parameters in the message before returning it.
+     *
+     * @param code   the code of the message to retrieve
+     * @param args   the arguments to be used for the message retrieval
+     * @param locale the locale of the message
+     * @return the processed message with replaced named parameters
+     */
+    @Override
+    public String getMessageWithNamedArgs(String code, Map<String, String> args, Locale locale) {
+        if (!CollectionUtils.isEmpty(args)) {
+            this.setNamedParameters(args);
+        }
+        return getMessageInternal(code, null, locale);
     }
 }
