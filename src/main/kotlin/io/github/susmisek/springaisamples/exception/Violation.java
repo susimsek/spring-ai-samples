@@ -13,11 +13,17 @@ public record Violation(
     @Schema(description = "Object name", example = "chatRequest")
     @JsonProperty("object")
     String objectName,
+
     @Schema(description = "Field name", example = "prompt")
+    @JsonProperty
     String field,
+
     @Schema(description = "Violation rejected value", example = "a")
+    @JsonProperty
     Object rejectedValue,
+
     @Schema(description = "Error Message", example = "size must be between 4 and 50")
+    @JsonProperty
     String message
 ) {
     public Violation(String objectName, String message) {

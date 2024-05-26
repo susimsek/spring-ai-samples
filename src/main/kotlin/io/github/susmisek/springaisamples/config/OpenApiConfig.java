@@ -4,8 +4,15 @@ import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.info.Contact;
 import io.swagger.v3.oas.annotations.info.Info;
 import io.swagger.v3.oas.annotations.info.License;
+import io.swagger.v3.oas.models.Operation;
+import io.swagger.v3.oas.models.media.StringSchema;
+import io.swagger.v3.oas.models.parameters.Parameter;
+import java.util.Arrays;
 import lombok.Generated;
+import org.springdoc.core.customizers.OperationCustomizer;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.method.HandlerMethod;
 
 @Configuration(proxyBeanMethods = false)
 @OpenAPIDefinition(
@@ -27,4 +34,17 @@ import org.springframework.context.annotation.Configuration;
 @Generated
 public class OpenApiConfig {
 
+    @Bean
+    public OperationCustomizer operationCustomizer() {
+        return (Operation operation, HandlerMethod handlerMethod) -> {
+            Parameter acceptLanguageHeader = new Parameter()
+                .in("header")
+                .schema(new StringSchema()._enum(Arrays.asList("en", "tr")))
+                .name("Accept-Language")
+                .description("Language preference")
+                .required(false);
+            operation.addParametersItem(acceptLanguageHeader);
+            return operation;
+        };
+    }
 }

@@ -16,8 +16,8 @@
     <logger name="liquibase" level="WARN"/>
     <logger name="io.netty" level="WARN"/>
     <logger name="com.netflix" level="WARN"/>
-    <logger name="com.netflix.discovery" level="INFO"/>
-    <logger name="io.swagger.v3" level="INFO"/>
+    <logger name="com.netflix.discovery" level="WARN"/>
+    <logger name="io.swagger.v3" level="WARN"/>
 
     <root level="${log.level}">
         <appender-ref ref="CONSOLE" />
