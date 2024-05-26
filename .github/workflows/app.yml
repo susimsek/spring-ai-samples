@@ -52,5 +52,5 @@ jobs:
         run: mvn deploy -Dgpg.skip -Dgithub
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build and publish docker native image
+      - name: Build and publish docker image
         run: mvn -ntp -Pnative spring-boot:build-image -Ddocker.image.name=suayb/${artifactId}:s17 -Dspring-boot.build-image.publish=true -Dspring-boot.build-image.docker.username=$DOCKER_REGISTRY_USERNAME -Dspring-boot.build-image.docker.password=$DOCKER_REGISTRY_PASSWORD -DskipTests
