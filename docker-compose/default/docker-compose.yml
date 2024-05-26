@@ -1,0 +1,26 @@
+services:
+  web:
+    image: suayb/spring-ai-samples:s17
+    container_name: spring-ai-samples-api
+    ports:
+      - 8071:8071
+    networks:
+      - backend
+    deploy:
+      resources:
+        limits:
+          memory: 700m
+    environment:
+      SPRING_APPLICATION_NAME: spring-ai-samples
+      SPRING_PROFILES_ACTIVE: default
+      OPENAI_API_KEY: test
+    healthcheck:
+      test: curl --fail --silent localhost:8071/actuator/health/readiness | grep UP || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+networks:
+  backend:
+    driver: "bridge"
