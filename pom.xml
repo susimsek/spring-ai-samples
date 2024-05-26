@@ -56,6 +56,8 @@
         <detekt.xmlReportFile>${project.build.directory}/detekt-reports/detekt.xml</detekt.xmlReportFile>
         <sonar.kotlin.detekt.reportPaths>${detekt.xmlReportFile}</sonar.kotlin.detekt.reportPaths>
         <sonar.kotlin.detekt.reportPaths>${detekt.xmlReportFile}</sonar.kotlin.detekt.reportPaths>
+        <rewrite.maven.plugin.version>5.32.0</rewrite.maven.plugin.version>
+        <rewrite.spring.version>5.11.0</rewrite.spring.version>
     </properties>
     <dependencies>
         <dependency>
@@ -335,6 +337,15 @@
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
             </plugin>
+            <plugin>
+                <groupId>org.openrewrite.maven</groupId>
+                <artifactId>rewrite-maven-plugin</artifactId>
+                <configuration>
+                    <activeRecipes>
+                        <recipe>org.openrewrite.java.spring.boot3.SpringBootProperties_3_3</recipe>
+                    </activeRecipes>
+                </configuration>
+            </plugin>
         </plugins>
         <pluginManagement>
             <plugins>
@@ -544,6 +555,18 @@
                             </goals>
                         </execution>
                     </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.openrewrite.maven</groupId>
+                    <artifactId>rewrite-maven-plugin</artifactId>
+                    <version>${rewrite.maven.plugin.version}</version>
+                    <dependencies>
+                        <dependency>
+                            <groupId>org.openrewrite.recipe</groupId>
+                            <artifactId>rewrite-spring</artifactId>
+                            <version>${rewrite.spring.version}</version>
+                        </dependency>
+                    </dependencies>
                 </plugin>
             </plugins>
         </pluginManagement>
