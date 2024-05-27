@@ -39,19 +39,24 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           cache: 'maven'
 
+      # Install UPX
+      - name: Install UPX
+        run: sudo apt-get install -y upx
+
       # Get branch name
       - name: Get Branch Name
         id: get_branch
         run: echo "BRANCH_NAME=$(echo ${GITHUB_REF} | awk -F'/' '{print $3}')" >> $GITHUB_ENV
 
-      # Print Java and Maven versions
-      - name: Print Java and Maven Version
+      # Print Java, Maven, and UPX versions
+      - name: Print Java, Maven, and UPX Version
         run: |
           echo "GRAALVM_HOME: $GRAALVM_HOME"
           echo "JAVA_HOME: $JAVA_HOME"
           java --version
           native-image --version
           mvn --version
+          upx --version
 
       # Configure Maven for GitHub Packages
       - name: Configure Maven for GitHub Packages
@@ -92,18 +97,26 @@ jobs:
       - name: Compile to Native Image
         run: mvn -Pnative native:compile
 
+      # List target directory contents to verify files
+      - name: List Target Directory
+        run: ls -l target/
+
+      # Compress the binary using UPX
+      - name: Compress Binary with UPX
+        run: upx -9 target/${{ github.event.repository.name }}
+
       # Upload JAR file
       - name: Upload JAR
         uses: actions/upload-artifact@v2
         with:
-          name: ${{ github.event.repository.name }}-${{ env.BRANCH_NAME }}
+          name: ${{ github.event.repository.name }}-${{ env.BRANCH_NAME }}-jar
           path: target/*.jar
 
       # Upload Linux binary
       - name: Upload Linux Binary
         uses: actions/upload-artifact@v2
         with:
-          name: ${{ github.event.repository.name }}-${{ env.BRANCH_NAME }}-exec-linux
+          name: ${{ github.event.repository.name }}-exec-${{ env.BRANCH_NAME }}-linux
           path: target/${{ github.event.repository.name }}
 
       # Build and Publish Docker Image using Spring Boot Maven Plugin
@@ -131,27 +144,40 @@ jobs:
           java-version: '17'
           cache: 'maven'
 
+      # Install UPX
+      - name: Install UPX
+        run: brew install upx
+
       # Get branch name
       - name: Get Branch Name
         id: get_branch
         run: echo "BRANCH_NAME=$(echo ${GITHUB_REF} | awk -F'/' '{print $3}')" >> $GITHUB_ENV
 
-      # Print Java and Maven versions
-      - name: Print Java and Maven Version
+      # Print Java, Maven, and UPX versions
+      - name: Print Java, Maven, and UPX Version
         run: |
           echo "GRAALVM_HOME: $GRAALVM_HOME"
           echo "JAVA_HOME: $JAVA_HOME"
           java --version
           native-image --version
           mvn --version
+          upx --version
 
       # Compile to native image
       - name: Compile to Native Image
         run: mvn -Pnative native:compile
 
+      # List target directory contents to verify files
+      - name: List Target Directory
+        run: ls -l target/
+
+      # Compress the binary using UPX
+      - name: Compress Binary with UPX
+        run: upx -9 target/${{ github.event.repository.name }}
+
       # Upload compiled binary
       - name: Upload Compiled Binary
         uses: actions/upload-artifact@v2
         with:
-          name: ${{ github.event.repository.name }}-${{ env.BRANCH_NAME }}-exec-macos
+          name: ${{ github.event.repository.name }}-exec-${{ env.BRANCH_NAME }}-macos
           path: target/${{ github.event.repository.name }}
