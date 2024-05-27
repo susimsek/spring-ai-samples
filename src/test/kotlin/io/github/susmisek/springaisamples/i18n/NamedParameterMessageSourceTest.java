@@ -16,172 +16,152 @@ import org.springframework.context.support.ResourceBundleMessageSource;
 
 class NamedParameterMessageSourceTest {
 
-    private NamedParameterMessageSource messageSource;
+    private NamedParameterMessageSource namedParameterMessageSource;
 
     @BeforeEach
     void setUp() {
-        messageSource = new NamedParameterMessageSource();
-        messageSource.setBasenames("i18n/messages");
-        messageSource.setUseCodeAsDefaultMessage(true);
-        messageSource.setDefaultEncoding("UTF-8");
-        messageSource.setFallbackToSystemLocale(false);
-        messageSource.setCacheSeconds(3600);
+        namedParameterMessageSource = new NamedParameterMessageSource();
+        namedParameterMessageSource.setBasenames("i18n/messages");
+        namedParameterMessageSource.setUseCodeAsDefaultMessage(true);
+        namedParameterMessageSource.setDefaultEncoding("UTF-8");
+        namedParameterMessageSource.setFallbackToSystemLocale(false);
+        namedParameterMessageSource.setCacheSeconds(3600);
     }
 
     @Test
     void testMessageWithNamedParameter() {
-        // Given
+        // Tests retrieving a message with a named parameter
         String code = "hello.message";
         Map<String, String> namedParams = new HashMap<>();
         namedParams.put("name", "John");
-        messageSource.setNamedParameters(namedParams);
+        namedParameterMessageSource.setNamedParameters(namedParams);
 
-        // When
         String expected = "Hello, John!";
-        String actual = messageSource.getMessage(code);
+        String actual = namedParameterMessageSource.getMessage(code);
 
-        // Then
         assertEquals(expected, actual);
     }
 
     @Test
     void testMessageWithoutNamedParameter() {
-        // Given
+        // Tests retrieving a message without a named parameter
         String code = "hello.message";
 
-        // When
         String expected = "Hello, {name}!";
-        String actual = messageSource.getMessage(code);
+        String actual = namedParameterMessageSource.getMessage(code);
 
-        // Then
         assertEquals(expected, actual);
     }
 
     @Test
     void testMessageWithMultipleNamedParameters() {
-        // Given
+        // Tests retrieving a message with multiple named parameters
         String code = "greeting.message";
         Map<String, String> namedParams = new HashMap<>();
         namedParams.put("time", "morning");
         namedParams.put("name", "Jane");
-        messageSource.setNamedParameters(namedParams);
+        namedParameterMessageSource.setNamedParameters(namedParams);
 
-        // When
         String expected = "Good morning, Jane!";
-        String actual = messageSource.getMessage(code);
+        String actual = namedParameterMessageSource.getMessage(code);
 
-        // Then
         assertEquals(expected, actual);
     }
 
     @Test
     void testMessageWithNonexistentParameter() {
-        // Given
+        // Tests retrieving a message with a nonexistent parameter
         String code = "goodbye.message";
 
-        // When
         String expected = "Goodbye, {name}!";
-        String actual = messageSource.getMessage(code);
+        String actual = namedParameterMessageSource.getMessage(code);
 
-        // Then
         assertEquals(expected, actual);
     }
 
     @Test
     void testMessageWithLocale() {
-        // Given
+        // Tests retrieving a message with a specific locale
         String code = "hello.message";
         Map<String, String> namedParams = new HashMap<>();
         namedParams.put("name", "John");
-        messageSource.setNamedParameters(namedParams);
+        namedParameterMessageSource.setNamedParameters(namedParams);
 
-        // When
         String expected = "Merhaba, John!";
-        String actual = messageSource.getMessage(code, null, new Locale("tr", "TR"));
+        String actual = namedParameterMessageSource.getMessage(code, null, new Locale("tr", "TR"));
 
-        // Then
         assertEquals(expected, actual);
     }
 
     @Test
     void addNamedParameter_ShouldAddParameter_WhenCalled() {
-        // Arrange
-        NamedParameterMessageSource messageSource = new NamedParameterMessageSource();
+        // Tests adding a named parameter correctly
+        NamedParameterMessageSource localMessageSource = new NamedParameterMessageSource();
+        localMessageSource.addNamedParameter("name", "John");
 
-        // Act
-        messageSource.addNamedParameter("name", "John");
-
-        // Assert
-        Map<String, String> namedParameters = messageSource.getNamedParameters();
+        Map<String, String> namedParameters = localMessageSource.getNamedParameters();
         assertEquals(1, namedParameters.size());
         assertEquals("John", namedParameters.get("name"));
     }
 
     @Test
     void testGetMessageWithNamedParametersAndLocale() {
-        // Given
+        // Tests retrieving a message with named parameters and a specific locale
         String code = "error.validation";
         Map<String, String> params = new HashMap<>();
         params.put("field", "username");
         params.put("error", "must not be empty");
 
-        // When
         String expectedMessageEn = "Validation error on field 'username': must not be empty";
-        String actualMessageEn = messageSource.getMessageWithNamedArgs(code, params, Locale.ENGLISH);
+        String actualMessageEn = namedParameterMessageSource.getMessageWithNamedArgs(code, params, Locale.ENGLISH);
         String expectedMessageTr = "Alan 'username' için doğrulama hatası: must not be empty";
-        String actualMessageTr = messageSource.getMessageWithNamedArgs(code, params, new Locale("TR","tr"));
+        String actualMessageTr = namedParameterMessageSource.getMessageWithNamedArgs(code, params, new Locale("TR", "tr"));
 
-        // Then
         assertEquals(expectedMessageEn, actualMessageEn);
         assertEquals(expectedMessageTr, actualMessageTr);
     }
 
     @Test
     void testGetMessageWithNamedParameters() {
-        // Given
+        // Tests retrieving a message with named parameters
         String code = "error.validation";
         Map<String, String> params = new HashMap<>();
         params.put("field", "username");
         params.put("error", "must not be empty");
 
-        // When
         String expectedMessage = "Validation error on field 'username': must not be empty";
-        String actualMessage = messageSource.getMessageWithNamedArgs(code, params);
+        String actualMessage = namedParameterMessageSource.getMessageWithNamedArgs(code, params);
 
-        // Then
         assertEquals(expectedMessage, actualMessage);
     }
 
     @Test
     void testGetMessageWithNamedArgs_MissingArgs() {
-        // Given
+        // Tests retrieving a message with missing parameters
         String code = "hello.message";
         String message = "Hello, {name}!";
         Map<String, String> args = new HashMap<>();
 
-        // When
-        String result = messageSource.getMessageWithNamedArgs(code, args, Locale.ENGLISH);
+        String result = namedParameterMessageSource.getMessageWithNamedArgs(code, args, Locale.ENGLISH);
 
-        // Then
         assertEquals(message, result);
     }
 
     @Test
     void testGetMessageWithNamedArgs_NoArgs() {
-        // Given
+        // Tests retrieving a message with no parameters
         String code = "hello.message";
         String message = "Hello, World!";
-        messageSource.addNamedParameter("name", "World");
+        namedParameterMessageSource.addNamedParameter("name", "World");
 
-        // When
-        String result = messageSource.getMessageWithNamedArgs(code, null, Locale.ENGLISH);
+        String result = namedParameterMessageSource.getMessageWithNamedArgs(code, null, Locale.ENGLISH);
 
-        // Then
         assertEquals(message, result);
     }
 
     @Test
     void testGetMessageInternalWithNullMessage() {
+        // Tests getMessageInternal method with null message
         ResourceBundleMessageSource mockMessageSource = new ResourceBundleMessageSource() {
             @Override
             protected String getMessageInternal(String code, Object[] args, Locale locale) {
@@ -197,33 +177,38 @@ class NamedParameterMessageSourceTest {
 
     @Test
     void testGetMessageWithEmptyNamedParameters() {
-        messageSource.setNamedParameters(new ConcurrentHashMap<>());
-        String result = messageSource.getMessageInternal("test.message", null, Locale.ENGLISH);
+        // Tests retrieving a message with empty named parameters
+        namedParameterMessageSource.setNamedParameters(new ConcurrentHashMap<>());
+        String result = namedParameterMessageSource.getMessageInternal("test.message", null, Locale.ENGLISH);
         assertEquals("This is {param1}", result);
     }
 
     @Test
     void testMessageWithNamedParametersEmpty() {
+        // Tests retrieving a message with empty named parameters
         Map<String, String> emptyParams = new ConcurrentHashMap<>();
-        messageSource.setNamedParameters(emptyParams);
-        String result = messageSource.getMessageInternal("test.message", null, Locale.ENGLISH);
+        namedParameterMessageSource.setNamedParameters(emptyParams);
+        String result = namedParameterMessageSource.getMessageInternal("test.message", null, Locale.ENGLISH);
         assertEquals("This is {param1}", result);
     }
 
     @Test
     void testMessageWithoutNamedParameters() {
-        String result = messageSource.getMessageInternal("simple.message", null, Locale.ENGLISH);
+        // Tests retrieving a message without named parameters
+        String result = namedParameterMessageSource.getMessageInternal("simple.message", null, Locale.ENGLISH);
         assertEquals("This is a simple message", result);
     }
 
     @Test
     void testMessageWithNoNamedParametersInMap() {
-        String result = messageSource.getMessageInternal("test.message", null, Locale.ENGLISH);
+        // Tests retrieving a message with no named parameters in the map
+        String result = namedParameterMessageSource.getMessageInternal("test.message", null, Locale.ENGLISH);
         assertEquals("This is {param1}", result);
     }
 
     @Test
     void testNamedParameterPattern() {
+        // Tests the named parameter pattern
         Pattern pattern = Pattern.compile("\\{([a-zA-Z0-9]+)}");
         Matcher matcher = pattern.matcher("This is {param1} and {param2}");
         assertTrue(matcher.find());
@@ -231,4 +216,48 @@ class NamedParameterMessageSourceTest {
         assertTrue(matcher.find());
         assertEquals("param2", matcher.group(1));
     }
+
+    @Test
+    void testGetMessageInternal_NoNamedParameters() {
+        // Tests getMessageInternal when there are no named parameters
+        String code = "simple.message";
+        namedParameterMessageSource.setNamedParameters(new ConcurrentHashMap<>());
+        String result = namedParameterMessageSource.getMessageInternal(code, null, Locale.ENGLISH);
+        assertEquals("This is a simple message", result);
+    }
+
+    @Test
+    void testGetMessageInternal_MessageNull() {
+        // Tests getMessageInternal when message is null
+        ResourceBundleMessageSource mockMessageSource = new ResourceBundleMessageSource() {
+            @Override
+            protected String getMessageInternal(String code, Object[] args, Locale locale) {
+                return null;
+            }
+        };
+
+        NamedParameterMessageSource customMessageSource = new NamedParameterMessageSource();
+        customMessageSource.setParentMessageSource(mockMessageSource);
+        String result = customMessageSource.getMessageInternal("nonexistent.message", null, Locale.ENGLISH);
+        assertNull(result);
+    }
+
+    @Test
+    void testGetMessageInternal_NoNamedParametersButHasPlaceholders() {
+        // Tests getMessageInternal when there are no named parameters but the message has placeholders
+        namedParameterMessageSource.setNamedParameters(new ConcurrentHashMap<>());
+        String code = "test.message.with.placeholders";
+        String message = "This is {param1}";
+        ResourceBundleMessageSource mockMessageSource = new ResourceBundleMessageSource() {
+            @Override
+            protected String getMessageInternal(String code, Object[] args, Locale locale) {
+                return message;
+            }
+        };
+
+        namedParameterMessageSource.setParentMessageSource(mockMessageSource);
+        String result = namedParameterMessageSource.getMessageInternal(code, null, Locale.ENGLISH);
+        assertEquals("This is {param1}", result);
+    }
+
 }
