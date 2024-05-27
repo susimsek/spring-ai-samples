@@ -67,17 +67,12 @@ jobs:
       - name: Download Dependencies
         run: mvn dependency:go-offline
 
-      # Run Snyk security test
-      - name: Snyk Test
+      # Run Snyk security test and monitor
+      - name: Snyk Test and Monitor
         continue-on-error: true
-        run: snyk test --all-projects
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-
-      # Run Snyk monitor
-      - name: Snyk Monitor
-        continue-on-error: true
-        run: snyk monitor --all-projects
+        run: |
+          snyk test --all-projects
+          snyk monitor --all-projects
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
