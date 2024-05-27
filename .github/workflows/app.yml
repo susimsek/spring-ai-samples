@@ -1,4 +1,4 @@
-name: Application Test, Sonar and Build
+name: Build, Test, and Publish Spring Boot Application
 
 on:
   workflow_dispatch:
@@ -6,12 +6,11 @@ on:
     branches:
       - main
   pull_request:
-    types: [opened, synchronize, reopened]
     branches:
       - main
 
 jobs:
-  build:
+  build-native:
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -84,12 +83,66 @@ jobs:
       - name: Quality Analysis
         run: mvn -ntp -Psonar initialize sonar:sonar -Dsonar.token=${{ secrets.SONAR_TOKEN }}
 
-      # Deploy to GitHub Packages
-      - name: Deploy to GitHub Packages
-        run: mvn deploy -Dgpg.skip -Dgithub
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # Compile to native image
+      - name: Compile to Native Image
+        run: mvn -Pnative native:compile
 
-      # Build and publish Docker image
+      # Upload JAR file
+      - name: Upload JAR
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ github.event.repository.name }}-jar-$(echo ${GITHUB_REF} | awk -F'/' '{print $3}')
+          path: target/*.jar
+
+      # Upload Linux binary
+      - name: Upload Linux Binary
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ github.event.repository.name }}-exec-$(echo ${GITHUB_REF} | awk -F'/' '{print $3}')
+          path: target/*-exec
+
+      # Build and Publish Docker Image using Spring Boot Maven Plugin
       - name: Build and Publish Docker Image
-        run: mvn -ntp -Pnative spring-boot:build-image -Dspring-boot.build-image.publish=true -Ddocker.username=${{ secrets.DOCKER_USERNAME }} -Ddocker.password=${{ secrets.DOCKER_PASSWORD }} -Dspring-boot.build-image.imageName=docker.io/${{ secrets.DOCKER_USERNAME }}/${{ github.event.repository.name }}:s17 -DskipTests
+        run: |
+          BRANCH_NAME=$(echo "${GITHUB_REF}" | awk -F'/' '{print $3}')
+          mvn -ntp -Pnative spring-boot:build-image -Dspring-boot.build-image.publish=true -Ddocker.username=${{ secrets.DOCKER_USERNAME }} -Ddocker.password=${{ secrets.DOCKER_PASSWORD }} -Dspring-boot.build-image.imageName=docker.io/${{ secrets.DOCKER_USERNAME }}/${{ github.repository_owner }}/${{ github.event.repository.name }}:${BRANCH_NAME} -DskipTests
+
+  build-native-macos:
+    needs: build-native
+    runs-on: macos-latest
+    defaults:
+      run:
+        working-directory: ${{ github.workspace }}
+    steps:
+      # Checkout the repository
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      # Set up JDK 17 with GraalVM
+      - name: Set up JDK 17 with GraalVM
+        uses: graalvm/setup-graalvm@v1
+        with:
+          distribution: 'liberica'
+          version: '22.3.0'
+          java-version: '17'
+          cache: 'maven'
+
+      # Print Java and Maven versions
+      - name: Print Java and Maven Version
+        run: |
+          echo "GRAALVM_HOME: $GRAALVM_HOME"
+          echo "JAVA_HOME: $JAVA_HOME"
+          java --version
+          native-image --version
+          mvn --version
+
+      # Compile to native image
+      - name: Compile to Native Image
+        run: mvn -Pnative native:compile
+
+      # Upload compiled binary
+      - name: Upload Compiled Binary
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ github.event.repository.name }}-exec-$(echo ${GITHUB_REF} | awk -F'/' '{print $3}')-macos
+          path: target/*-exec
