@@ -39,6 +39,11 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           cache: 'maven'
 
+      # Get branch name
+      - name: Get Branch Name
+        id: get_branch
+        run: echo "BRANCH_NAME=$(echo ${GITHUB_REF} | awk -F'/' '{print $3}')" >> $GITHUB_ENV
+
       # Print Java and Maven versions
       - name: Print Java and Maven Version
         run: |
@@ -91,21 +96,20 @@ jobs:
       - name: Upload JAR
         uses: actions/upload-artifact@v2
         with:
-          name: ${{ github.event.repository.name }}-jar-$(echo ${GITHUB_REF} | awk -F'/' '{print $3}')
+          name: ${{ github.event.repository.name }}-${{ env.BRANCH_NAME }}-jar
           path: target/*.jar
 
       # Upload Linux binary
       - name: Upload Linux Binary
         uses: actions/upload-artifact@v2
         with:
-          name: ${{ github.event.repository.name }}-exec-$(echo ${GITHUB_REF} | awk -F'/' '{print $3}')
+          name: ${{ github.event.repository.name }}-${{ env.BRANCH_NAME }}-exec-linux
           path: target/*-exec
 
       # Build and Publish Docker Image using Spring Boot Maven Plugin
       - name: Build and Publish Docker Image
         run: |
-          BRANCH_NAME=$(echo "${GITHUB_REF}" | awk -F'/' '{print $3}')
-          mvn -ntp -Pnative spring-boot:build-image -Dspring-boot.build-image.publish=true -Ddocker.username=${{ secrets.DOCKER_USERNAME }} -Ddocker.password=${{ secrets.DOCKER_PASSWORD }} -Dspring-boot.build-image.imageName=docker.io/${{ secrets.DOCKER_USERNAME }}/${{ github.repository_owner }}/${{ github.event.repository.name }}:${BRANCH_NAME} -DskipTests
+          mvn -ntp -Pnative spring-boot:build-image -Dspring-boot.build-image.publish=true -Ddocker.username=${{ secrets.DOCKER_USERNAME }} -Ddocker.password=${{ secrets.DOCKER_PASSWORD }} -Dspring-boot.build-image.imageName=docker.io/${{ secrets.DOCKER_USERNAME }}/${{ github.repository_owner }}/${{ github.event.repository.name }}:${{ env.BRANCH_NAME }} -DskipTests
 
   build-native-macos:
     needs: build-native
@@ -127,6 +131,11 @@ jobs:
           java-version: '17'
           cache: 'maven'
 
+      # Get branch name
+      - name: Get Branch Name
+        id: get_branch
+        run: echo "BRANCH_NAME=$(echo ${GITHUB_REF} | awk -F'/' '{print $3}')" >> $GITHUB_ENV
+
       # Print Java and Maven versions
       - name: Print Java and Maven Version
         run: |
@@ -144,5 +153,5 @@ jobs:
       - name: Upload Compiled Binary
         uses: actions/upload-artifact@v2
         with:
-          name: ${{ github.event.repository.name }}-exec-$(echo ${GITHUB_REF} | awk -F'/' '{print $3}')-macos
+          name: ${{ github.event.repository.name }}-${{ env.BRANCH_NAME }}-exec-macos
           path: target/*-exec
