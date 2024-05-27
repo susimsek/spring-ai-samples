@@ -115,7 +115,7 @@ class NamedParameterMessageSourceTest {
         String expectedMessageEn = "Validation error on field 'username': must not be empty";
         String actualMessageEn = namedParameterMessageSource.getMessageWithNamedArgs(code, params, Locale.ENGLISH);
         String expectedMessageTr = "Alan 'username' için doğrulama hatası: must not be empty";
-        String actualMessageTr = namedParameterMessageSource.getMessageWithNamedArgs(code, params, new Locale("TR", "tr"));
+        String actualMessageTr = namedParameterMessageSource.getMessageWithNamedArgs(code, params, new Locale("tr", "TR"));
 
         assertEquals(expectedMessageEn, actualMessageEn);
         assertEquals(expectedMessageTr, actualMessageTr);
