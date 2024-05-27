@@ -56,12 +56,6 @@ jobs:
       - name: List Target Directory
         run: ls -l target/
 
-      # Compress the binary using UPX
-      - name: Compress Binary with UPX
-        run: |
-          upx -9 target/${{ github.event.repository.name }}
-          chmod +x target/${{ github.event.repository.name }}
-
       # Upload compressed binary
       - name: Upload Compressed Binary
         uses: actions/upload-artifact@v2
