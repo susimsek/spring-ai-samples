@@ -53,4 +53,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Build and publish docker image
-        run: mvn -ntp -Pnative spring-boot:build-image -Dspring-boot.build-image.publish=true -Ddocker.username=${{ secrets.DOCKER_USERNAME }} -Ddocker.password=${{ secrets.DOCKER_PASSWORD }} -Dspring-boot.build-image.image.name=docker.io/${{ secrets.DOCKER_REGISTRY_USERNAME }}/${artifactId}:s17 -DskipTests
+        run: mvn -ntp -Pnative spring-boot:build-image -Dspring-boot.build-image.publish=true \
+          -Ddocker.username=${{ secrets.DOCKER_USERNAME }} \
+          -Ddocker.password=${{ secrets.DOCKER_PASSWORD }} \
+          -Dspring-boot.build-image.image.name=docker.io/${{ secrets.DOCKER_REGISTRY_USERNAME }}/${artifactId}:s17 -DskipTests
