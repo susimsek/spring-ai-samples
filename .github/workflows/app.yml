@@ -1,4 +1,4 @@
-name: Application Test, Sonar and build.
+name: Application Test, Sonar and Build
 
 on:
   workflow_dispatch:
@@ -22,35 +22,47 @@ jobs:
       contents: read
       packages: write
     steps:
-      - uses: actions/checkout@v4
-      - uses: snyk/actions/setup@master
-      - name: Set up JDK 17
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Snyk
+        uses: snyk/actions/setup@master
+
+      - name: Set up GraalVM (Liberica)
         uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
-          java-version: 17
+          distribution: 'liberica'
+          java-version: '22.3.r17'
           cache: 'maven'
+
       - name: Print Java Version
-        run:  java -version
+        run: java -version
+
       - name: Download Dependencies
         run: mvn dependency:go-offline
+
       - name: Snyk test
         continue-on-error: true
         run: snyk test --all-projects
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
       - name: Snyk monitor
         continue-on-error: true
         run: snyk monitor --all-projects
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-      - name: Test
+
+      - name: Run Tests
         run: mvn -ntp clean verify
+
       - name: Quality Analysis
         run: mvn -ntp -Psonar initialize sonar:sonar -Dsonar.token=${{ secrets.SONAR_TOKEN }}
-      - name: Deploy to github packages
+
+      - name: Deploy to GitHub Packages
         run: mvn deploy -Dgpg.skip -Dgithub
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build and publish docker image
-        run: mvn -ntp -Pnative spring-boot:build-image -Dspring-boot.build-image.publish=true -Ddocker.username=${{ secrets.DOCKER_USERNAME }} -Ddocker.password=${{ secrets.DOCKER_PASSWORD }} -Dspring-boot.build-image.image.name=docker.io/${{ secrets.DOCKER_REGISTRY_USERNAME }}/${artifactId}:s17 -DskipTests
+
+      - name: Build and Publish Docker Image
+        run: mvn -ntp -Pnative spring-boot:build-image -Dspring-boot.build-image.publish=true -Ddocker.username=${{ secrets.DOCKER_USERNAME }} -Ddocker.password=${{ secrets.DOCKER_PASSWORD }} -Dspring-boot.build-image.imageName=docker.io/${{ secrets.DOCKER_USERNAME }}/${{ github.event.repository.name }}:s17 -DskipTests
