@@ -22,10 +22,15 @@ jobs:
       contents: read
       packages: write
     steps:
+      # Checkout the repository
       - name: Checkout Repository
         uses: actions/checkout@v4
+
+      # Set up Snyk
       - name: Set up Snyk
         uses: snyk/actions/setup@master
+
+      # Set up JDK 17 with GraalVM
       - name: Set up JDK 17 with GraalVM
         uses: graalvm/setup-graalvm@v1
         with:
@@ -34,29 +39,62 @@ jobs:
           java-version: '17'
           github-token: ${{ secrets.GITHUB_TOKEN }}
           cache: 'maven'
-      - name: Print Java Version
+
+      # Print Java and Maven versions
+      - name: Print Java and Maven Version
         run: |
           echo "GRAALVM_HOME: $GRAALVM_HOME"
           echo "JAVA_HOME: $JAVA_HOME"
           java --version
           native-image --version
+          mvn --version
+
+      # Configure Maven for GitHub Packages
+      - name: Configure Maven for GitHub Packages
+        run: |
+          mkdir -p ~/.m2
+          echo '<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd">
+                  <servers>
+                    <server>
+                      <id>github</id>
+                      <username>${{ github.actor }}</username>
+                      <password>${{ secrets.GITHUB_TOKEN }}</password>
+                    </server>
+                  </servers>
+                </settings>' > ~/.m2/settings.xml
+
+      # Download dependencies
       - name: Download Dependencies
         run: mvn dependency:go-offline
-      - name: Snyk test
+
+      # Run Snyk security test
+      - name: Snyk Test
         continue-on-error: true
         run: snyk test --all-projects
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-      - name: Snyk monitor
+
+      # Run Snyk monitor
+      - name: Snyk Monitor
         continue-on-error: true
         run: snyk monitor --all-projects
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-      - name: Test
+
+      # Run tests
+      - name: Run Tests
         run: mvn -ntp clean verify
+
+      # Run quality analysis
       - name: Quality Analysis
         run: mvn -ntp -Psonar initialize sonar:sonar -Dsonar.token=${{ secrets.SONAR_TOKEN }}
-      - name: Deploy to github packages
+
+      # Deploy to GitHub Packages
+      - name: Deploy to GitHub Packages
         run: mvn deploy -Dgpg.skip -Dgithub
-      - name: Build and publish docker image
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Build and publish Docker image
+      - name: Build and Publish Docker Image
         run: mvn -ntp -Pnative spring-boot:build-image -Dspring-boot.build-image.publish=true -Ddocker.username=${{ secrets.DOCKER_USERNAME }} -Ddocker.password=${{ secrets.DOCKER_PASSWORD }} -Dspring-boot.build-image.imageName=docker.io/${{ secrets.DOCKER_USERNAME }}/${{ github.event.repository.name }}:s17 -DskipTests
