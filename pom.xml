@@ -159,7 +159,7 @@
                     <image>
                         <name>suayb/${project.artifactId}:s17</name>
                         <pullPolicy>IF_NOT_PRESENT</pullPolicy>
-                        <builder>paketobuildpacks/builder:base</builder>
+                        <builder>paketobuildpacks/builder:tiny</builder>
                         <env>
                             <BP_NATIVE_IMAGE>true</BP_NATIVE_IMAGE>
                             <BP_BINARY_COMPRESSION_METHOD>upx</BP_BINARY_COMPRESSION_METHOD>

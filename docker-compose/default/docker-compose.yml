@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   web:
-    image: suayb/spring-ai-samples:s17
+    image: docker.io/suayb/spring-ai-samples:s17
     container_name: spring-ai-samples-api
     platform: linux/amd64
     ports:
