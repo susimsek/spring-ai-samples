@@ -105,19 +105,19 @@ jobs:
       - name: Compress Binary with UPX
         run: upx -9 target/${{ github.event.repository.name }}
 
-      # Upload JAR file
-      - name: Upload JAR
-        uses: actions/upload-artifact@v2
-        with:
-          name: ${{ github.event.repository.name }}-${{ env.BRANCH_NAME }}-jar
-          path: target/*.jar
-
       # Upload Linux binary
       - name: Upload Linux Binary
         uses: actions/upload-artifact@v2
         with:
           name: ${{ github.event.repository.name }}-exec-${{ env.BRANCH_NAME }}-linux
           path: target/${{ github.event.repository.name }}
+
+      # Upload JAR file
+      - name: Upload JAR
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ github.event.repository.name }}-${{ env.BRANCH_NAME }}-jar
+          path: target/*.jar
 
       # Build and Publish Docker Image using Spring Boot Maven Plugin
       - name: Build and Publish Docker Image
