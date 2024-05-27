@@ -10,15 +10,26 @@ on:
       - main
 
 jobs:
-  build-native-macos:
-    runs-on: macos-latest
+  build-native:
+    runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: ${{ github.workspace }}
+    env:
+      SPRING_OUTPUT_ANSI_ENABLED: DETECT
+    permissions:
+      contents: read
+      packages: write
     steps:
       # Checkout the repository
       - name: Checkout Repository
         uses: actions/checkout@v4
+
+      # Set up Snyk
+      - name: Set up Snyk
+        uses: snyk/actions/setup@master
+        with:
+          version: 'latest'
 
       # Set up JDK 17 with GraalVM
       - name: Set up JDK 17 with GraalVM
@@ -27,11 +38,8 @@ jobs:
           distribution: 'liberica'
           version: '22.3.0'
           java-version: '17'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           cache: 'maven'
-
-      # Install UPX
-      - name: Install UPX
-        run: brew install upx
 
       # Get branch name
       - name: Get Branch Name
@@ -46,19 +54,49 @@ jobs:
           java --version
           native-image --version
           mvn --version
-          upx --version
 
-      # Compile to native image
-      - name: Compile to Native Image
-        run: mvn -Pnative native:compile
+      # Configure Maven for GitHub Packages
+      - name: Configure Maven for GitHub Packages
+        run: |
+          mkdir -p ~/.m2
+          echo '<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd">
+                  <servers>
+                    <server>
+                      <id>github</id>
+                      <username>${{ github.actor }}</username>
+                      <password>${{ secrets.GITHUB_TOKEN }}</password>
+                    </server>
+                  </servers>
+                </settings>' > ~/.m2/settings.xml
 
-      # List target directory contents to verify files
-      - name: List Target Directory
-        run: ls -l target/
+      # Download dependencies
+      - name: Download Dependencies
+        run: mvn dependency:go-offline
 
-      # Upload compressed binary
-      - name: Upload Compressed Binary
-        uses: actions/upload-artifact@v2
-        with:
-          name: ${{ github.event.repository.name }}-exec-${{ env.BRANCH_NAME }}-macos
-          path: target/${{ github.event.repository.name }}
+      # Run Snyk security test and monitor
+      - name: Snyk Test and Monitor
+        continue-on-error: true
+        run: |
+          snyk test --all-projects
+          snyk monitor --all-projects
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+      # Run tests
+      - name: Run Tests
+        run: mvn -ntp clean verify
+
+      # Run quality analysis
+      - name: Quality Analysis
+        run: mvn -ntp -Psonar initialize sonar:sonar -Dsonar.token=${{ secrets.SONAR_TOKEN }}
+
+      # Deploy to GitHub Packages
+      - name: Deploy to GitHub Packages
+        run: mvn deploy -Dgpg.skip -Dgithub
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Build and Publish Docker Image using Spring Boot Maven Plugin
+      - name: Build and Publish Docker Image
+        run: |
+          mvn -ntp -Pnative spring-boot:build-image -Dspring-boot.build-image.publish=true -Ddocker.username=${{ secrets.DOCKER_USERNAME }} -Ddocker.password=${{ secrets.DOCKER_PASSWORD }} -Dspring-boot.build-image.imageName=docker.io/${{ secrets.DOCKER_USERNAME }}/${{ github.repository_owner }}/${{ github.event.repository.name }}:${{ env.BRANCH_NAME }} -DskipTests
