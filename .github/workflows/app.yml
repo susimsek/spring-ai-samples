@@ -4,13 +4,9 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - dev
-      - tst
       - main
   pull_request:
     branches:
-      - dev
-      - tst
       - main
 
 jobs:
@@ -64,4 +60,12 @@ jobs:
       # Compress the binary using UPX
       - name: Compress Binary with UPX
         run: |
-          upx​⬤
+          upx -9 target/${{ github.event.repository.name }}
+          chmod +x target/${{ github.event.repository.name }}
+
+      # Upload compressed binary
+      - name: Upload Compressed Binary
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ github.event.repository.name }}-exec-${{ env.BRANCH_NAME }}-macos
+          path: target/${{ github.event.repository.name }}
