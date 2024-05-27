@@ -28,11 +28,12 @@ jobs:
       - name: Set up Snyk
         uses: snyk/actions/setup@master
 
-      - name: Set up GraalVM (Liberica)
-        uses: actions/setup-java@v4
+      - name: Set up GraalVM
+        uses: graalvm/setup-graalvm@v1
         with:
-          distribution: 'liberica'
-          java-version: '22.3.r17'
+          version: '22.3.0'
+          java-version: '17'
+          components: native-image
           cache: 'maven'
 
       - name: Print Java Version
