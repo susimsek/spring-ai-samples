@@ -96,7 +96,7 @@ jobs:
       - name: Upload JAR
         uses: actions/upload-artifact@v2
         with:
-          name: ${{ github.event.repository.name }}-${{ env.BRANCH_NAME }}-jar
+          name: ${{ github.event.repository.name }}-${{ env.BRANCH_NAME }}
           path: target/*.jar
 
       # Upload Linux binary
@@ -104,7 +104,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: ${{ github.event.repository.name }}-${{ env.BRANCH_NAME }}-exec-linux
-          path: target/*-exec
+          path: target/${{ github.event.repository.name }}
 
       # Build and Publish Docker Image using Spring Boot Maven Plugin
       - name: Build and Publish Docker Image
@@ -154,4 +154,4 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: ${{ github.event.repository.name }}-${{ env.BRANCH_NAME }}-exec-macos
-          path: target/*-exec
+          path: target/${{ github.event.repository.name }}
