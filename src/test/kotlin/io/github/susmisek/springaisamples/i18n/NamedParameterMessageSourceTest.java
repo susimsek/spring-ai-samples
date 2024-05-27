@@ -260,4 +260,21 @@ class NamedParameterMessageSourceTest {
         assertEquals("This is {param1}", result);
     }
 
+    @Test
+    void testGetMessageInternal_MessageNonNullAndNamedParametersEmpty() {
+        // Tests getMessageInternal when message is non-null and named parameters are empty
+        namedParameterMessageSource.setNamedParameters(new ConcurrentHashMap<>());
+        String code = "simple.message";
+        String message = "This is a simple message";
+        ResourceBundleMessageSource mockMessageSource = new ResourceBundleMessageSource() {
+            @Override
+            protected String getMessageInternal(String code, Object[] args, Locale locale) {
+                return message;
+            }
+        };
+
+        namedParameterMessageSource.setParentMessageSource(mockMessageSource);
+        String result = namedParameterMessageSource.getMessageInternal(code, null, Locale.ENGLISH);
+        assertEquals("This is a simple message", result);
+    }
 }
