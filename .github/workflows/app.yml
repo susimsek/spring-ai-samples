@@ -31,8 +31,10 @@ jobs:
       - name: Set up GraalVM
         uses: graalvm/setup-graalvm@v1
         with:
+          distribution: 'liberica'
           version: '22.3.0'
           java-version: '17'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           components: native-image
           cache: 'maven'
 
