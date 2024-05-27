@@ -24,48 +24,35 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
-
       - name: Set up Snyk
         uses: snyk/actions/setup@master
-
-      - name: Set up GraalVM
-        uses: graalvm/setup-graalvm@v1
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
         with:
-          distribution: 'graalvm'
-          version: '22.3.0'
-          java-version: '17'
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          components: native-image
+          distribution: 'temurin'
+          java-version: 17
           cache: 'maven'
-
       - name: Print Java Version
-        run: java -version
-
+        run:  java -version
       - name: Download Dependencies
         run: mvn dependency:go-offline
-
       - name: Snyk test
         continue-on-error: true
         run: snyk test --all-projects
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-
       - name: Snyk monitor
         continue-on-error: true
         run: snyk monitor --all-projects
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-
-      - name: Run Tests
+      - name: Test
         run: mvn -ntp clean verify
-
       - name: Quality Analysis
         run: mvn -ntp -Psonar initialize sonar:sonar -Dsonar.token=${{ secrets.SONAR_TOKEN }}
-
-      - name: Deploy to GitHub Packages
+      - name: Deploy to github packages
         run: mvn deploy -Dgpg.skip -Dgithub
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Build and Publish Docker Image
+      - name: Build and publish docker image
         run: mvn -ntp -Pnative spring-boot:build-image -Dspring-boot.build-image.publish=true -Ddocker.username=${{ secrets.DOCKER_USERNAME }} -Ddocker.password=${{ secrets.DOCKER_PASSWORD }} -Dspring-boot.build-image.imageName=docker.io/${{ secrets.DOCKER_USERNAME }}/${{ github.event.repository.name }}:s17 -DskipTests
