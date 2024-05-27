@@ -18,17 +18,21 @@ import org.springframework.util.CollectionUtils;
  */
 public class NamedParameterMessageSource extends ResourceBundleMessageSource implements ParameterMessageSource {
 
-    private static final Pattern NAMED_PATTERN = Pattern.compile("\\{([a-zA-Z0-9_]+)}");
+    /**
+     * Pattern to match named parameters in the format {paramName}.
+     * This pattern matches sequences that conform to Java variable name constraints.
+     */
+    private static final Pattern NAMED_PATTERN = Pattern.compile("\\{([a-zA-Z_]\\w*)}");
 
     /**
-     * Replaces named parameters in the message with their corresponding values.
+     * Replaces named parameters in the message template with their corresponding values.
      *
-     * @param msg  the message containing named parameters
+     * @param messageTemplate the message containing named parameters
      * @param args the map containing parameter names and their values
      * @return the message with named parameters replaced by their values
      */
-    private String replaceNamedParameters(String msg, Map<String, String> args) {
-        Matcher matcher = NAMED_PATTERN.matcher(msg);
+    private String replaceNamedParameters(String messageTemplate, Map<String, String> args) {
+        Matcher matcher = NAMED_PATTERN.matcher(messageTemplate);
         StringBuilder result = new StringBuilder();
         while (matcher.find()) {
             String paramName = matcher.group(1);
@@ -63,7 +67,8 @@ public class NamedParameterMessageSource extends ResourceBundleMessageSource imp
      * @throws NoSuchMessageException if the message with the specified code is not found
      */
     @Override
-    public String getMessageWithNamedArgs(String code, Map<String, String> args) throws NoSuchMessageException {
+    public String getMessageWithNamedArgs(String code,
+                                          @Nullable Map<String, String> args) throws NoSuchMessageException {
         return getMessageWithNamedArgs(code, args, LocaleContextHolder.getLocale());
     }
 
@@ -77,7 +82,9 @@ public class NamedParameterMessageSource extends ResourceBundleMessageSource imp
      * @throws NoSuchMessageException if the message with the specified code is not found
      */
     @Override
-    public String getMessageWithNamedArgs(String code, Map<String, String> args, Locale locale) throws NoSuchMessageException {
+    public String getMessageWithNamedArgs(String code,
+                                          @Nullable Map<String, String> args,
+                                          Locale locale) throws NoSuchMessageException {
         String message = super.getMessage(code, null, locale);
         if (!CollectionUtils.isEmpty(args)) {
             message = replaceNamedParameters(message, args);
