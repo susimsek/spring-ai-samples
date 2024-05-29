@@ -92,7 +92,7 @@ jobs:
 
       # Deploy to GitHub Packages
       - name: Deploy to GitHub Packages
-        run: mvn deploy -Dgpg.skip -Dgithub
+        run: mvn deploy -Dgpg.skip -Dgithub -DskipTests
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
