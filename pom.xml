@@ -8,7 +8,7 @@
         <version>3.3.0</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>io.github.susmisek</groupId>
+    <groupId>io.github.susimsek</groupId>
     <artifactId>spring-ai-samples</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <packaging>jar</packaging>

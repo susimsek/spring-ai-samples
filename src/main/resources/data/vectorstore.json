@@ -1,0 +1,20 @@
+{
+  "documents": [
+    {
+      "id": "1",
+      "text": "This is a sample document.",
+      "metadata": {
+        "author": "John Doe",
+        "date": "2023-01-01"
+      }
+    },
+    {
+      "id": "2",
+      "text": "This is another sample document.",
+      "metadata": {
+        "author": "Jane Smith",
+        "date": "2023-01-02"
+      }
+    }
+  ]
+}
