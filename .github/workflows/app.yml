@@ -99,4 +99,4 @@ jobs:
       # Build and Publish Docker Image using Spring Boot Maven Plugin
       - name: Build and Publish Docker Image
         run: |
-          mvn -ntp -Pnative spring-boot:build-image -Dspring-boot.build-image.publish=true -Ddocker.username=${{ secrets.DOCKER_USERNAME }} -Ddocker.password=${{ secrets.DOCKER_PASSWORD }} -Dspring-boot.build-image.image.name=docker.io/${{ secrets.DOCKER_USERNAME }}/${{ github.repository_owner }}/${{ github.event.repository.name }}:${{ env.BRANCH_NAME }} -DskipTests
+          mvn -ntp -Pnative spring-boot:build-image -Dspring-boot.build-image.publish=true -Ddocker.username=${{ secrets.DOCKER_USERNAME }} -Ddocker.password=${{ secrets.DOCKER_PASSWORD }} -Dimage.name=docker.io/${{ secrets.DOCKER_USERNAME }}/${{ github.repository_owner }}/${{ github.event.repository.name }}:${{ env.BRANCH_NAME }} -DskipTests

@@ -160,7 +160,8 @@
                         <enabled>true</enabled>
                     </layers>
                     <image>
-                        <name>suayb/${project.artifactId}:s17</name>
+                        <!--suppress UnresolvedMavenProperty -->
+                        <name>${image.name}</name>
                         <pullPolicy>IF_NOT_PRESENT</pullPolicy>
                         <builder>paketobuildpacks/builder:tiny</builder>
                         <env>
