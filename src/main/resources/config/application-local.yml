@@ -28,3 +28,7 @@ logging:
     io.github.susimsek.springaisamples: DEBUG
   pattern:
     level: '%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]'
+weather:
+  client:
+    api-key: ${WEATHER_API_KEY}
+    api-url: http://api.weatherapi.com/v1
