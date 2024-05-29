@@ -3,7 +3,6 @@ package io.github.susimsek.springaisamples.exception;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-import io.github.susimsek.springaisamples.exception.Violation;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ElementKind;
 import jakarta.validation.Path;

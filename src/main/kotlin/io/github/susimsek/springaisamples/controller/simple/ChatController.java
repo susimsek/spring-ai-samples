@@ -33,7 +33,7 @@ public class ChatController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successful response",
             content = {@Content(mediaType = MediaType.TEXT_PLAIN_VALUE, schema = @Schema(implementation = String.class),
-                    examples = {@ExampleObject(value = "Here is a response for the provided message.")})}),
+                examples = {@ExampleObject(value = "Here is a response for the provided message.")})}),
         @ApiResponse(responseCode = "500", description = "Internal server error",
             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                 schema = @Schema(implementation = ProblemDetail.class)))})

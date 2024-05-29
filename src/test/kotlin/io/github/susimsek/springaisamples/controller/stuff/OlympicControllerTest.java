@@ -7,7 +7,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import io.github.susimsek.springaisamples.config.LocaleConfig;
-import io.github.susimsek.springaisamples.controller.stuff.OlympicController;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.Collections;
@@ -45,7 +44,8 @@ class OlympicControllerTest {
     @Test
     void testGet2024OlympicSports_ValidRequest() throws Exception {
         // Mock chatClient response
-        ChatResponse mockResponse = new ChatResponse(Collections.singletonList(new Generation("Athletics, Swimming, Gymnastics")));
+        ChatResponse mockResponse =
+            new ChatResponse(Collections.singletonList(new Generation("Athletics, Swimming, Gymnastics")));
         when(chatClient.call(any(Prompt.class))).thenReturn(mockResponse);
 
         // Mock Resource objects with ByteArrayInputStream

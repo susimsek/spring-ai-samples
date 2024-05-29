@@ -54,7 +54,8 @@ class ChatUtilsTest {
         AssistantMessage assistantMessage = new AssistantMessage(content);
         MapOutputParser outputParser = new MapOutputParser();
         when(generation.getOutput()).thenReturn(assistantMessage);
-        Map<String, Object> expectedMap = Map.of("John Doe", Map.of("github", "http://www.example.com", "twitter", "@example"));
+        Map<String, Object> expectedMap =
+            Map.of("John Doe", Map.of("github", "http://www.example.com", "twitter", "@example"));
 
         // When
         Map<String, Object> actualMap = ChatUtils.parseResponse(generation, outputParser);

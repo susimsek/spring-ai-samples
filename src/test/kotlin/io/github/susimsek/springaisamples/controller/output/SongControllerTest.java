@@ -7,7 +7,6 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 
 import io.github.susimsek.springaisamples.config.LocaleConfig;
-import io.github.susimsek.springaisamples.controller.output.SongController;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.ai.chat.ChatClient;
@@ -59,7 +58,7 @@ class SongControllerTest {
         mockMvc.perform(MockMvcRequestBuilders.get("/api/ai/songs")
                 .param("artist", "A"))
             .andExpect(MockMvcResultMatchers.status().isBadRequest())
-            .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON));;
+            .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON));
     }
 
     @Test

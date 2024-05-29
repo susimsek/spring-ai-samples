@@ -7,7 +7,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import io.github.susimsek.springaisamples.config.LocaleConfig;
-import io.github.susimsek.springaisamples.controller.prompt.YouTubeController;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.List;
@@ -39,7 +38,8 @@ class YouTubeControllerTest {
 
     @Test
     void testFindPopularYouTubersStepOne() throws Exception {
-        String expectedResponse = "List 10 of the most popular YouTubers in tech along with their current subscriber counts. If you don't know the answer, just say \"I don't know\".";
+        String expectedResponse =
+            "List 10 of the most popular YouTubers in tech along with their current subscriber counts. If you don't know the answer, just say \"I don't know\".";
         ChatResponse chatResponse = new ChatResponse(List.of(new Generation(expectedResponse)));
 
         when(chatClient.call(any(Prompt.class))).thenReturn(chatResponse);
@@ -60,7 +60,8 @@ class YouTubeControllerTest {
 
     @Test
     void testFindPopularYouTubers() throws Exception {
-        String expectedResponse = "List 10 of the most popular YouTubers in tech along with their current subscriber counts. If you don't know the answer, just say \"I don't know\".";
+        String expectedResponse =
+            "List 10 of the most popular YouTubers in tech along with their current subscriber counts. If you don't know the answer, just say \"I don't know\".";
         ChatResponse chatResponse = new ChatResponse(List.of(new Generation(expectedResponse)));
 
         // Mock input stream for ytPromptResource

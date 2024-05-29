@@ -3,7 +3,6 @@ package io.github.susimsek.springaisamples.config;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import io.github.susimsek.springaisamples.config.LocaleConfig;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import org.junit.jupiter.api.Test;
@@ -20,11 +19,12 @@ class LocaleConfigTest {
         properties.setBasename("i18n/messages");
 
         // When
-        ResourceBundleMessageSource messageSource = (ResourceBundleMessageSource) localeConfig.messageSource(properties);
+        ResourceBundleMessageSource messageSource =
+            (ResourceBundleMessageSource) localeConfig.messageSource(properties);
 
         // Then
         assertNotNull(messageSource);
-        assertArrayEquals(new String[]{"i18n/messages"}, messageSource.getBasenameSet().toArray());
+        assertArrayEquals(new String[] {"i18n/messages"}, messageSource.getBasenameSet().toArray());
     }
 
     @Test
@@ -35,7 +35,8 @@ class LocaleConfigTest {
         properties.setEncoding(StandardCharsets.UTF_8);
 
         // When
-        ResourceBundleMessageSource messageSource = (ResourceBundleMessageSource) localeConfig.messageSource(properties);
+        ResourceBundleMessageSource messageSource =
+            (ResourceBundleMessageSource) localeConfig.messageSource(properties);
 
         // Then
         assertNotNull(messageSource);
@@ -49,7 +50,8 @@ class LocaleConfigTest {
         properties.setFallbackToSystemLocale(false);
 
         // When
-        ResourceBundleMessageSource messageSource = (ResourceBundleMessageSource) localeConfig.messageSource(properties);
+        ResourceBundleMessageSource messageSource =
+            (ResourceBundleMessageSource) localeConfig.messageSource(properties);
 
         // Then
         assertNotNull(messageSource);
@@ -63,7 +65,8 @@ class LocaleConfigTest {
         properties.setCacheDuration(Duration.ofSeconds(60));
 
         // When
-        ResourceBundleMessageSource messageSource = (ResourceBundleMessageSource) localeConfig.messageSource(properties);
+        ResourceBundleMessageSource messageSource =
+            (ResourceBundleMessageSource) localeConfig.messageSource(properties);
 
         // Then
         assertNotNull(messageSource);
@@ -77,7 +80,8 @@ class LocaleConfigTest {
         properties.setAlwaysUseMessageFormat(true);
 
         // When
-        ResourceBundleMessageSource messageSource = (ResourceBundleMessageSource) localeConfig.messageSource(properties);
+        ResourceBundleMessageSource messageSource =
+            (ResourceBundleMessageSource) localeConfig.messageSource(properties);
 
         // Then
         assertNotNull(messageSource);
@@ -91,7 +95,8 @@ class LocaleConfigTest {
         properties.setUseCodeAsDefaultMessage(true);
 
         // When
-        ResourceBundleMessageSource messageSource = (ResourceBundleMessageSource) localeConfig.messageSource(properties);
+        ResourceBundleMessageSource messageSource =
+            (ResourceBundleMessageSource) localeConfig.messageSource(properties);
 
         // Then
         assertNotNull(messageSource);
@@ -107,7 +112,8 @@ class LocaleConfigTest {
         properties.setCacheDuration(null);
 
         // When
-        ResourceBundleMessageSource messageSource = (ResourceBundleMessageSource) localeConfig.messageSource(properties);
+        ResourceBundleMessageSource messageSource =
+            (ResourceBundleMessageSource) localeConfig.messageSource(properties);
 
         // Then
         assertNotNull(messageSource);

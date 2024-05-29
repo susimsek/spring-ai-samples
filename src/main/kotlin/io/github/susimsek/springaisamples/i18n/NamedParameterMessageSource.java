@@ -28,7 +28,7 @@ public class NamedParameterMessageSource extends ResourceBundleMessageSource imp
      * Replaces named parameters in the message template with their corresponding values.
      *
      * @param messageTemplate the message containing named parameters
-     * @param args the map containing parameter names and their values
+     * @param args            the map containing parameter names and their values
      * @return the message with named parameters replaced by their values
      */
     private String replaceNamedParameters(String messageTemplate, Map<String, String> args) {

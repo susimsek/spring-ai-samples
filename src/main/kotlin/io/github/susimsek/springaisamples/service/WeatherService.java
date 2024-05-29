@@ -3,11 +3,10 @@ package io.github.susimsek.springaisamples.service;
 import io.github.susimsek.springaisamples.client.WeatherClient;
 import io.github.susimsek.springaisamples.model.WeatherRequest;
 import io.github.susimsek.springaisamples.model.WeatherResponse;
+import java.util.function.Function;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-
-import java.util.function.Function;
 
 @Service
 @RequiredArgsConstructor

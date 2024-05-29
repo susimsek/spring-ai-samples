@@ -8,7 +8,6 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 
 import io.github.susimsek.springaisamples.config.LocaleConfig;
-import io.github.susimsek.springaisamples.controller.output.BookController;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.ai.chat.ChatClient;
@@ -66,7 +65,8 @@ class BookControllerTest {
             // Then
             .andExpect(MockMvcResultMatchers.status().isOk())
             .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(MockMvcResultMatchers.jsonPath("$.author", is(author))) // Burada $.name yerine $.author kullanıldı
+            .andExpect(
+                MockMvcResultMatchers.jsonPath("$.author", is(author))) // Burada $.name yerine $.author kullanıldı
             .andExpect(MockMvcResultMatchers.jsonPath("$.books", hasSize(3)))
             .andExpect(MockMvcResultMatchers.jsonPath("$.books", contains("Book 1", "Book 2", "Book 3")));
     }

@@ -10,7 +10,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import io.github.susimsek.springaisamples.config.LocaleConfig;
-import io.github.susimsek.springaisamples.controller.rag.FaqController;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.List;
@@ -76,7 +75,8 @@ class FaqControllerTest {
         // Given
         String message = "How can I buy tickets for the Olympic Games Paris 2024";
 
-        when(vectorStore.similaritySearch(any(SearchRequest.class))).thenThrow(new RuntimeException("SimSearch failed"));
+        when(vectorStore.similaritySearch(any(SearchRequest.class))).thenThrow(
+            new RuntimeException("SimSearch failed"));
 
         // When/Then
         mockMvc.perform(get("/api/ai/faq")

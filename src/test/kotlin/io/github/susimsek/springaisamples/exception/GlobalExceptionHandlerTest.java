@@ -6,7 +6,6 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import io.github.susimsek.springaisamples.exception.GlobalExceptionHandler;
 import io.github.susimsek.springaisamples.i18n.ParameterMessageSource;
 import jakarta.validation.ConstraintViolationException;
 import java.util.Collections;
@@ -44,10 +43,11 @@ class GlobalExceptionHandlerTest {
 
         when(messageSource.getMessage(anyString())).thenReturn("Requested media type is not acceptable.");
 
-        ResponseEntity<Object> response = exceptionHandler.handleHttpMediaTypeNotAcceptable(ex, headers, HttpStatus.NOT_ACCEPTABLE, request);
+        ResponseEntity<Object> response =
+            exceptionHandler.handleHttpMediaTypeNotAcceptable(ex, headers, HttpStatus.NOT_ACCEPTABLE, request);
         assertNotNull(response);
         assertEquals(HttpStatus.NOT_ACCEPTABLE, response.getStatusCode());
-        var problemDetail =((ProblemDetail) response.getBody());
+        var problemDetail = ((ProblemDetail) response.getBody());
         assertNotNull(problemDetail);
         assertEquals("Requested media type is not acceptable.", problemDetail.getDetail());
     }
@@ -65,7 +65,7 @@ class GlobalExceptionHandlerTest {
             ex, headers, HttpStatus.UNSUPPORTED_MEDIA_TYPE, request);
         assertNotNull(response);
         assertEquals(HttpStatus.UNSUPPORTED_MEDIA_TYPE, response.getStatusCode());
-        var problemDetail =((ProblemDetail) response.getBody());
+        var problemDetail = ((ProblemDetail) response.getBody());
         assertNotNull(problemDetail);
         assertEquals("Requested media type is not supported.", problemDetail.getDetail());
     }
@@ -78,10 +78,11 @@ class GlobalExceptionHandlerTest {
 
         when(messageSource.getMessage(anyString())).thenReturn("Requested HTTP method is not supported.");
 
-        ResponseEntity<Object> response = exceptionHandler.handleHttpRequestMethodNotSupported(ex, headers, HttpStatus.METHOD_NOT_ALLOWED, request);
+        ResponseEntity<Object> response =
+            exceptionHandler.handleHttpRequestMethodNotSupported(ex, headers, HttpStatus.METHOD_NOT_ALLOWED, request);
         assertNotNull(response);
         assertEquals(HttpStatus.METHOD_NOT_ALLOWED, response.getStatusCode());
-        var problemDetail =((ProblemDetail) response.getBody());
+        var problemDetail = ((ProblemDetail) response.getBody());
         assertNotNull(problemDetail);
         assertEquals("Requested HTTP method is not supported.", problemDetail.getDetail());
     }
@@ -95,10 +96,11 @@ class GlobalExceptionHandlerTest {
 
         when(messageSource.getMessage(anyString())).thenReturn("Validation error occurred.");
 
-        ResponseEntity<Object> response = exceptionHandler.handleMethodArgumentNotValid(ex, headers, HttpStatus.BAD_REQUEST, request);
+        ResponseEntity<Object> response =
+            exceptionHandler.handleMethodArgumentNotValid(ex, headers, HttpStatus.BAD_REQUEST, request);
         assertNotNull(response);
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        var problemDetail =((ProblemDetail) response.getBody());
+        var problemDetail = ((ProblemDetail) response.getBody());
         assertNotNull(problemDetail);
         assertEquals("Validation error occurred.", problemDetail.getDetail());
     }
@@ -113,7 +115,7 @@ class GlobalExceptionHandlerTest {
         ResponseEntity<Object> response = exceptionHandler.handleConstraintViolationException(ex, request);
         assertNotNull(response);
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        var problemDetail =((ProblemDetail) response.getBody());
+        var problemDetail = ((ProblemDetail) response.getBody());
         assertNotNull(problemDetail);
         assertEquals("Validation error occurred.", problemDetail.getDetail());
     }
@@ -130,7 +132,7 @@ class GlobalExceptionHandlerTest {
 
         assertNotNull(response);
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-        var problemDetail =((ProblemDetail) response.getBody());
+        var problemDetail = ((ProblemDetail) response.getBody());
         assertNotNull(problemDetail);
         assertEquals("No handler found for the requested URL.", problemDetail.getDetail());
     }
@@ -141,11 +143,12 @@ class GlobalExceptionHandlerTest {
         Exception ex = new Exception("message");
         WebRequest request = mock(WebRequest.class);
 
-        when(messageSource.getMessage(anyString())).thenReturn("An unexpected condition was encountered on the server.");
+        when(messageSource.getMessage(anyString())).thenReturn(
+            "An unexpected condition was encountered on the server.");
 
         ResponseEntity<Object> response = exceptionHandler.handleAllExceptions(ex, request);
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
-        var problemDetail =((ProblemDetail) response.getBody());
+        var problemDetail = ((ProblemDetail) response.getBody());
         assertNotNull(problemDetail);
         assertEquals("An unexpected condition was encountered on the server.", problemDetail.getDetail());
     }

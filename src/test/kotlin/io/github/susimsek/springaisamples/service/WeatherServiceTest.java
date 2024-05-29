@@ -1,23 +1,22 @@
 package io.github.susimsek.springaisamples.service;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
+
 import io.github.susimsek.springaisamples.client.WeatherClient;
 import io.github.susimsek.springaisamples.model.Condition;
 import io.github.susimsek.springaisamples.model.Current;
 import io.github.susimsek.springaisamples.model.Location;
 import io.github.susimsek.springaisamples.model.WeatherRequest;
 import io.github.susimsek.springaisamples.model.WeatherResponse;
+import java.time.LocalDateTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.time.LocalDateTime;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class WeatherServiceTest {

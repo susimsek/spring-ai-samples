@@ -11,11 +11,11 @@ spring:
       fail-on-unknown-properties: false
     default-property-inclusion: non_null
   ai:
-   openai:
-     api-key: ${OPENAI_API_KEY}
-     chat:
-       options:
-         model: gpt-4o
+    openai:
+      api-key: ${OPENAI_API_KEY}
+      chat:
+        options:
+          model: gpt-4o
 
 management:
   tracing:

@@ -44,15 +44,15 @@ public class BookController {
     private static final String DEFAULT_AUTHOR = "Ken Kousen";
     private static final String AUTHOR_REGEX = "^[A-Za-z\\s'-]+$";
     private static final String BOOK_MESSAGE_TEMPLATE = """
-            Generate a list of books written by the author {author}. If you aren't positive that a book
-            belongs to this author please don't include it.
-            {format}
-            """;
+        Generate a list of books written by the author {author}. If you aren't positive that a book
+        belongs to this author please don't include it.
+        {format}
+        """;
     private static final String LINKS_MESSAGE_TEMPLATE = """
-            Generate a list of books written by the author {author}. If you aren't positive that a book
-            belongs to this author please don't include it.
-            {format}
-            """;
+        Generate a list of books written by the author {author}. If you aren't positive that a book
+        belongs to this author please don't include it.
+        {format}
+        """;
 
 
     @Operation(summary = "Get books by Craig Walls", description = "Generate a list of books written by Craig Walls.")

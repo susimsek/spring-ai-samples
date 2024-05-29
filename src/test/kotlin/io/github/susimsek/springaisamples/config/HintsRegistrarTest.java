@@ -2,7 +2,6 @@ package io.github.susimsek.springaisamples.config;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import io.github.susimsek.springaisamples.config.HintsRegistrar;
 import io.github.susimsek.springaisamples.exception.Violation;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

@@ -55,7 +55,8 @@ public class CityController {
         @Size(min = 2, max = 200, message = "{validation.field.size}")
         String message) {
 
-        SystemMessage systemMessage = new SystemMessage("You are a helpful AI Assistant answering questions about cities around the world.");
+        SystemMessage systemMessage =
+            new SystemMessage("You are a helpful AI Assistant answering questions about cities around the world.");
         UserMessage userMessage = new UserMessage(message);
         OpenAiChatOptions chatOptions = OpenAiChatOptions.builder()
             .withFunction("currentWeatherFunction")

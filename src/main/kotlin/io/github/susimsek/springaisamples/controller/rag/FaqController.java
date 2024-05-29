@@ -65,7 +65,7 @@ public class FaqController {
         @NotBlank(message = "{validation.field.notBlank}")
         @Size(min = 5, max = 255, message = "{validation.field.size}")
         @RequestParam(value = "message",
-        defaultValue = "How can I buy tickets for the Olympic Games Paris 2024") String message) {
+            defaultValue = "How can I buy tickets for the Olympic Games Paris 2024") String message) {
         List<String> contentList = searchSimilarDocuments(message);
         String response = generateResponse(message, contentList);
         return ResponseEntity.ok(response);
