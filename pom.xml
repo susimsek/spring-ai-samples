@@ -166,6 +166,9 @@
                         <env>
                             <BP_NATIVE_IMAGE>true</BP_NATIVE_IMAGE>
                             <BP_BINARY_COMPRESSION_METHOD>upx</BP_BINARY_COMPRESSION_METHOD>
+                            <BP_JVM_VERSION>17</BP_JVM_VERSION>
+                            <BP_MAVEN_BUILD_ARGUMENTS>-DskipTests clean package</BP_MAVEN_BUILD_ARGUMENTS>
+                            <BP_OCI_IMAGE_FORMAT>docker</BP_OCI_IMAGE_FORMAT>
                         </env>
                     </image>
                     <docker>
