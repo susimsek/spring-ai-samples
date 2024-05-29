@@ -156,6 +156,9 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
+                    <layers>
+                        <enabled>true</enabled>
+                    </layers>
                     <image>
                         <name>suayb/${project.artifactId}:s17</name>
                         <pullPolicy>IF_NOT_PRESENT</pullPolicy>
