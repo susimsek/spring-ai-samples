@@ -14,6 +14,7 @@ public class HintsRegistrar implements RuntimeHintsRegistrar {
     public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
         hints.reflection().registerType(Violation.class, TypeHint.Builder::withMembers);
         hints.resources().registerPattern("data/*.json");
+        hints.resources().registerPattern("images/*.png");
         hints.resources().registerPattern("prompts/*.st");
         hints.resources().registerPattern("*.txt");
     }
