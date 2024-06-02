@@ -8,9 +8,7 @@ import java.io.IOException;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
-import org.springframework.stereotype.Component;
 
-@Component
 @RequiredArgsConstructor
 public class JsonLogFormatter implements LogFormatter {
 
