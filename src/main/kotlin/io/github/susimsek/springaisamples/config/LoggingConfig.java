@@ -4,16 +4,19 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.susimsek.springaisamples.logging.config.LoggingProperties;
 import io.github.susimsek.springaisamples.logging.formatter.JsonLogFormatter;
 import io.github.susimsek.springaisamples.logging.formatter.LogFormatter;
-import io.github.susimsek.springaisamples.logging.interceptor.RestClientLoggingInterceptor;
+import io.github.susimsek.springaisamples.logging.handler.HttpLoggingHandler;
 import io.github.susimsek.springaisamples.logging.strategy.DefaultObfuscationStrategy;
 import io.github.susimsek.springaisamples.logging.strategy.NoOpObfuscationStrategy;
 import io.github.susimsek.springaisamples.logging.strategy.ObfuscationStrategy;
 import io.github.susimsek.springaisamples.logging.utils.Obfuscator;
+import io.github.susimsek.springaisamples.logging.utils.PathFilter;
+import io.github.susimsek.springaisamples.logging.wrapper.HttpLoggingWrapper;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.util.AntPathMatcher;
 
 @Configuration
 @EnableConfigurationProperties(LoggingProperties.class)
@@ -21,9 +24,14 @@ import org.springframework.context.annotation.Configuration;
 public class LoggingConfig {
 
     @Bean
-    public RestClientLoggingInterceptor restClientLoggingInterceptor(
-        LoggingProperties loggingProperties, LogFormatter logFormatter, Obfuscator obfuscator) {
-        return new RestClientLoggingInterceptor(loggingProperties, logFormatter, obfuscator);
+    public HttpLoggingWrapper httpLoggingWrapper(HttpLoggingHandler httpLoggingHandler) {
+        return new HttpLoggingWrapper(httpLoggingHandler);
+    }
+
+    @Bean
+    public HttpLoggingHandler httpLoggingHandler(LoggingProperties loggingProperties, LogFormatter logFormatter,
+                                                 Obfuscator obfuscator, PathFilter pathFilter) {
+        return new HttpLoggingHandler(loggingProperties, logFormatter, obfuscator, pathFilter);
     }
 
     @Bean
@@ -35,7 +43,7 @@ public class LoggingConfig {
     @Bean
     public ObfuscationStrategy obfuscationStrategy(LoggingProperties loggingProperties,
                                                    ObjectMapper objectMapper) {
-        if (loggingProperties.getObfuscate().isEnabled()) {
+        if (loggingProperties.getHttp().getObfuscate().isEnabled()) {
             return new DefaultObfuscationStrategy(loggingProperties, objectMapper);
         } else {
             return new NoOpObfuscationStrategy();
@@ -45,5 +53,10 @@ public class LoggingConfig {
     @Bean
     public Obfuscator obfuscator(ObfuscationStrategy obfuscationStrategy) {
         return new Obfuscator(obfuscationStrategy);
+    }
+
+    @Bean
+    public PathFilter pathFilter(LoggingProperties loggingProperties) {
+        return new PathFilter(loggingProperties, new AntPathMatcher());
     }
 }

@@ -1,7 +1,7 @@
 package io.github.susimsek.springaisamples.config;
 
 import io.github.susimsek.springaisamples.client.WeatherClient;
-import io.github.susimsek.springaisamples.logging.interceptor.RestClientLoggingInterceptor;
+import io.github.susimsek.springaisamples.logging.wrapper.HttpLoggingWrapper;
 import java.util.Map;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.web.client.RestClientBuilderConfigurer;
@@ -23,12 +23,12 @@ public class RestClientConfig {
     @Scope("prototype")
     RestClient.Builder restClientBuilder(
         RestClientBuilderConfigurer restClientBuilderConfigurer,
-        ObjectProvider<RestClientLoggingInterceptor> restClientLoggingInterceptorProvider) {
+        ObjectProvider<HttpLoggingWrapper> httpLoggingWrapperProvider) {
         RestClient.Builder builder = RestClient.builder()
             .requestFactory(ClientHttpRequestFactories.get(ClientHttpRequestFactorySettings.DEFAULTS));
-        RestClientLoggingInterceptor loggingInterceptor = restClientLoggingInterceptorProvider.getIfAvailable();
-        if (loggingInterceptor != null) {
-            builder = builder.requestInterceptor(loggingInterceptor);
+        HttpLoggingWrapper httpLoggingWrapper = httpLoggingWrapperProvider.getIfAvailable();
+        if (httpLoggingWrapper != null) {
+            builder = builder.requestInterceptor(httpLoggingWrapper.createRestClientInterceptor());
         }
         return restClientBuilderConfigurer.configure(builder);
     }

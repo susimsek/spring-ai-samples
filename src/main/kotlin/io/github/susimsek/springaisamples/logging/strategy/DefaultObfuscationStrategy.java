@@ -24,8 +24,8 @@ public class DefaultObfuscationStrategy implements ObfuscationStrategy {
     public HttpHeaders maskHeaders(HttpHeaders headers) {
         HttpHeaders maskedHeaders = new HttpHeaders();
         headers.forEach((key, value) -> maskedHeaders.addAll(key,
-            shouldMask(loggingProperties.getObfuscate().getHeaders(), key)
-                ? List.of(loggingProperties.getObfuscate().getMaskValue())
+            shouldMask(loggingProperties.getHttp().getObfuscate().getHeaders(), key)
+                ? List.of(loggingProperties.getHttp().getObfuscate().getMaskValue())
                 : value));
         return maskedHeaders;
     }
@@ -37,7 +37,7 @@ public class DefaultObfuscationStrategy implements ObfuscationStrategy {
         }
         try {
             JsonNode rootNode = objectMapper.readTree(body);
-            maskJsonPaths(rootNode, loggingProperties.getObfuscate().getJsonBodyFields());
+            maskJsonPaths(rootNode, loggingProperties.getHttp().getObfuscate().getJsonBodyFields());
             return objectMapper.writeValueAsString(rootNode);
         } catch (Exception e) {
             return body;
@@ -51,8 +51,8 @@ public class DefaultObfuscationStrategy implements ObfuscationStrategy {
         MultiValueMap<String, String> maskedParams = new LinkedMultiValueMap<>();
 
         queryParams.forEach((key, value) -> maskedParams.addAll(key,
-            shouldMask(loggingProperties.getObfuscate().getParameters(), key)
-                ? List.of(loggingProperties.getObfuscate().getMaskValue())
+            shouldMask(loggingProperties.getHttp().getObfuscate().getParameters(), key)
+                ? List.of(loggingProperties.getHttp().getObfuscate().getMaskValue())
                 : value));
 
         builder.replaceQueryParams(maskedParams);
@@ -76,7 +76,7 @@ public class DefaultObfuscationStrategy implements ObfuscationStrategy {
             if (index == pathParts.length - 1) {
                 ((ObjectNode) currentNode).set(
                     currentPart,
-                    JsonNodeFactory.instance.textNode(loggingProperties.getObfuscate().getMaskValue()));
+                    JsonNodeFactory.instance.textNode(loggingProperties.getHttp().getObfuscate().getMaskValue()));
             } else {
                 maskJsonNodeRecursive(currentNode.get(currentPart), pathParts, index + 1);
             }

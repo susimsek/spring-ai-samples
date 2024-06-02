@@ -23,7 +23,8 @@ public class JsonLogFormatter implements LogFormatter {
 
         Optional.ofNullable(httpLog.getUri()).ifPresent(uri -> logNode
             .put("uri", uri.toString())
-            .put("host", uri.getHost()));
+            .put("host", uri.getHost())
+            .put("path", uri.getPath()));
 
         Optional.ofNullable(httpLog.getHeaders())
             .map(this::parseHeaders)

@@ -34,10 +34,10 @@ class LoggingPropertiesTest {
 
     @Test
     void testConfiguredValues() {
-        assertFalse(loggingProperties.isEnabled());
-        assertEquals(LogLevel.FULL, loggingProperties.getLevel());
+        assertFalse(loggingProperties.getHttp().isEnabled());
+        assertEquals(LogLevel.FULL, loggingProperties.getHttp().getLevel());
 
-        LoggingProperties.Obfuscate obfuscate = loggingProperties.getObfuscate();
+        LoggingProperties.Obfuscate obfuscate = loggingProperties.getHttp().getObfuscate();
         assertNotNull(obfuscate);
         assertEquals("####", obfuscate.getMaskValue());
         assertEquals(Arrays.asList("Authorization", "Set-Cookie"), obfuscate.getHeaders());

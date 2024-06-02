@@ -2,11 +2,13 @@ package io.github.susimsek.springaisamples.config;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import io.github.susimsek.springaisamples.client.WeatherClient;
-import io.github.susimsek.springaisamples.logging.interceptor.RestClientLoggingInterceptor;
-import org.junit.jupiter.api.BeforeEach;
+import io.github.susimsek.springaisamples.logging.wrapper.HttpLoggingWrapper;
+import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -14,7 +16,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.web.client.RestClientBuilderConfigurer;
+import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.support.RestClientAdapter;
+import org.springframework.web.service.invoker.HttpServiceProxyFactory;
 
 @ExtendWith(MockitoExtension.class)
 class RestClientConfigTest {
@@ -23,53 +28,61 @@ class RestClientConfigTest {
     private RestClientBuilderConfigurer restClientBuilderConfigurer;
 
     @Mock
-    private ObjectProvider<RestClientLoggingInterceptor> restClientLoggingInterceptorProvider;
+    private ObjectProvider<HttpLoggingWrapper> httpLoggingWrapperProvider;
 
     @Mock
-    private WeatherClientProperties weatherClientProperties;
-
-    @Mock
-    private RestClientLoggingInterceptor restClientLoggingInterceptor;
+    private WeatherClientProperties properties;
 
     @InjectMocks
     private RestClientConfig restClientConfig;
 
-    @BeforeEach
-    void setUp() {
-        when(restClientBuilderConfigurer.configure(any(RestClient.Builder.class)))
-            .thenAnswer(invocation -> invocation.getArgument(0));
+    @Test
+    void testRestClientBuilder_WithLoggingWrapper() {
+        HttpLoggingWrapper httpLoggingWrapper = mock(HttpLoggingWrapper.class);
+        ClientHttpRequestInterceptor interceptor = mock(ClientHttpRequestInterceptor.class);
+
+        when(httpLoggingWrapperProvider.getIfAvailable()).thenReturn(httpLoggingWrapper);
+        when(httpLoggingWrapper.createRestClientInterceptor()).thenReturn(interceptor);
+        RestClient.Builder builder = RestClient.builder();
+        when(restClientBuilderConfigurer.configure(any(RestClient.Builder.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        RestClient.Builder resultBuilder = restClientConfig.restClientBuilder(restClientBuilderConfigurer, httpLoggingWrapperProvider);
+
+        assertNotNull(resultBuilder);
+        verify(httpLoggingWrapperProvider).getIfAvailable();
+        verify(httpLoggingWrapper).createRestClientInterceptor();
     }
 
     @Test
-    void testRestClientBuilderWithoutLoggingInterceptor() {
-        when(restClientLoggingInterceptorProvider.getIfAvailable()).thenReturn(null);
+    void testRestClientBuilder_WithoutLoggingWrapper() {
+        when(httpLoggingWrapperProvider.getIfAvailable()).thenReturn(null);
+        RestClient.Builder builder = RestClient.builder();
+        when(restClientBuilderConfigurer.configure(any(RestClient.Builder.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        RestClient.Builder builder = restClientConfig.restClientBuilder(
-            restClientBuilderConfigurer, restClientLoggingInterceptorProvider);
+        RestClient.Builder resultBuilder = restClientConfig.restClientBuilder(restClientBuilderConfigurer, httpLoggingWrapperProvider);
 
-        assertNotNull(builder);
-    }
-
-    @Test
-    void testRestClientBuilderWithLoggingInterceptor() {
-        when(restClientLoggingInterceptorProvider.getIfAvailable()).thenReturn(restClientLoggingInterceptor);
-
-        RestClient.Builder builder = restClientConfig.restClientBuilder(
-            restClientBuilderConfigurer, restClientLoggingInterceptorProvider);
-
-        assertNotNull(builder);
+        assertNotNull(resultBuilder);
+        verify(httpLoggingWrapperProvider).getIfAvailable();
     }
 
     @Test
     void testWeatherClient() {
-        when(weatherClientProperties.getApiUrl()).thenReturn("http://api.weather.com");
-        when(weatherClientProperties.getApiKey()).thenReturn("dummyApiKey");
+        when(properties.getApiUrl()).thenReturn("http://example.com");
+        when(properties.getApiKey()).thenReturn("testApiKey");
 
-        RestClient.Builder builder = restClientConfig.restClientBuilder(
-            restClientBuilderConfigurer, restClientLoggingInterceptorProvider);
+        RestClient.Builder restClientBuilder = RestClient.builder()
+            .baseUrl("http://example.com")
+            .defaultUriVariables(Map.of("apiKey", "testApiKey"));
+        RestClient restClient = restClientBuilder.build();
 
-        WeatherClient weatherClient = restClientConfig.weatherClient(builder, weatherClientProperties);
+        WeatherClient weatherClient = restClientConfig.weatherClient(restClientBuilder, properties);
 
         assertNotNull(weatherClient);
+
+        // Verifying if the HttpServiceProxyFactory and WeatherClient are correctly created
+        HttpServiceProxyFactory factory = HttpServiceProxyFactory.builderFor(RestClientAdapter.create(restClient)).build();
+        WeatherClient expectedClient = factory.createClient(WeatherClient.class);
+
+        assertNotNull(expectedClient);
     }
 }

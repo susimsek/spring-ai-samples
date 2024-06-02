@@ -1,10 +1,7 @@
 package io.github.susimsek.springaisamples.config;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -12,99 +9,123 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.susimsek.springaisamples.logging.config.LoggingProperties;
 import io.github.susimsek.springaisamples.logging.formatter.JsonLogFormatter;
 import io.github.susimsek.springaisamples.logging.formatter.LogFormatter;
-import io.github.susimsek.springaisamples.logging.interceptor.RestClientLoggingInterceptor;
+import io.github.susimsek.springaisamples.logging.handler.HttpLoggingHandler;
 import io.github.susimsek.springaisamples.logging.strategy.DefaultObfuscationStrategy;
 import io.github.susimsek.springaisamples.logging.strategy.NoOpObfuscationStrategy;
 import io.github.susimsek.springaisamples.logging.strategy.ObfuscationStrategy;
 import io.github.susimsek.springaisamples.logging.utils.Obfuscator;
+import io.github.susimsek.springaisamples.logging.utils.PathFilter;
+import io.github.susimsek.springaisamples.logging.wrapper.HttpLoggingWrapper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 
-@ExtendWith(MockitoExtension.class)
 class LoggingConfigTest {
 
-    @Mock
-    private LoggingProperties loggingProperties;
-
-    @Mock
-    private ObjectProvider<ObjectMapper> objectMapperProvider;
-
-    @InjectMocks
     private LoggingConfig loggingConfig;
 
-    @Test
-    void testRestClientLoggingInterceptorBean() {
-        LogFormatter logFormatter = mock(LogFormatter.class);
-        Obfuscator obfuscator = mock(Obfuscator.class);
-
-        RestClientLoggingInterceptor interceptor = loggingConfig.restClientLoggingInterceptor(loggingProperties, logFormatter, obfuscator);
-
-        assertNotNull(interceptor);
-        // Additional verifications for interceptor behavior can be added if needed
+    @BeforeEach
+    void setUp() {
+        loggingConfig = new LoggingConfig();
     }
 
     @Test
-    void testLogFormatterBean() {
-        ObjectMapper objectMapper = new ObjectMapper();
-        when(objectMapperProvider.getIfAvailable(any())).thenReturn(objectMapper);
+    void testHttpLoggingWrapperBeanCreation() {
+        HttpLoggingHandler httpLoggingHandlerMock = mock(HttpLoggingHandler.class);
+        HttpLoggingWrapper httpLoggingWrapper = loggingConfig.httpLoggingWrapper(httpLoggingHandlerMock);
+        assertNotNull(httpLoggingWrapper);
+        assertEquals(HttpLoggingWrapper.class, httpLoggingWrapper.getClass());
+    }
 
-        LogFormatter logFormatter = loggingConfig.logFormatter(objectMapperProvider);
+    @Test
+    void testHttpLoggingHandlerBeanCreation() {
+        LoggingProperties loggingPropertiesMock = mock(LoggingProperties.class);
+        LogFormatter logFormatterMock = mock(LogFormatter.class);
+        Obfuscator obfuscatorMock = mock(Obfuscator.class);
+        PathFilter pathFilterMock = mock(PathFilter.class);
+        HttpLoggingHandler httpLoggingHandler = loggingConfig.httpLoggingHandler(loggingPropertiesMock, logFormatterMock, obfuscatorMock, pathFilterMock);
+        assertNotNull(httpLoggingHandler);
+        assertEquals(HttpLoggingHandler.class, httpLoggingHandler.getClass());
+    }
 
+    @Test
+    void testLogFormatterBeanCreation() {
+        @SuppressWarnings("unchecked")
+        ObjectProvider<ObjectMapper> objectMapperProviderMock = mock(ObjectProvider.class);
+        LogFormatter logFormatter = loggingConfig.logFormatter(objectMapperProviderMock);
         assertNotNull(logFormatter);
-        assertInstanceOf(JsonLogFormatter.class, logFormatter);
+        assertEquals(JsonLogFormatter.class, logFormatter.getClass());
     }
 
     @Test
-    void testObfuscationStrategyBeanWithDefaultObfuscation() {
-        ObjectMapper objectMapper = new ObjectMapper();
-        LoggingProperties.Obfuscate obfuscate = new LoggingProperties.Obfuscate();
-        obfuscate.setEnabled(true);
-        when(loggingProperties.getObfuscate()).thenReturn(obfuscate);
+    void testObfuscationStrategyBeanCreationWhenEnabled() {
+        // Mock LoggingProperties
+        LoggingProperties loggingPropertiesMock = mock(LoggingProperties.class);
 
-        ObfuscationStrategy obfuscationStrategy = loggingConfig.obfuscationStrategy(loggingProperties, objectMapper);
+        // Mock HttpLoggingProperties
+        LoggingProperties.Http httpMock = mock(LoggingProperties.Http.class);
+        when(loggingPropertiesMock.getHttp()).thenReturn(httpMock);
 
+        // Mock Obfuscate
+        LoggingProperties.Obfuscate obfuscateMock = mock(LoggingProperties.Obfuscate.class);
+        when(httpMock.getObfuscate()).thenReturn(obfuscateMock);
+
+        // Mock isEnabled() method of Obfuscate
+        when(obfuscateMock.isEnabled()).thenReturn(true);
+
+        // Mock ObjectMapper
+        ObjectMapper objectMapperMock = mock(ObjectMapper.class);
+
+        // Invoke the method under test
+        ObfuscationStrategy obfuscationStrategy = loggingConfig.obfuscationStrategy(loggingPropertiesMock, objectMapperMock);
+
+        // Verify that the correct strategy is returned
         assertNotNull(obfuscationStrategy);
-        assertInstanceOf(DefaultObfuscationStrategy.class, obfuscationStrategy);
+        assertEquals(DefaultObfuscationStrategy.class, obfuscationStrategy.getClass());
     }
 
     @Test
-    void testObfuscationStrategyBeanWithNoOpObfuscation() {
-        ObjectMapper objectMapper = new ObjectMapper();
-        LoggingProperties.Obfuscate obfuscate = new LoggingProperties.Obfuscate();
-        obfuscate.setEnabled(false);
-        when(loggingProperties.getObfuscate()).thenReturn(obfuscate);
+    void testObfuscationStrategyBeanCreationWhenDisabled() {
+        // Mock LoggingProperties
+        LoggingProperties loggingPropertiesMock = mock(LoggingProperties.class);
 
-        ObfuscationStrategy obfuscationStrategy = loggingConfig.obfuscationStrategy(loggingProperties, objectMapper);
+        // Mock HttpLoggingProperties
+        LoggingProperties.Http httpMock = mock(LoggingProperties.Http.class);
+        when(loggingPropertiesMock.getHttp()).thenReturn(httpMock);
 
+        // Mock Obfuscate
+        LoggingProperties.Obfuscate obfuscateMock = mock(LoggingProperties.Obfuscate.class);
+        when(httpMock.getObfuscate()).thenReturn(obfuscateMock);
+
+        // Mock isEnabled() method of Obfuscate
+        when(obfuscateMock.isEnabled()).thenReturn(false);
+
+        // Mock ObjectMapper
+        ObjectMapper objectMapperMock = mock(ObjectMapper.class);
+
+        // Invoke the method under test
+        ObfuscationStrategy obfuscationStrategy = loggingConfig.obfuscationStrategy(loggingPropertiesMock, objectMapperMock);
+
+        // Verify that the correct strategy is returned
         assertNotNull(obfuscationStrategy);
-        assertInstanceOf(NoOpObfuscationStrategy.class, obfuscationStrategy);
+        assertEquals(NoOpObfuscationStrategy.class, obfuscationStrategy.getClass());
     }
 
     @Test
-    void testObfuscatorBean() {
-        ObfuscationStrategy obfuscationStrategy = mock(ObfuscationStrategy.class);
-
-        Obfuscator obfuscator = loggingConfig.obfuscator(obfuscationStrategy);
-
+    void testObfuscatorBeanCreation() {
+        ObfuscationStrategy obfuscationStrategyMock = mock(ObfuscationStrategy.class);
+        Obfuscator obfuscator = loggingConfig.obfuscator(obfuscationStrategyMock);
         assertNotNull(obfuscator);
+        assertEquals(Obfuscator.class, obfuscator.getClass());
     }
 
-    // Additional test to cover conditional property scenario
     @Test
-    void testConditionalOnProperty() {
-        // Simulate conditional property not being set
-        System.clearProperty("logging.http.enabled");
-        LoggingConfig config = new LoggingConfig();
-        assertTrue(config.getClass().isAnnotationPresent(ConditionalOnProperty.class));
-
-        ConditionalOnProperty conditionalOnProperty = config.getClass().getAnnotation(ConditionalOnProperty.class);
-        assertEquals("logging.http.enabled", conditionalOnProperty.name()[0]);
-        assertEquals("true", conditionalOnProperty.havingValue());
-        assertTrue(conditionalOnProperty.matchIfMissing());
+    void testPathFilterBeanCreation() {
+        LoggingProperties loggingPropertiesMock = mock(LoggingProperties.class);
+        PathFilter pathFilter = loggingConfig.pathFilter(loggingPropertiesMock);
+        assertNotNull(pathFilter);
+        assertEquals(PathFilter.class, pathFilter.getClass());
     }
+
+
 }

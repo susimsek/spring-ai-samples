@@ -59,6 +59,20 @@ logging:
         - $.secretKey
         - $.apiSecret
         - $.apiKey
+    exclude:
+      rules:
+        - path-pattern: "/actuator/info"
+        - path-pattern: "/actuator/health/**"
+        - pathPattern: "/error"
+        - pathPattern: "/static/**"
+        - pathPattern: "/public/**"
+        - pathPattern: "/resources/**"
+        - pathPattern: "/webjars/**"
+        - pathPattern: "/v3/api-docs/**"
+        - pathPattern: "/swagger-ui/**"
+    include:
+      rules:
+        - pathPattern: "/**"
 weather:
   client:
     api-key: ${WEATHER_API_KEY}

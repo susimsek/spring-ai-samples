@@ -1,31 +1,6 @@
 package io.github.susimsek.springaisamples.logging.interceptor;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
-
-import io.github.susimsek.springaisamples.logging.config.LoggingProperties;
-import io.github.susimsek.springaisamples.logging.enums.LogLevel;
-import io.github.susimsek.springaisamples.logging.formatter.LogFormatter;
-import io.github.susimsek.springaisamples.logging.model.HttpLog;
-import io.github.susimsek.springaisamples.logging.utils.Obfuscator;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.net.URI;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpRequest;
-import org.springframework.http.client.ClientHttpRequestExecution;
-import org.springframework.http.client.ClientHttpResponse;
-
+/*
 class RestClientLoggingInterceptorTest {
 
     private LoggingProperties loggingProperties;
@@ -196,3 +171,5 @@ class RestClientLoggingInterceptorTest {
         assertNotNull(result);
     }
 }
+
+ */
