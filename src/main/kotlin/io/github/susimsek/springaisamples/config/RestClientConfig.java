@@ -1,6 +1,5 @@
 package io.github.susimsek.springaisamples.config;
 
-import io.github.susimsek.springaisamples.client.JsonPlaceholderClient;
 import io.github.susimsek.springaisamples.client.WeatherClient;
 import io.github.susimsek.springaisamples.logging.interceptor.RestClientLoggingInterceptor;
 import java.util.Map;
@@ -49,18 +48,4 @@ public class RestClientConfig {
 
         return factory.createClient(WeatherClient.class);
     }
-
-    @Bean
-    public JsonPlaceholderClient jsonPlaceholderClient(RestClient.Builder restClientBuilder) {
-        RestClient client = restClientBuilder
-            .baseUrl("https://jsonplaceholder.typicode.com")
-            .build();
-
-        HttpServiceProxyFactory factory = HttpServiceProxyFactory
-            .builderFor(RestClientAdapter.create(client))
-            .build();
-
-        return factory.createClient(JsonPlaceholderClient.class);
-    }
-
 }
