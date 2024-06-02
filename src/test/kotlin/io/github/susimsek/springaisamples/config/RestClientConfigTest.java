@@ -9,6 +9,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.web.client.RestClient;
 
 @ExtendWith(MockitoExtension.class)
 class RestClientConfigTest {
@@ -24,7 +25,8 @@ class RestClientConfigTest {
         when(weatherClientProperties.getApiUrl()).thenReturn("https://api.example.com");
         when(weatherClientProperties.getApiKey()).thenReturn("sampleapikey1234567890123456");
 
-        WeatherClient weatherClient = restClientConfig.weatherClient(weatherClientProperties);
+        WeatherClient weatherClient = restClientConfig.weatherClient(
+            RestClient.builder(), weatherClientProperties);
         assertNotNull(weatherClient);
     }
 }

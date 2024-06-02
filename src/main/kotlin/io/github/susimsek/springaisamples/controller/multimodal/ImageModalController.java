@@ -30,7 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "ai", description = "Spring AI Sample Rest Apis")
 @RequestMapping("/api/ai/images")
 @Validated
-public class ImageController {
+public class ImageModalController {
 
     private final ChatClient chatClient;
 

@@ -28,6 +28,36 @@ logging:
     io.github.susimsek.springaisamples: DEBUG
   pattern:
     level: '%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]'
+  http:
+    enabled: true
+    level: FULL
+    obfuscate:
+      mask-value: "****"
+      headers:
+        - Authorization
+        - Cookie
+        - Set-Cookie
+        - X-API-Key
+        - X-CSRF-Token
+        - WWW-Authenticate
+      parameters:
+        - key
+        - password
+        - token
+        - secret
+        - api_key
+        - access_token
+        - refresh_token
+      json-body-fields:
+        - $.title
+        - $.token
+        - $.accessToken
+        - $.refreshToken
+        - $.idToken
+        - $.email
+        - $.secretKey
+        - $.apiSecret
+        - $.apiKey
 weather:
   client:
     api-key: ${WEATHER_API_KEY}

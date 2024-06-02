@@ -24,9 +24,9 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-@WebMvcTest(ImageController.class)
+@WebMvcTest(ImageModalController.class)
 @Import(LocaleConfig.class)
-class ImageControllerTest {
+class ImageModalControllerTest {
 
     @Autowired
     MockMvc mockMvc;
