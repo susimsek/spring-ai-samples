@@ -5,6 +5,9 @@ import io.github.susimsek.springaisamples.logging.config.LoggingProperties;
 import io.github.susimsek.springaisamples.logging.formatter.JsonLogFormatter;
 import io.github.susimsek.springaisamples.logging.formatter.LogFormatter;
 import io.github.susimsek.springaisamples.logging.interceptor.RestClientLoggingInterceptor;
+import io.github.susimsek.springaisamples.logging.utils.DefaultObfuscationStrategy;
+import io.github.susimsek.springaisamples.logging.utils.NoOpObfuscationStrategy;
+import io.github.susimsek.springaisamples.logging.utils.ObfuscationStrategy;
 import io.github.susimsek.springaisamples.logging.utils.Obfuscator;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -30,9 +33,17 @@ public class LoggingConfig {
     }
 
     @Bean
-    public Obfuscator obfuscator(LoggingProperties loggingProperties,
-                                 ObjectProvider<ObjectMapper> objectMapperProvider) {
-        ObjectMapper objectMapper = objectMapperProvider.getIfAvailable(ObjectMapper::new);
-        return new Obfuscator(loggingProperties, objectMapper);
+    public ObfuscationStrategy obfuscationStrategy(LoggingProperties loggingProperties,
+                                                   ObjectMapper objectMapper) {
+        if (loggingProperties.getObfuscate().isEnabled()) {
+            return new DefaultObfuscationStrategy(loggingProperties, objectMapper);
+        } else {
+            return new NoOpObfuscationStrategy();
+        }
+    }
+
+    @Bean
+    public Obfuscator obfuscator(ObfuscationStrategy obfuscationStrategy) {
+        return new Obfuscator(obfuscationStrategy);
     }
 }

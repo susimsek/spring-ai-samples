@@ -19,6 +19,7 @@ public class LoggingProperties {
     @Getter
     @Setter
     public static class Obfuscate {
+        private boolean enabled = true;
         private String maskValue = "****";
         private List<String> headers = Arrays.asList(
             "Authorization",
