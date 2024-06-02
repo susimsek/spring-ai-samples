@@ -1,4 +1,4 @@
-package io.github.susimsek.springaisamples.logging.utils;
+package io.github.susimsek.springaisamples.logging.strategy;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;

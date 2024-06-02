@@ -1,4 +1,4 @@
-package io.github.susimsek.springaisamples.logging.utils;
+package io.github.susimsek.springaisamples.logging.strategy;
 
 import java.net.URI;
 import org.springframework.http.HttpHeaders;

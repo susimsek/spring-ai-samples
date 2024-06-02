@@ -1,4 +1,4 @@
-package io.github.susimsek.springaisamples.logging.utils;
+package io.github.susimsek.springaisamples.logging.strategy;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;

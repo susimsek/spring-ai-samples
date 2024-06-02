@@ -3,6 +3,7 @@ package io.github.susimsek.springaisamples.logging.utils;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
+import io.github.susimsek.springaisamples.logging.strategy.ObfuscationStrategy;
 import java.net.URI;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

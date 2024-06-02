@@ -1,5 +1,6 @@
 package io.github.susimsek.springaisamples.logging.utils;
 
+import io.github.susimsek.springaisamples.logging.strategy.ObfuscationStrategy;
 import java.net.URI;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
