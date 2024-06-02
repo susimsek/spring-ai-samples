@@ -59,7 +59,8 @@ class JsonLogFormatterTest {
               "method": "GET",
               "statusCode": 200,
               "uri": "http://localhost",
-              "host": "localhost"
+              "host": "localhost",
+              "path": ""
             }
             """;
 
@@ -88,6 +89,7 @@ class JsonLogFormatterTest {
               "statusCode": 201,
               "uri": "http://localhost",
               "host": "localhost",
+              "path": "",
               "headers": {
                 "Content-Type": [
                   "application/json"
@@ -118,6 +120,7 @@ class JsonLogFormatterTest {
               "statusCode": 201,
               "uri": "http://localhost",
               "host": "localhost",
+              "path": "",
               "body": {
                 "key": "value"
               }
@@ -146,6 +149,7 @@ class JsonLogFormatterTest {
               "statusCode": 201,
               "uri": "http://localhost",
               "host": "localhost",
+              "path": "",
               "body": {
                 "body": "plain text body"
               }
