@@ -1,175 +1,70 @@
 package io.github.susimsek.springaisamples.logging.interceptor;
 
-/*
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import io.github.susimsek.springaisamples.logging.handler.HttpLoggingHandler;
+import io.github.susimsek.springaisamples.logging.utils.BufferingClientHttpResponseWrapper;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpRequest;
+import org.springframework.http.client.ClientHttpRequestExecution;
+import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.mock.http.client.MockClientHttpResponse;
+
+@ExtendWith(MockitoExtension.class)
 class RestClientLoggingInterceptorTest {
 
-    private LoggingProperties loggingProperties;
-    private LogFormatter logFormatter;
-    private Obfuscator obfuscator;
+    @Mock
+    private HttpLoggingHandler httpLoggingHandler;
+
+    @Mock
+    private ClientHttpRequestExecution execution;
+
+    @InjectMocks
     private RestClientLoggingInterceptor interceptor;
 
+    private HttpRequest request;
+    private byte[] body;
+
     @BeforeEach
-    void setUp() {
-        loggingProperties = mock(LoggingProperties.class);
-        logFormatter = mock(LogFormatter.class);
-        obfuscator = mock(Obfuscator.class);
-        interceptor = new RestClientLoggingInterceptor(loggingProperties, logFormatter, obfuscator);
-    }
+    void setUp() throws Exception {
+        request = mock(HttpRequest.class);
+        body = "request-body".getBytes();
 
-    @Test
-    void testInterceptWithLogLevelNone() throws IOException {
-        HttpRequest request = mock(HttpRequest.class);
-        byte[] body = "request body".getBytes();
-        ClientHttpRequestExecution execution = mock(ClientHttpRequestExecution.class);
-        ClientHttpResponse response = mock(ClientHttpResponse.class);
-
-        when(loggingProperties.getLevel()).thenReturn(LogLevel.NONE);
-        when(execution.execute(request, body)).thenReturn(response);
-
-        ClientHttpResponse result = interceptor.intercept(request, body, execution);
-
-        verify(execution, times(1)).execute(request, body);
-        verifyNoMoreInteractions(logFormatter, obfuscator);
-        assertNotNull(result);
-    }
-
-    @Test
-    void testInterceptWithLogLevelFull() throws IOException {
-        HttpRequest request = mock(HttpRequest.class);
-        byte[] body = "request body".getBytes();
-        ClientHttpRequestExecution execution = mock(ClientHttpRequestExecution.class);
-        ClientHttpResponse response = mock(ClientHttpResponse.class);
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("Content-Type", "application/json");
-
-        when(loggingProperties.getLevel()).thenReturn(LogLevel.FULL);
         when(request.getMethod()).thenReturn(HttpMethod.GET);
-        when(request.getURI()).thenReturn(URI.create("http://localhost"));
-        when(response.getStatusCode()).thenReturn(org.springframework.http.HttpStatus.OK);
-        when(response.getHeaders()).thenReturn(headers);
-        when(response.getBody()).thenReturn(new ByteArrayInputStream("response body".getBytes()));
-        when(execution.execute(request, body)).thenReturn(response);
-        when(obfuscator.maskUriParameters(any(URI.class))).thenReturn(URI.create("http://localhost"));
-        when(obfuscator.maskHeaders(any(HttpHeaders.class))).thenReturn(headers);
-        when(obfuscator.maskBody(any(String.class))).thenReturn("masked body");
-
-        ClientHttpResponse result = interceptor.intercept(request, body, execution);
-
-        verify(execution, times(1)).execute(request, body);
-        verify(obfuscator, times(1)).maskUriParameters(any(URI.class));
-        verify(obfuscator, times(1)).maskHeaders(any(HttpHeaders.class));
-        verify(obfuscator, times(2)).maskBody(any(String.class));
-        verify(logFormatter, times(2)).format(any(HttpLog.class));
-        assertNotNull(result);
+        when(request.getURI()).thenReturn(new URI("http://example.com"));
+        when(request.getHeaders()).thenReturn(new HttpHeaders());
     }
 
     @Test
-    void testInterceptWithException() throws IOException {
-        HttpRequest request = mock(HttpRequest.class);
-        byte[] body = "request body".getBytes();
-        ClientHttpRequestExecution execution = mock(ClientHttpRequestExecution.class);
-        IOException exception = new IOException("Test exception");
-        HttpHeaders headers = new HttpHeaders();
+    void intercept_shouldLogRequestAndResponse() throws IOException, URISyntaxException {
+        // Given
+        MockClientHttpResponse mockResponse = new MockClientHttpResponse(new ByteArrayInputStream("response-body".getBytes()), 200);
+        when(execution.execute(any(HttpRequest.class), any(byte[].class))).thenReturn(mockResponse);
 
-        when(loggingProperties.getLevel()).thenReturn(LogLevel.FULL);
-        when(request.getMethod()).thenReturn(HttpMethod.GET);
-        when(request.getURI()).thenReturn(URI.create("http://localhost"));
-        when(request.getHeaders()).thenReturn(headers);
-        when(obfuscator.maskUriParameters(any(URI.class))).thenReturn(URI.create("http://localhost"));
-        when(obfuscator.maskHeaders(any(HttpHeaders.class))).thenReturn(headers);
-        when(obfuscator.maskBody(any(String.class))).thenReturn("masked body");
+        // When
+        ClientHttpResponse response = interceptor.intercept(request, body, execution);
 
-        doThrow(exception).when(execution).execute(request, body);
-
-        assertThrows(IOException.class, () -> interceptor.intercept(request, body, execution));
-
-        verify(execution, times(1)).execute(request, body);
-        verify(obfuscator, times(1)).maskUriParameters(any(URI.class));
-        verify(logFormatter, times(1)).format(any(HttpLog.class));
-    }
-
-    @Test
-    void testLogResponseWithIOException() throws IOException {
-        HttpRequest request = mock(HttpRequest.class);
-        ClientHttpResponse response = mock(ClientHttpResponse.class);
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("Content-Type", "application/json");
-
-        when(loggingProperties.getLevel()).thenReturn(LogLevel.FULL);
-        when(request.getMethod()).thenReturn(HttpMethod.GET);
-        when(request.getURI()).thenReturn(URI.create("http://localhost"));
-        when(request.getHeaders()).thenReturn(headers);
-        when(response.getStatusCode()).thenThrow(new IOException("Test IOException"));
-        when(response.getHeaders()).thenReturn(headers);
-        when(response.getBody()).thenReturn(new ByteArrayInputStream("response body".getBytes()));
-        when(obfuscator.maskUriParameters(any(URI.class))).thenReturn(URI.create("http://localhost"));
-        when(obfuscator.maskHeaders(any(HttpHeaders.class))).thenReturn(headers);
-        when(obfuscator.maskBody(any(String.class))).thenReturn("masked body");
-
-        assertThrows(IOException.class, () -> interceptor.intercept(
-            request,
-            "request body".getBytes(),
-            (req, bod) -> response));
-
-        verify(obfuscator, times(1)).maskUriParameters(any(URI.class));
-        verify(obfuscator, times(1)).maskHeaders(any(HttpHeaders.class));
-        verify(obfuscator, times(1)).maskBody(any(String.class));
-        verify(logFormatter, times(1)).format(any(HttpLog.class));
-    }
-
-    @Test
-    void testInterceptWithLogLevelBasic() throws IOException {
-        HttpRequest request = mock(HttpRequest.class);
-        byte[] body = "request body".getBytes();
-        ClientHttpRequestExecution execution = mock(ClientHttpRequestExecution.class);
-        ClientHttpResponse response = mock(ClientHttpResponse.class);
-
-        when(loggingProperties.getLevel()).thenReturn(LogLevel.BASIC);
-        when(request.getMethod()).thenReturn(HttpMethod.GET);
-        when(request.getURI()).thenReturn(URI.create("http://localhost"));
-        when(response.getStatusCode()).thenReturn(org.springframework.http.HttpStatus.OK);
-        when(response.getBody()).thenReturn(new ByteArrayInputStream("response body".getBytes()));
-        when(execution.execute(request, body)).thenReturn(response);
-        when(obfuscator.maskUriParameters(any(URI.class))).thenReturn(URI.create("http://localhost"));
-
-        ClientHttpResponse result = interceptor.intercept(request, body, execution);
-
-        verify(execution, times(1)).execute(request, body);
-        verify(obfuscator, times(1)).maskUriParameters(any(URI.class));
-        verify(logFormatter, times(2)).format(any(HttpLog.class));
-        assertNotNull(result);
-    }
-
-    @Test
-    void testInterceptWithLogLevelHeaders() throws IOException {
-        HttpRequest request = mock(HttpRequest.class);
-        byte[] body = "request body".getBytes();
-        ClientHttpRequestExecution execution = mock(ClientHttpRequestExecution.class);
-        ClientHttpResponse response = mock(ClientHttpResponse.class);
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("Content-Type", "application/json");
-
-        when(loggingProperties.getLevel()).thenReturn(LogLevel.HEADERS);
-        when(request.getMethod()).thenReturn(HttpMethod.GET);
-        when(request.getURI()).thenReturn(URI.create("http://localhost"));
-        when(response.getStatusCode()).thenReturn(org.springframework.http.HttpStatus.OK);
-        when(response.getHeaders()).thenReturn(headers);
-        when(response.getBody()).thenReturn(new ByteArrayInputStream("response body".getBytes()));
-        when(execution.execute(request, body)).thenReturn(response);
-        when(obfuscator.maskUriParameters(any(URI.class))).thenReturn(URI.create("http://localhost"));
-        when(obfuscator.maskHeaders(any(HttpHeaders.class))).thenReturn(headers);
-
-        ClientHttpResponse result = interceptor.intercept(request, body, execution);
-
-        verify(execution, times(1)).execute(request, body);
-        verify(obfuscator, times(1)).maskUriParameters(any(URI.class));
-        verify(obfuscator, times(1)).maskHeaders(any(HttpHeaders.class));
-        verify(logFormatter, times(2)).format(any(HttpLog.class));
-        assertNotNull(result);
+        // Then
+        verify(httpLoggingHandler).logRequest(eq("GET"), eq(new URI("http://example.com")), any(HttpHeaders.class), eq(body));
+        verify(httpLoggingHandler).logResponse(eq("GET"), eq(new URI("http://example.com")), eq(200), any(HttpHeaders.class), eq("response-body".getBytes()));
+        assertEquals(200, response.getStatusCode().value());
+        assertArrayEquals("response-body".getBytes(), ((BufferingClientHttpResponseWrapper) response).getBody().readAllBytes());
     }
 }
-
- */
