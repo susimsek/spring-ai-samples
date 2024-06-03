@@ -12,6 +12,7 @@ import java.nio.charset.StandardCharsets;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -33,8 +34,10 @@ public class HttpLoggingHandler implements LoggingHandler {
             .type(HttpLogType.REQUEST)
             .method(method)
             .uri(uri)
-            .headers(logLevel == LogLevel.HEADERS || logLevel == LogLevel.FULL
-                ? obfuscator.maskHeaders(headers) : new HttpHeaders());
+            .headers(
+                logLevel == LogLevel.HEADERS || logLevel == LogLevel.FULL
+                    ? obfuscator.maskHeaders(headers) : new HttpHeaders()
+            );
 
         if (logLevel == LogLevel.FULL) {
             logBuilder.body(obfuscator.maskBody(new String(body, StandardCharsets.UTF_8)));
@@ -47,7 +50,8 @@ public class HttpLoggingHandler implements LoggingHandler {
     }
 
     @Override
-    public void logResponse(String method, URI uri, int statusCode, HttpHeaders headers, byte[] responseBody) {
+    public void logResponse(
+        String method, URI uri, int statusCode, HttpHeaders headers, byte[] responseBody) {
         LogLevel logLevel = loggingProperties.getHttp().getLevel();
         if (logLevel == LogLevel.NONE || !shouldLog(uri.getPath(), method)) {
             return;
@@ -58,11 +62,20 @@ public class HttpLoggingHandler implements LoggingHandler {
             .method(method)
             .uri(uri)
             .statusCode(statusCode)
-            .headers(logLevel == LogLevel.HEADERS || logLevel == LogLevel.FULL
-                ? obfuscator.maskHeaders(headers) : new HttpHeaders());
+            .headers(
+                logLevel == LogLevel.HEADERS || logLevel == LogLevel.FULL
+                    ? obfuscator.maskHeaders(headers) : new HttpHeaders()
+            );
 
-        if (logLevel == LogLevel.FULL) {
+        HttpStatus status = HttpStatus.valueOf(statusCode);
+        if (logLevel == LogLevel.FULL && status.is2xxSuccessful()) {
             logBuilder.body(obfuscator.maskBody(new String(responseBody, StandardCharsets.UTF_8)));
+        } else if (status == HttpStatus.UNAUTHORIZED || status == HttpStatus.FORBIDDEN
+            || status == HttpStatus.TOO_MANY_REQUESTS) {
+            logBuilder.body(null); // Log these responses without body
+        } else if (status.is4xxClientError() || status.is5xxServerError()) {
+            logBuilder.body(obfuscator.maskBody(
+                new String(responseBody, StandardCharsets.UTF_8))); // Log other 4xx and 5xx errors with body
         }
 
         String formattedLog = logFormatter.format(logBuilder.build());

@@ -4,12 +4,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import io.github.susimsek.springaisamples.logging.config.LoggingProperties;
+import io.github.susimsek.springaisamples.logging.enums.HttpLogType;
 import io.github.susimsek.springaisamples.logging.enums.LogLevel;
 import io.github.susimsek.springaisamples.logging.formatter.LogFormatter;
 import io.github.susimsek.springaisamples.logging.model.HttpLog;
@@ -17,6 +19,7 @@ import io.github.susimsek.springaisamples.logging.utils.Obfuscator;
 import io.github.susimsek.springaisamples.logging.utils.PathFilter;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,6 +28,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 
 @ExtendWith(MockitoExtension.class)
 class HttpLoggingHandlerTest {
@@ -318,5 +322,105 @@ class HttpLoggingHandlerTest {
 
         verify(logFormatter).format(any());
         verifyNoMoreInteractions(logFormatter);  // Ensure no log output occurs
+    }
+
+    @Test
+    void logRequest_shouldLogRequest() {
+        setupHttpLogging(LogLevel.FULL);
+
+        URI uri = URI.create("http://example.com");
+        HttpHeaders headers = new HttpHeaders();
+        byte[] body = "request-body".getBytes(StandardCharsets.UTF_8);
+        String maskedBody = "masked-request-body";
+        when(obfuscator.maskBody(anyString())).thenReturn(maskedBody);
+
+        httpLoggingHandler.logRequest("GET", uri, headers, body);
+
+        verify(logFormatter).format(argThat(log -> matchesLog(log, HttpLogType.REQUEST, "GET", uri, 0, maskedBody)));
+    }
+
+    @Test
+    void logResponse_shouldLogUnauthorizedResponseWithoutBody() {
+        setupHttpLogging(LogLevel.FULL);
+
+        URI uri = URI.create("http://example.com");
+        HttpHeaders headers = new HttpHeaders();
+        byte[] body = "response-body".getBytes(StandardCharsets.UTF_8);
+
+        httpLoggingHandler.logResponse("GET", uri, HttpStatus.UNAUTHORIZED.value(), headers, body);
+
+        verify(logFormatter).format(argThat(log -> matchesLog(log, HttpLogType.RESPONSE, "GET", uri, HttpStatus.UNAUTHORIZED.value(), null)));
+    }
+
+    @Test
+    void logResponse_shouldLogForbiddenResponseWithoutBody() {
+        setupHttpLogging(LogLevel.FULL);
+
+        URI uri = URI.create("http://example.com");
+        HttpHeaders headers = new HttpHeaders();
+        byte[] body = "response-body".getBytes(StandardCharsets.UTF_8);
+
+        httpLoggingHandler.logResponse("GET", uri, HttpStatus.FORBIDDEN.value(), headers, body);
+
+        verify(logFormatter).format(argThat(log -> matchesLog(log, HttpLogType.RESPONSE, "GET", uri, HttpStatus.FORBIDDEN.value(), null)));
+    }
+
+    @Test
+    void logResponse_shouldLogTooManyRequestsResponseWithoutBody() {
+        setupHttpLogging(LogLevel.FULL);
+
+        URI uri = URI.create("http://example.com");
+        HttpHeaders headers = new HttpHeaders();
+        byte[] body = "response-body".getBytes(StandardCharsets.UTF_8);
+
+        httpLoggingHandler.logResponse("GET", uri, HttpStatus.TOO_MANY_REQUESTS.value(), headers, body);
+
+        verify(logFormatter).format(argThat(log -> matchesLog(log, HttpLogType.RESPONSE, "GET", uri, HttpStatus.TOO_MANY_REQUESTS.value(), null)));
+    }
+
+    @Test
+    void logResponse_shouldLogNotFoundResponseWithBody() {
+        setupHttpLogging(LogLevel.FULL);
+
+        URI uri = URI.create("http://example.com");
+        HttpHeaders headers = new HttpHeaders();
+        byte[] body = "response-body".getBytes(StandardCharsets.UTF_8);
+        String maskedBody = "masked-response-body";
+        when(obfuscator.maskBody(anyString())).thenReturn(maskedBody);
+
+        httpLoggingHandler.logResponse("GET", uri, HttpStatus.NOT_FOUND.value(), headers, body);
+
+        verify(logFormatter).format(argThat(log -> matchesLog(log, HttpLogType.RESPONSE, "GET", uri, HttpStatus.NOT_FOUND.value(), maskedBody)));
+    }
+
+    @Test
+    void logResponse_shouldLogInternalServerErrorResponseWithBody() {
+        setupHttpLogging(LogLevel.FULL);
+
+        URI uri = URI.create("http://example.com");
+        HttpHeaders headers = new HttpHeaders();
+        byte[] body = "response-body".getBytes(StandardCharsets.UTF_8);
+        String maskedBody = "masked-response-body";
+        when(obfuscator.maskBody(anyString())).thenReturn(maskedBody);
+
+        httpLoggingHandler.logResponse("GET", uri, HttpStatus.INTERNAL_SERVER_ERROR.value(), headers, body);
+
+        verify(logFormatter).format(argThat(log -> matchesLog(log, HttpLogType.RESPONSE, "GET", uri, HttpStatus.INTERNAL_SERVER_ERROR.value(), maskedBody)));
+    }
+
+    private void setupHttpLogging(LogLevel level) {
+        LoggingProperties.Http httpProperties = new LoggingProperties.Http();
+        httpProperties.setLevel(level);
+        when(loggingProperties.getHttp()).thenReturn(httpProperties);
+        when(pathFilter.shouldInclude(anyString(), anyString())).thenReturn(true);
+        when(pathFilter.shouldExclude(anyString(), anyString())).thenReturn(false);
+    }
+
+    private boolean matchesLog(HttpLog log, HttpLogType type, String method, URI uri, int statusCode, String body) {
+        return log.getType() == type &&
+            log.getMethod().equals(method) &&
+            log.getUri().equals(uri) &&
+            (statusCode == 0 || log.getStatusCode() == statusCode) &&
+            (body == null ? log.getBody() == null : log.getBody().equals(body));
     }
 }
