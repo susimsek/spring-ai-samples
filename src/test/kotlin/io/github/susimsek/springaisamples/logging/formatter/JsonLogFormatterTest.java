@@ -1,6 +1,9 @@
 package io.github.susimsek.springaisamples.logging.formatter;
 
+import static io.github.susimsek.springaisamples.logging.enums.HttpLogType.REQUEST;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -26,7 +29,7 @@ class JsonLogFormatterTest {
 
         httpLog = HttpLog.builder()
             .source(Source.CLIENT)
-            .type(HttpLogType.REQUEST)
+            .type(REQUEST)
             .method("GET")
             .uri(new URI("https://example.com/path"))
             .statusCode(200)
@@ -117,5 +120,27 @@ class JsonLogFormatterTest {
         String expectedLog = expectedLogNode.toPrettyString();
 
         assertEquals(expectedLog, formattedLog);
+    }
+
+    @Test
+    void testParseBody_WhenValidJsonBody_ShouldReturnJsonNode() {
+        // Arrange
+        String validJsonBody = "{\"key\":\"value\"}";
+        HttpLog httpLog = HttpLog.builder()
+            .type(HttpLogType.REQUEST)
+            .method("GET")
+            .uri(URI.create("https://example.com"))
+            .statusCode(200)
+            .headers(new HttpHeaders())
+            .body(validJsonBody)
+            .source(Source.CLIENT)
+            .build();
+
+        // Act
+        String result = jsonLogFormatter.format(httpLog);
+
+        // Assert
+        assertNotNull(result);
+        assertTrue(result.contains("\"key\" : \"value\""));
     }
 }
