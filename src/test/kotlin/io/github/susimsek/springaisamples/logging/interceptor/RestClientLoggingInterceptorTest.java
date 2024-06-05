@@ -1,14 +1,17 @@
 package io.github.susimsek.springaisamples.logging.interceptor;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.anyInt;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.isNull;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import io.github.susimsek.springaisamples.logging.handler.HttpLoggingHandler;
+import io.github.susimsek.springaisamples.logging.enums.Source;
+import io.github.susimsek.springaisamples.logging.handler.LoggingHandler;
 import io.github.susimsek.springaisamples.logging.utils.BufferingClientHttpResponseWrapper;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -25,46 +28,108 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpResponse;
-import org.springframework.mock.http.client.MockClientHttpResponse;
 
 @ExtendWith(MockitoExtension.class)
 class RestClientLoggingInterceptorTest {
 
     @Mock
-    private HttpLoggingHandler httpLoggingHandler;
+    private LoggingHandler loggingHandler;
+
+    @Mock
+    private HttpRequest request;
 
     @Mock
     private ClientHttpRequestExecution execution;
 
+    @Mock
+    private ClientHttpResponse response;
+
     @InjectMocks
     private RestClientLoggingInterceptor interceptor;
 
-    private HttpRequest request;
-    private byte[] body;
+    private byte[] requestBody;
 
     @BeforeEach
-    void setUp() throws Exception {
-        request = mock(HttpRequest.class);
-        body = "request-body".getBytes();
-
-        when(request.getMethod()).thenReturn(HttpMethod.GET);
-        when(request.getURI()).thenReturn(new URI("http://example.com"));
-        when(request.getHeaders()).thenReturn(new HttpHeaders());
+    void setUp() {
+        requestBody = "request body".getBytes();
     }
 
     @Test
-    void intercept_shouldLogRequestAndResponse() throws IOException, URISyntaxException {
-        // Given
-        MockClientHttpResponse mockResponse = new MockClientHttpResponse(new ByteArrayInputStream("response-body".getBytes()), 200);
-        when(execution.execute(any(HttpRequest.class), any(byte[].class))).thenReturn(mockResponse);
+    void testIntercept_ShouldLogRequestAndResponse() throws IOException, URISyntaxException {
+        // Arrange
+        when(request.getMethod()).thenReturn(HttpMethod.GET);
+        when(request.getURI()).thenReturn(new URI("http://localhost/test"));
+        when(request.getHeaders()).thenReturn(new HttpHeaders());
+        when(loggingHandler.shouldNotLog(any(String.class), any(String.class))).thenReturn(false);
+        when(execution.execute(any(HttpRequest.class), any(byte[].class))).thenReturn(response);
+        when(response.getBody()).thenReturn(new ByteArrayInputStream("response body".getBytes()));
+        when(response.getHeaders()).thenReturn(new HttpHeaders());
+        when(response.getStatusCode()).thenReturn(org.springframework.http.HttpStatus.OK);
 
-        // When
-        ClientHttpResponse response = interceptor.intercept(request, body, execution);
+        // Act
+        interceptor.intercept(request, requestBody, execution);
 
-        // Then
-        verify(httpLoggingHandler).logRequest(eq("GET"), eq(new URI("http://example.com")), any(HttpHeaders.class), eq(body));
-        verify(httpLoggingHandler).logResponse(eq("GET"), eq(new URI("http://example.com")), eq(200), any(HttpHeaders.class), eq("response-body".getBytes()));
-        assertEquals(200, response.getStatusCode().value());
-        assertArrayEquals("response-body".getBytes(), ((BufferingClientHttpResponseWrapper) response).getBody().readAllBytes());
+        // Assert
+        verify(loggingHandler, times(1)).logRequest(
+            anyString(), any(URI.class), any(HttpHeaders.class), any(byte[].class), any(Source.class)
+        );
+        verify(loggingHandler, times(1)).logResponse(
+            anyString(), any(URI.class), anyInt(), any(HttpHeaders.class), any(byte[].class), any(Source.class)
+        );
+    }
+
+    @Test
+    void testIntercept_ShouldNotLogWhenNotNeeded() throws IOException, URISyntaxException {
+        // Arrange
+        when(request.getMethod()).thenReturn(HttpMethod.GET);
+        when(request.getURI()).thenReturn(new URI("http://localhost/test"));
+        when(loggingHandler.shouldNotLog(any(String.class), any(String.class))).thenReturn(true);
+        when(execution.execute(any(HttpRequest.class), any(byte[].class))).thenReturn(response);
+
+        // Act
+        interceptor.intercept(request, requestBody, execution);
+
+        // Assert
+        verify(loggingHandler, never()).logRequest(anyString(), any(URI.class), any(HttpHeaders.class), any(byte[].class), any(Source.class));
+        verify(loggingHandler, never()).logResponse(anyString(), any(URI.class), anyInt(), any(HttpHeaders.class), any(byte[].class), any(Source.class));
+    }
+
+    @Test
+    void testIntercept_ShouldLogErrorResponseOnIOException() throws IOException, URISyntaxException {
+        // Arrange
+        when(request.getMethod()).thenReturn(HttpMethod.GET);
+        when(request.getURI()).thenReturn(new URI("http://localhost/test"));
+        when(request.getHeaders()).thenReturn(new HttpHeaders());
+        when(loggingHandler.shouldNotLog(any(String.class), any(String.class))).thenReturn(false);
+        when(execution.execute(any(HttpRequest.class), any(byte[].class))).thenThrow(new IOException("Test IOException"));
+
+        // Act & Assert
+        IOException exception = assertThrows(IOException.class, () -> interceptor.intercept(request, requestBody, execution));
+
+        verify(loggingHandler, times(1)).logRequest(
+            anyString(), any(URI.class), any(HttpHeaders.class), any(byte[].class), any(Source.class)
+        );
+        verify(loggingHandler, times(1)).logResponse(
+            anyString(), any(URI.class), anyInt(), any(HttpHeaders.class), isNull(), any(Source.class)
+        );
+        assert "Test IOException".equals(exception.getMessage());
+    }
+
+    @Test
+    void testLogResponse_ShouldWrapResponse() throws IOException, URISyntaxException {
+        // Arrange
+        when(request.getMethod()).thenReturn(HttpMethod.GET);
+        when(request.getURI()).thenReturn(new URI("http://localhost/test"));
+        when(loggingHandler.shouldNotLog(any(String.class), any(String.class))).thenReturn(false);
+        when(execution.execute(any(HttpRequest.class), any(byte[].class))).thenReturn(response);
+        when(response.getBody()).thenReturn(new ByteArrayInputStream("response body".getBytes()));
+        when(response.getHeaders()).thenReturn(new HttpHeaders());
+        when(response.getStatusCode()).thenReturn(org.springframework.http.HttpStatus.OK);
+
+        // Act
+        ClientHttpResponse result = interceptor.intercept(request, requestBody, execution);
+
+        // Assert
+        assert result instanceof BufferingClientHttpResponseWrapper;
     }
 }

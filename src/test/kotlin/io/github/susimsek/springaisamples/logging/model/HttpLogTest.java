@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 import io.github.susimsek.springaisamples.logging.enums.HttpLogType;
+import io.github.susimsek.springaisamples.logging.enums.Source;
 import java.net.URI;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
@@ -44,8 +45,10 @@ class HttpLogTest {
         httpLog.setStatusCode(201);
         httpLog.setHeaders(headers);
         httpLog.setBody("plain text body");
+        httpLog.setSource(Source.CLIENT);
 
         assertEquals(HttpLogType.RESPONSE, httpLog.getType());
+        assertEquals(Source.CLIENT, httpLog.getSource());
         assertEquals("POST", httpLog.getMethod());
         assertEquals(URI.create("http://localhost"), httpLog.getUri());
         assertEquals(201, httpLog.getStatusCode());
@@ -60,8 +63,9 @@ class HttpLogTest {
         assertNull(httpLog.getType());
         assertNull(httpLog.getMethod());
         assertNull(httpLog.getUri());
-        assertEquals(0, httpLog.getStatusCode());
+        assertNull(httpLog.getStatusCode());
         assertNull(httpLog.getHeaders());
         assertNull(httpLog.getBody());
+        assertNull(httpLog.getSource());
     }
 }

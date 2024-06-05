@@ -2,12 +2,12 @@ package io.github.susimsek.springaisamples.logging.formatter;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.github.susimsek.springaisamples.logging.model.HttpLog;
 import java.io.IOException;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
+import org.springframework.util.StringUtils;
 
 @RequiredArgsConstructor
 public class JsonLogFormatter implements LogFormatter {
@@ -16,23 +16,23 @@ public class JsonLogFormatter implements LogFormatter {
 
     @Override
     public String format(HttpLog httpLog) {
-        ObjectNode logNode = objectMapper.createObjectNode()
+        var logNode = objectMapper.createObjectNode()
+            .put("source", httpLog.getSource().toString().toLowerCase())
             .put("type", httpLog.getType().toString().toLowerCase())
             .put("method", httpLog.getMethod())
-            .put("statusCode", httpLog.getStatusCode());
+            .put("uri", httpLog.getUri().toString())
+            .put("host", httpLog.getUri().getHost())
+            .put("path", httpLog.getUri().getPath());
 
-        Optional.ofNullable(httpLog.getUri()).ifPresent(uri -> logNode
-            .put("uri", uri.toString())
-            .put("host", uri.getHost())
-            .put("path", uri.getPath()));
+        Optional.ofNullable(httpLog.getStatusCode())
+            .ifPresent(statusCode -> logNode.put("statusCode", statusCode));
 
         Optional.ofNullable(httpLog.getHeaders())
-            .map(this::parseHeaders)
-            .ifPresent(headers -> logNode.set("headers", headers));
+            .ifPresent(headers -> logNode.set("headers", parseHeaders(headers)));
 
-        Optional.ofNullable(httpLog.getBody())
-            .map(this::parseBody)
-            .ifPresent(body -> logNode.set("body", body));
+        if (StringUtils.hasText(httpLog.getBody())) {
+            logNode.set("body", parseBody(httpLog.getBody()));
+        }
 
         return logNode.toPrettyString();
     }

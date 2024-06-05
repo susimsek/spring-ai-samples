@@ -43,9 +43,9 @@ class LoggingConfigTest {
         LogFormatter logFormatterMock = mock(LogFormatter.class);
         Obfuscator obfuscatorMock = mock(Obfuscator.class);
         PathFilter pathFilterMock = mock(PathFilter.class);
-        HttpLoggingHandler httpLoggingHandler = loggingConfig.httpLoggingHandler(loggingPropertiesMock, logFormatterMock, obfuscatorMock, pathFilterMock);
-        assertNotNull(httpLoggingHandler);
-        assertEquals(HttpLoggingHandler.class, httpLoggingHandler.getClass());
+        var loggingHandler = loggingConfig.loggingHandler(loggingPropertiesMock, logFormatterMock, obfuscatorMock, pathFilterMock);
+        assertNotNull(loggingHandler);
+        assertEquals(HttpLoggingHandler.class, loggingHandler.getClass());
     }
 
     @Test

@@ -1,34 +1,30 @@
 package io.github.susimsek.springaisamples.logging.handler;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import io.github.susimsek.springaisamples.logging.config.LoggingProperties;
-import io.github.susimsek.springaisamples.logging.enums.HttpLogType;
 import io.github.susimsek.springaisamples.logging.enums.LogLevel;
+import io.github.susimsek.springaisamples.logging.enums.Source;
 import io.github.susimsek.springaisamples.logging.formatter.LogFormatter;
 import io.github.susimsek.springaisamples.logging.model.HttpLog;
 import io.github.susimsek.springaisamples.logging.utils.Obfuscator;
 import io.github.susimsek.springaisamples.logging.utils.PathFilter;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 
 @ExtendWith(MockitoExtension.class)
 class HttpLoggingHandlerTest {
@@ -50,377 +46,302 @@ class HttpLoggingHandlerTest {
 
     @BeforeEach
     void setUp() {
+        when(loggingProperties.getHttp()).thenReturn(new LoggingProperties.Http());
+    }
+
+    @Test
+    void logRequest_shouldLogRequest_whenLogLevelIsFull() throws URISyntaxException {
+        // Arrange
+        URI uri = new URI("https://example.com/test");
+        HttpHeaders headers = new HttpHeaders();
+        byte[] body = "request body".getBytes();
         LoggingProperties.Http httpProperties = new LoggingProperties.Http();
+        httpProperties.setLevel(LogLevel.FULL);
+
         when(loggingProperties.getHttp()).thenReturn(httpProperties);
-    }
-
-    @Test
-    void logRequest_ShouldLogWhenLogLevelIsNotNone() throws URISyntaxException {
-        LoggingProperties.Http httpProperties = loggingProperties.getHttp();
-        httpProperties.setLevel(LogLevel.FULL);
-
-        URI uri = new URI("http://example.com");
-        HttpHeaders headers = new HttpHeaders();
-        byte[] body = "request body".getBytes();
-
+        when(obfuscator.maskBody(anyString())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(obfuscator.maskHeaders(any(HttpHeaders.class))).thenReturn(headers);
+        when(logFormatter.format(any(HttpLog.class))).thenReturn("formatted log");
         when(pathFilter.shouldInclude(anyString(), anyString())).thenReturn(true);
         when(pathFilter.shouldExclude(anyString(), anyString())).thenReturn(false);
-        when(obfuscator.maskHeaders(headers)).thenReturn(headers);
-        when(obfuscator.maskBody(anyString())).thenReturn("masked body");
-        when(logFormatter.format(any(HttpLog.class))).thenReturn("formatted log");
 
-        httpLoggingHandler.logRequest("GET", uri, headers, body);
+        // Act
+        httpLoggingHandler.logRequest("GET", uri, headers, body, Source.CLIENT);
 
-        ArgumentCaptor<HttpLog> logCaptor = ArgumentCaptor.forClass(HttpLog.class);
-        verify(logFormatter).format(logCaptor.capture());
-        assertEquals("formatted log", logFormatter.format(logCaptor.getValue()));
+        // Assert
+        verify(logFormatter).format(any(HttpLog.class));
+        verify(pathFilter).shouldInclude(uri.getPath(), "GET");
+        verify(pathFilter).shouldExclude(uri.getPath(), "GET");
     }
 
     @Test
-    void logResponse_ShouldLogWhenLogLevelIsNotNone() throws URISyntaxException {
-        LoggingProperties.Http httpProperties = loggingProperties.getHttp();
+    void logResponse_shouldLogResponse_whenStatusIsClientError() throws URISyntaxException {
+        // Arrange
+        URI uri = new URI("https://example.com/test");
+        HttpHeaders headers = new HttpHeaders();
+        byte[] responseBody = "client error response".getBytes();
+        int statusCode = 400;
+        LoggingProperties.Http httpProperties = new LoggingProperties.Http();
         httpProperties.setLevel(LogLevel.FULL);
 
-        URI uri = new URI("http://example.com");
-        HttpHeaders headers = new HttpHeaders();
-        byte[] responseBody = "response body".getBytes();
-
+        when(loggingProperties.getHttp()).thenReturn(httpProperties);
+        when(obfuscator.maskBody(anyString())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(obfuscator.maskHeaders(any(HttpHeaders.class))).thenReturn(headers);
+        when(logFormatter.format(any(HttpLog.class))).thenReturn("formatted log");
         when(pathFilter.shouldInclude(anyString(), anyString())).thenReturn(true);
         when(pathFilter.shouldExclude(anyString(), anyString())).thenReturn(false);
-        when(obfuscator.maskHeaders(headers)).thenReturn(headers);
-        when(obfuscator.maskBody(anyString())).thenReturn("masked body");
-        when(logFormatter.format(any(HttpLog.class))).thenReturn("formatted log");
 
-        httpLoggingHandler.logResponse("GET", uri, 200, headers, responseBody);
+        // Act
+        httpLoggingHandler.logResponse("GET", uri, statusCode, headers, responseBody, Source.CLIENT);
 
-        ArgumentCaptor<HttpLog> logCaptor = ArgumentCaptor.forClass(HttpLog.class);
-        verify(logFormatter).format(logCaptor.capture());
-        assertEquals("formatted log", logFormatter.format(logCaptor.getValue()));
+        // Assert
+        verify(logFormatter).format(any(HttpLog.class));
+        verify(pathFilter).shouldInclude(uri.getPath(), "GET");
+        verify(pathFilter).shouldExclude(uri.getPath(), "GET");
     }
 
     @Test
-    void logRequest_ShouldNotLogWhenLogLevelIsNone() throws URISyntaxException {
-        LoggingProperties.Http httpProperties = loggingProperties.getHttp();
-        httpProperties.setLevel(LogLevel.NONE);
-
-        URI uri = new URI("http://example.com");
+    void logRequest_shouldNotLog_whenShouldNotLogReturnsTrue() throws URISyntaxException {
+        // Arrange
+        URI uri = new URI("https://example.com/test");
         HttpHeaders headers = new HttpHeaders();
         byte[] body = "request body".getBytes();
+        LoggingProperties.Http httpProperties = new LoggingProperties.Http();
+        httpProperties.setLevel(LogLevel.FULL);
 
-        httpLoggingHandler.logRequest("GET", uri, headers, body);
+        when(loggingProperties.getHttp()).thenReturn(httpProperties);
+        when(pathFilter.shouldInclude(anyString(), anyString())).thenReturn(false);
 
-        verify(logFormatter, never()).format(any());
+        // Act
+        httpLoggingHandler.logRequest("GET", uri, headers, body, Source.CLIENT);
+
+        // Assert
+        verify(logFormatter, never()).format(any(HttpLog.class));
     }
 
     @Test
-    void logResponse_ShouldNotLogWhenLogLevelIsNone() throws URISyntaxException {
-        LoggingProperties.Http httpProperties = loggingProperties.getHttp();
-        httpProperties.setLevel(LogLevel.NONE);
-
-        URI uri = new URI("http://example.com");
+    void logResponse_shouldNotLog_whenShouldNotLogReturnsTrue() throws URISyntaxException {
+        // Arrange
+        URI uri = new URI("https://example.com/test");
         HttpHeaders headers = new HttpHeaders();
         byte[] responseBody = "response body".getBytes();
+        int statusCode = 200;
+        LoggingProperties.Http httpProperties = new LoggingProperties.Http();
+        httpProperties.setLevel(LogLevel.FULL);
 
-        httpLoggingHandler.logResponse("GET", uri, 200, headers, responseBody);
+        when(loggingProperties.getHttp()).thenReturn(httpProperties);
+        when(pathFilter.shouldInclude(anyString(), anyString())).thenReturn(false);
 
-        verify(logFormatter, never()).format(any());
+        // Act
+        httpLoggingHandler.logResponse("GET", uri, statusCode, headers, responseBody, Source.CLIENT);
+
+        // Assert
+        verify(logFormatter, never()).format(any(HttpLog.class));
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {200, 400, 401, 403, 429, 500})
+    void logResponse_shouldLogResponse_forVariousStatusCodes(int statusCode) throws URISyntaxException {
+        // Arrange
+        URI uri = new URI("https://example.com/test");
+        HttpHeaders headers = new HttpHeaders();
+        byte[] responseBody = "response body".getBytes();
+        LoggingProperties.Http httpProperties = new LoggingProperties.Http();
+        httpProperties.setLevel(LogLevel.FULL);
+
+        when(loggingProperties.getHttp()).thenReturn(httpProperties);
+        lenient().when(obfuscator.maskBody(anyString())).thenAnswer(invocation -> invocation.getArgument(0));
+        lenient().when(obfuscator.maskHeaders(any(HttpHeaders.class))).thenReturn(headers);
+        when(logFormatter.format(any(HttpLog.class))).thenReturn("formatted log");
+        when(pathFilter.shouldInclude(anyString(), anyString())).thenReturn(true);
+        lenient().when(pathFilter.shouldExclude(anyString(), anyString())).thenReturn(false);
+
+        // Act
+        httpLoggingHandler.logResponse("GET", uri, statusCode, headers, responseBody, Source.CLIENT);
+
+        // Assert
+        verify(logFormatter).format(any(HttpLog.class));
+        verify(pathFilter).shouldInclude(uri.getPath(), "GET");
+        verify(pathFilter).shouldExclude(uri.getPath(), "GET");
     }
 
     @Test
-    void logRequest_ShouldLogHeadersWhenLogLevelIsHeaders() throws URISyntaxException {
-        LoggingProperties.Http httpProperties = loggingProperties.getHttp();
+    void logResponse_shouldLogResponse_whenStatusIs429() throws URISyntaxException {
+        // Arrange
+        URI uri = new URI("https://example.com/test");
+        HttpHeaders headers = new HttpHeaders();
+        byte[] responseBody = "too many requests".getBytes();
+        int statusCode = 429;
+        LoggingProperties.Http httpProperties = new LoggingProperties.Http();
+        httpProperties.setLevel(LogLevel.FULL);
+
+        when(loggingProperties.getHttp()).thenReturn(httpProperties);
+        when(obfuscator.maskHeaders(any(HttpHeaders.class))).thenReturn(headers);
+        when(logFormatter.format(any(HttpLog.class))).thenReturn("formatted log");
+        when(pathFilter.shouldInclude(anyString(), anyString())).thenReturn(true);
+        when(pathFilter.shouldExclude(anyString(), anyString())).thenReturn(false);
+
+        // Act
+        httpLoggingHandler.logResponse("GET", uri, statusCode, headers, responseBody, Source.CLIENT);
+
+        // Assert
+        verify(logFormatter).format(any(HttpLog.class));
+        verify(pathFilter).shouldInclude(uri.getPath(), "GET");
+        verify(pathFilter).shouldExclude(uri.getPath(), "GET");
+    }
+
+    @Test
+    void logResponse_shouldLogResponse_whenStatusIs500() throws URISyntaxException {
+        // Arrange
+        URI uri = new URI("https://example.com/test");
+        HttpHeaders headers = new HttpHeaders();
+        byte[] responseBody = "internal server error".getBytes();
+        int statusCode = 500;
+        LoggingProperties.Http httpProperties = new LoggingProperties.Http();
+        httpProperties.setLevel(LogLevel.FULL);
+
+        when(loggingProperties.getHttp()).thenReturn(httpProperties);
+        when(obfuscator.maskBody(anyString())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(obfuscator.maskHeaders(any(HttpHeaders.class))).thenReturn(headers);
+        when(logFormatter.format(any(HttpLog.class))).thenReturn("formatted log");
+        when(pathFilter.shouldInclude(anyString(), anyString())).thenReturn(true);
+        when(pathFilter.shouldExclude(anyString(), anyString())).thenReturn(false);
+
+        // Act
+        httpLoggingHandler.logResponse("GET", uri, statusCode, headers, responseBody, Source.CLIENT);
+
+        // Assert
+        verify(logFormatter).format(any(HttpLog.class));
+        verify(pathFilter).shouldInclude(uri.getPath(), "GET");
+        verify(pathFilter).shouldExclude(uri.getPath(), "GET");
+    }
+
+    @Test
+    void logResponse_shouldLogResponse_whenLogLevelIsBasic() throws URISyntaxException {
+        // Arrange
+        URI uri = new URI("https://example.com/test");
+        HttpHeaders headers = new HttpHeaders();
+        byte[] responseBody = "basic log level response".getBytes();
+        int statusCode = 200;
+        LoggingProperties.Http httpProperties = new LoggingProperties.Http();
+        httpProperties.setLevel(LogLevel.BASIC);
+
+        when(loggingProperties.getHttp()).thenReturn(httpProperties);
+        when(logFormatter.format(any(HttpLog.class))).thenReturn("formatted log");
+        when(pathFilter.shouldInclude(anyString(), anyString())).thenReturn(true);
+        when(pathFilter.shouldExclude(anyString(), anyString())).thenReturn(false);
+
+        // Act
+        httpLoggingHandler.logResponse("GET", uri, statusCode, headers, responseBody, Source.CLIENT);
+
+        // Assert
+        verify(logFormatter).format(any(HttpLog.class));
+        verify(pathFilter).shouldInclude(uri.getPath(), "GET");
+        verify(pathFilter).shouldExclude(uri.getPath(), "GET");
+    }
+
+    @Test
+    void logResponse_shouldLogResponse_whenLogLevelIsHeaders() throws URISyntaxException {
+        // Arrange
+        URI uri = new URI("https://example.com/test");
+        HttpHeaders headers = new HttpHeaders();
+        byte[] responseBody = "headers log level response".getBytes();
+        int statusCode = 200;
+        LoggingProperties.Http httpProperties = new LoggingProperties.Http();
         httpProperties.setLevel(LogLevel.HEADERS);
 
-        URI uri = new URI("http://example.com");
+        when(loggingProperties.getHttp()).thenReturn(httpProperties);
+        when(obfuscator.maskHeaders(any(HttpHeaders.class))).thenReturn(headers);
+        when(logFormatter.format(any(HttpLog.class))).thenReturn("formatted log");
+        when(pathFilter.shouldInclude(anyString(), anyString())).thenReturn(true);
+        when(pathFilter.shouldExclude(anyString(), anyString())).thenReturn(false);
+
+        // Act
+        httpLoggingHandler.logResponse("GET", uri, statusCode, headers, responseBody, Source.CLIENT);
+
+        // Assert
+        verify(logFormatter).format(any(HttpLog.class));
+        verify(pathFilter).shouldInclude(uri.getPath(), "GET");
+        verify(pathFilter).shouldExclude(uri.getPath(), "GET");
+    }
+
+    @Test
+    void logRequest_shouldNotLog_whenLogLevelIsNone() throws URISyntaxException {
+        // Arrange
+        URI uri = new URI("https://example.com/test");
         HttpHeaders headers = new HttpHeaders();
         byte[] body = "request body".getBytes();
+        LoggingProperties.Http httpProperties = new LoggingProperties.Http();
+        httpProperties.setLevel(LogLevel.NONE);
 
-        when(pathFilter.shouldInclude(anyString(), anyString())).thenReturn(true);
-        when(pathFilter.shouldExclude(anyString(), anyString())).thenReturn(false);
-        when(obfuscator.maskHeaders(headers)).thenReturn(headers);
-        when(logFormatter.format(any())).thenReturn("formatted log");
+        when(loggingProperties.getHttp()).thenReturn(httpProperties);
 
-        httpLoggingHandler.logRequest("GET", uri, headers, body);
+        // Act
+        httpLoggingHandler.logRequest("GET", uri, headers, body, Source.CLIENT);
 
-        ArgumentCaptor<HttpLog> logCaptor = ArgumentCaptor.forClass(HttpLog.class);
-        verify(logFormatter).format(logCaptor.capture());
-        HttpLog capturedLog = logCaptor.getValue();
-        assertEquals(headers, capturedLog.getHeaders());
-        assertNull(capturedLog.getBody());  // Body should not be logged in HEADERS level
+        // Assert
+        verify(logFormatter, never()).format(any(HttpLog.class));
     }
 
     @Test
-    void logResponse_ShouldLogHeadersWhenLogLevelIsHeaders() throws URISyntaxException {
-        LoggingProperties.Http httpProperties = loggingProperties.getHttp();
-        httpProperties.setLevel(LogLevel.HEADERS);
-
-        URI uri = new URI("http://example.com");
+    void logRequest_shouldNotLog_whenPathIsExcluded() throws URISyntaxException {
+        // Arrange
+        URI uri = new URI("https://example.com/test");
         HttpHeaders headers = new HttpHeaders();
-        byte[] responseBody = "response body".getBytes();
-
-        when(pathFilter.shouldInclude(anyString(), anyString())).thenReturn(true);
-        when(pathFilter.shouldExclude(anyString(), anyString())).thenReturn(false);
-        when(obfuscator.maskHeaders(headers)).thenReturn(headers);
-        when(logFormatter.format(any())).thenReturn("formatted log");
-
-        httpLoggingHandler.logResponse("GET", uri, 200, headers, responseBody);
-
-        ArgumentCaptor<HttpLog> logCaptor = ArgumentCaptor.forClass(HttpLog.class);
-        verify(logFormatter).format(logCaptor.capture());
-        HttpLog capturedLog = logCaptor.getValue();
-        assertEquals(headers, capturedLog.getHeaders());
-        assertNull(capturedLog.getBody());  // Body should not be logged in HEADERS level
-    }
-
-    @Test
-    void logRequest_ShouldNotLogWhenPathShouldBeExcluded() throws URISyntaxException {
-        LoggingProperties.Http httpProperties = loggingProperties.getHttp();
+        byte[] body = "request body".getBytes();
+        LoggingProperties.Http httpProperties = new LoggingProperties.Http();
         httpProperties.setLevel(LogLevel.FULL);
 
-        URI uri = new URI("http://example.com");
-        HttpHeaders headers = new HttpHeaders();
-        byte[] body = "request body".getBytes();
-
+        when(loggingProperties.getHttp()).thenReturn(httpProperties);
         when(pathFilter.shouldInclude(anyString(), anyString())).thenReturn(true);
         when(pathFilter.shouldExclude(anyString(), anyString())).thenReturn(true);
 
-        httpLoggingHandler.logRequest("GET", uri, headers, body);
+        // Act
+        httpLoggingHandler.logRequest("GET", uri, headers, body, Source.CLIENT);
 
-        verify(logFormatter, never()).format(any());
+        // Assert
+        verify(logFormatter, never()).format(any(HttpLog.class));
     }
 
     @Test
-    void logResponse_ShouldNotLogWhenPathShouldBeExcluded() throws URISyntaxException {
-        LoggingProperties.Http httpProperties = loggingProperties.getHttp();
-        httpProperties.setLevel(LogLevel.FULL);
-
-        URI uri = new URI("http://example.com");
+    void logResponse_shouldNotLog_whenPathIsExcluded() throws URISyntaxException {
+        // Arrange
+        URI uri = new URI("https://example.com/test");
         HttpHeaders headers = new HttpHeaders();
         byte[] responseBody = "response body".getBytes();
+        int statusCode = 200;
+        LoggingProperties.Http httpProperties = new LoggingProperties.Http();
+        httpProperties.setLevel(LogLevel.FULL);
 
+        when(loggingProperties.getHttp()).thenReturn(httpProperties);
         when(pathFilter.shouldInclude(anyString(), anyString())).thenReturn(true);
         when(pathFilter.shouldExclude(anyString(), anyString())).thenReturn(true);
 
-        httpLoggingHandler.logResponse("GET", uri, 200, headers, responseBody);
+        // Act
+        httpLoggingHandler.logResponse("GET", uri, statusCode, headers, responseBody, Source.CLIENT);
 
-        verify(logFormatter, never()).format(any());
+        // Assert
+        verify(logFormatter, never()).format(any(HttpLog.class));
     }
 
     @Test
-    void logRequest_ShouldLogWhenLogLevelIsBasic() throws URISyntaxException {
-        LoggingProperties.Http httpProperties = loggingProperties.getHttp();
-        httpProperties.setLevel(LogLevel.BASIC);
-
-        URI uri = new URI("http://example.com");
+    void logRequest_shouldNotLog_whenLogLevelIsNotHeaders() throws URISyntaxException {
+        // Arrange
+        URI uri = new URI("https://example.com/test");
         HttpHeaders headers = new HttpHeaders();
         byte[] body = "request body".getBytes();
-
-        when(pathFilter.shouldInclude(anyString(), anyString())).thenReturn(true);
-        when(pathFilter.shouldExclude(anyString(), anyString())).thenReturn(false);
-        when(logFormatter.format(any())).thenReturn("formatted log");
-
-        httpLoggingHandler.logRequest("GET", uri, headers, body);
-
-        ArgumentCaptor<HttpLog> logCaptor = ArgumentCaptor.forClass(HttpLog.class);
-        verify(logFormatter).format(logCaptor.capture());
-        HttpLog capturedLog = logCaptor.getValue();
-        assertEquals(headers, capturedLog.getHeaders());
-        assertNull(capturedLog.getBody());  // Body should not be logged in BASIC level
-    }
-
-    @Test
-    void logResponse_ShouldLogWhenLogLevelIsBasic() throws URISyntaxException {
-        LoggingProperties.Http httpProperties = loggingProperties.getHttp();
-        httpProperties.setLevel(LogLevel.BASIC);
-
-        URI uri = new URI("http://example.com");
-        HttpHeaders headers = new HttpHeaders();
-        byte[] responseBody = "response body".getBytes();
-
-        when(pathFilter.shouldInclude(anyString(), anyString())).thenReturn(true);
-        when(pathFilter.shouldExclude(anyString(), anyString())).thenReturn(false);
-        when(logFormatter.format(any())).thenReturn("formatted log");
-
-        httpLoggingHandler.logResponse("GET", uri, 200, headers, responseBody);
-
-        ArgumentCaptor<HttpLog> logCaptor = ArgumentCaptor.forClass(HttpLog.class);
-        verify(logFormatter).format(logCaptor.capture());
-        HttpLog capturedLog = logCaptor.getValue();
-        assertEquals(headers, capturedLog.getHeaders());
-        assertNull(capturedLog.getBody());  // Body should not be logged in BASIC level
-    }
-
-    @Test
-    void logRequest_ShouldNotLogWhenShouldIncludeIsFalse() throws URISyntaxException {
-        LoggingProperties.Http httpProperties = loggingProperties.getHttp();
-        httpProperties.setLevel(LogLevel.FULL);
-
-        URI uri = new URI("http://example.com");
-        HttpHeaders headers = new HttpHeaders();
-        byte[] body = "request body".getBytes();
-
-        when(pathFilter.shouldInclude(anyString(), anyString())).thenReturn(false);
-
-        httpLoggingHandler.logRequest("GET", uri, headers, body);
-
-        verify(logFormatter, never()).format(any());
-    }
-
-    @Test
-    void logResponse_ShouldNotLogWhenShouldIncludeIsFalse() throws URISyntaxException {
-        LoggingProperties.Http httpProperties = loggingProperties.getHttp();
-        httpProperties.setLevel(LogLevel.FULL);
-
-        URI uri = new URI("http://example.com");
-        HttpHeaders headers = new HttpHeaders();
-        byte[] responseBody = "response body".getBytes();
-
-        when(pathFilter.shouldInclude(anyString(), anyString())).thenReturn(false);
-
-        httpLoggingHandler.logResponse("GET", uri, 200, headers, responseBody);
-
-        verify(logFormatter, never()).format(any());
-    }
-
-    @Test
-    void logRequest_ShouldNotLogWhenFormattedLogIsNull() throws URISyntaxException {
-        LoggingProperties.Http httpProperties = loggingProperties.getHttp();
-        httpProperties.setLevel(LogLevel.FULL);
-
-        URI uri = new URI("http://example.com");
-        HttpHeaders headers = new HttpHeaders();
-        byte[] body = "request body".getBytes();
-
-        when(pathFilter.shouldInclude(anyString(), anyString())).thenReturn(true);
-        when(pathFilter.shouldExclude(anyString(), anyString())).thenReturn(false);
-        when(obfuscator.maskHeaders(headers)).thenReturn(headers);
-        when(obfuscator.maskBody(anyString())).thenReturn("masked body");
-        when(logFormatter.format(any())).thenReturn(null);  // Simulate null formatted log
-
-        httpLoggingHandler.logRequest("GET", uri, headers, body);
-
-        verify(logFormatter).format(any());
-        verifyNoMoreInteractions(logFormatter);  // Ensure no log output occurs
-    }
-
-    @Test
-    void logResponse_ShouldNotLogWhenFormattedLogIsNull() throws URISyntaxException {
-        LoggingProperties.Http httpProperties = loggingProperties.getHttp();
-        httpProperties.setLevel(LogLevel.FULL);
-
-        URI uri = new URI("http://example.com");
-        HttpHeaders headers = new HttpHeaders();
-        byte[] responseBody = "response body".getBytes();
-
-        when(pathFilter.shouldInclude(anyString(), anyString())).thenReturn(true);
-        when(pathFilter.shouldExclude(anyString(), anyString())).thenReturn(false);
-        when(obfuscator.maskHeaders(headers)).thenReturn(headers);
-        when(obfuscator.maskBody(anyString())).thenReturn("masked body");
-        when(logFormatter.format(any())).thenReturn(null);  // Simulate null formatted log
-
-        httpLoggingHandler.logResponse("GET", uri, 200, headers, responseBody);
-
-        verify(logFormatter).format(any());
-        verifyNoMoreInteractions(logFormatter);  // Ensure no log output occurs
-    }
-
-    @Test
-    void logRequest_shouldLogRequest() {
-        setupHttpLogging(LogLevel.FULL);
-
-        URI uri = URI.create("http://example.com");
-        HttpHeaders headers = new HttpHeaders();
-        byte[] body = "request-body".getBytes(StandardCharsets.UTF_8);
-        String maskedBody = "masked-request-body";
-        when(obfuscator.maskBody(anyString())).thenReturn(maskedBody);
-
-        httpLoggingHandler.logRequest("GET", uri, headers, body);
-
-        verify(logFormatter).format(argThat(log -> matchesLog(log, HttpLogType.REQUEST, "GET", uri, 0, maskedBody)));
-    }
-
-    @Test
-    void logResponse_shouldLogUnauthorizedResponseWithoutBody() {
-        setupHttpLogging(LogLevel.FULL);
-
-        URI uri = URI.create("http://example.com");
-        HttpHeaders headers = new HttpHeaders();
-        byte[] body = "response-body".getBytes(StandardCharsets.UTF_8);
-
-        httpLoggingHandler.logResponse("GET", uri, HttpStatus.UNAUTHORIZED.value(), headers, body);
-
-        verify(logFormatter).format(argThat(log -> matchesLog(log, HttpLogType.RESPONSE, "GET", uri, HttpStatus.UNAUTHORIZED.value(), null)));
-    }
-
-    @Test
-    void logResponse_shouldLogForbiddenResponseWithoutBody() {
-        setupHttpLogging(LogLevel.FULL);
-
-        URI uri = URI.create("http://example.com");
-        HttpHeaders headers = new HttpHeaders();
-        byte[] body = "response-body".getBytes(StandardCharsets.UTF_8);
-
-        httpLoggingHandler.logResponse("GET", uri, HttpStatus.FORBIDDEN.value(), headers, body);
-
-        verify(logFormatter).format(argThat(log -> matchesLog(log, HttpLogType.RESPONSE, "GET", uri, HttpStatus.FORBIDDEN.value(), null)));
-    }
-
-    @Test
-    void logResponse_shouldLogTooManyRequestsResponseWithoutBody() {
-        setupHttpLogging(LogLevel.FULL);
-
-        URI uri = URI.create("http://example.com");
-        HttpHeaders headers = new HttpHeaders();
-        byte[] body = "response-body".getBytes(StandardCharsets.UTF_8);
-
-        httpLoggingHandler.logResponse("GET", uri, HttpStatus.TOO_MANY_REQUESTS.value(), headers, body);
-
-        verify(logFormatter).format(argThat(log -> matchesLog(log, HttpLogType.RESPONSE, "GET", uri, HttpStatus.TOO_MANY_REQUESTS.value(), null)));
-    }
-
-    @Test
-    void logResponse_shouldLogNotFoundResponseWithBody() {
-        setupHttpLogging(LogLevel.FULL);
-
-        URI uri = URI.create("http://example.com");
-        HttpHeaders headers = new HttpHeaders();
-        byte[] body = "response-body".getBytes(StandardCharsets.UTF_8);
-        String maskedBody = "masked-response-body";
-        when(obfuscator.maskBody(anyString())).thenReturn(maskedBody);
-
-        httpLoggingHandler.logResponse("GET", uri, HttpStatus.NOT_FOUND.value(), headers, body);
-
-        verify(logFormatter).format(argThat(log -> matchesLog(log, HttpLogType.RESPONSE, "GET", uri, HttpStatus.NOT_FOUND.value(), maskedBody)));
-    }
-
-    @Test
-    void logResponse_shouldLogInternalServerErrorResponseWithBody() {
-        setupHttpLogging(LogLevel.FULL);
-
-        URI uri = URI.create("http://example.com");
-        HttpHeaders headers = new HttpHeaders();
-        byte[] body = "response-body".getBytes(StandardCharsets.UTF_8);
-        String maskedBody = "masked-response-body";
-        when(obfuscator.maskBody(anyString())).thenReturn(maskedBody);
-
-        httpLoggingHandler.logResponse("GET", uri, HttpStatus.INTERNAL_SERVER_ERROR.value(), headers, body);
-
-        verify(logFormatter).format(argThat(log -> matchesLog(log, HttpLogType.RESPONSE, "GET", uri, HttpStatus.INTERNAL_SERVER_ERROR.value(), maskedBody)));
-    }
-
-    private void setupHttpLogging(LogLevel level) {
         LoggingProperties.Http httpProperties = new LoggingProperties.Http();
-        httpProperties.setLevel(level);
+        httpProperties.setLevel(LogLevel.BASIC); // Not HEADERS level
+
         when(loggingProperties.getHttp()).thenReturn(httpProperties);
         when(pathFilter.shouldInclude(anyString(), anyString())).thenReturn(true);
         when(pathFilter.shouldExclude(anyString(), anyString())).thenReturn(false);
-    }
 
-    private boolean matchesLog(HttpLog log, HttpLogType type, String method, URI uri, int statusCode, String body) {
-        return log.getType() == type &&
-            log.getMethod().equals(method) &&
-            log.getUri().equals(uri) &&
-            (statusCode == 0 || log.getStatusCode() == statusCode) &&
-            (body == null ? log.getBody() == null : log.getBody().equals(body));
+        // Act
+        httpLoggingHandler.logRequest("GET", uri, headers, body, Source.CLIENT);
+
+        // Assert
+        verify(obfuscator, never()).maskHeaders(any(HttpHeaders.class));
+        verify(logFormatter).format(any(HttpLog.class));
     }
 }

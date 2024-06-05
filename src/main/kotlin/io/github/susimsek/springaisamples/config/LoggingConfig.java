@@ -2,9 +2,11 @@ package io.github.susimsek.springaisamples.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.susimsek.springaisamples.logging.config.LoggingProperties;
+import io.github.susimsek.springaisamples.logging.filter.LoggingFilter;
 import io.github.susimsek.springaisamples.logging.formatter.JsonLogFormatter;
 import io.github.susimsek.springaisamples.logging.formatter.LogFormatter;
 import io.github.susimsek.springaisamples.logging.handler.HttpLoggingHandler;
+import io.github.susimsek.springaisamples.logging.handler.LoggingHandler;
 import io.github.susimsek.springaisamples.logging.strategy.DefaultObfuscationStrategy;
 import io.github.susimsek.springaisamples.logging.strategy.NoOpObfuscationStrategy;
 import io.github.susimsek.springaisamples.logging.strategy.ObfuscationStrategy;
@@ -24,13 +26,20 @@ import org.springframework.util.AntPathMatcher;
 public class LoggingConfig {
 
     @Bean
-    public HttpLoggingWrapper httpLoggingWrapper(HttpLoggingHandler httpLoggingHandler) {
-        return new HttpLoggingWrapper(httpLoggingHandler);
+    public HttpLoggingWrapper httpLoggingWrapper(LoggingHandler loggingHandler) {
+        return new HttpLoggingWrapper(loggingHandler);
     }
 
     @Bean
-    public HttpLoggingHandler httpLoggingHandler(LoggingProperties loggingProperties, LogFormatter logFormatter,
-                                                 Obfuscator obfuscator, PathFilter pathFilter) {
+    public LoggingFilter loggingFilter(LoggingHandler loggingHandler) {
+        return new LoggingFilter(loggingHandler);
+    }
+
+    @Bean
+    public LoggingHandler loggingHandler(LoggingProperties loggingProperties,
+                                         LogFormatter logFormatter,
+                                         Obfuscator obfuscator,
+                                         PathFilter pathFilter) {
         return new HttpLoggingHandler(loggingProperties, logFormatter, obfuscator, pathFilter);
     }
 

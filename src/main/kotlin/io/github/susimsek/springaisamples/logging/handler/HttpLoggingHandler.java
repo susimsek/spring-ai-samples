@@ -3,6 +3,7 @@ package io.github.susimsek.springaisamples.logging.handler;
 import io.github.susimsek.springaisamples.logging.config.LoggingProperties;
 import io.github.susimsek.springaisamples.logging.enums.HttpLogType;
 import io.github.susimsek.springaisamples.logging.enums.LogLevel;
+import io.github.susimsek.springaisamples.logging.enums.Source;
 import io.github.susimsek.springaisamples.logging.formatter.LogFormatter;
 import io.github.susimsek.springaisamples.logging.model.HttpLog;
 import io.github.susimsek.springaisamples.logging.utils.Obfuscator;
@@ -24,67 +25,73 @@ public class HttpLoggingHandler implements LoggingHandler {
     private final PathFilter pathFilter;
 
     @Override
-    public void logRequest(String method, URI uri, HttpHeaders headers, byte[] body) {
-        LogLevel logLevel = loggingProperties.getHttp().getLevel();
-        if (logLevel == LogLevel.NONE || !shouldLog(uri.getPath(), method)) {
+    public void logRequest(String method, URI uri, HttpHeaders headers, byte[] body, Source source) {
+        if (shouldNotLog(uri.getPath(), method)) {
             return;
         }
 
-        HttpLog.HttpLogBuilder logBuilder = HttpLog.builder()
-            .type(HttpLogType.REQUEST)
-            .method(method)
-            .uri(uri)
-            .headers(
-                logLevel == LogLevel.HEADERS || logLevel == LogLevel.FULL
-                    ? obfuscator.maskHeaders(headers) : new HttpHeaders()
-            );
-
-        if (logLevel == LogLevel.FULL) {
+        HttpLog.HttpLogBuilder logBuilder = initLogBuilder(
+            HttpLogType.REQUEST, method, uri, headers, source
+        );
+        if (isLogLevel(LogLevel.FULL)) {
             logBuilder.body(obfuscator.maskBody(new String(body, StandardCharsets.UTF_8)));
         }
 
-        String formattedLog = logFormatter.format(logBuilder.build());
-        if (formattedLog != null) {
-            log.info(formattedLog);
-        }
+        log("HTTP Request: {}", logFormatter.format(logBuilder.build()));
     }
 
     @Override
-    public void logResponse(
-        String method, URI uri, int statusCode, HttpHeaders headers, byte[] responseBody) {
-        LogLevel logLevel = loggingProperties.getHttp().getLevel();
-        if (logLevel == LogLevel.NONE || !shouldLog(uri.getPath(), method)) {
+    public void logResponse(String method, URI uri, Integer statusCode, HttpHeaders headers,
+                            byte[] responseBody, Source source) {
+        if (shouldNotLog(uri.getPath(), method)) {
             return;
         }
 
-        HttpLog.HttpLogBuilder logBuilder = HttpLog.builder()
-            .type(HttpLogType.RESPONSE)
-            .method(method)
-            .uri(uri)
-            .statusCode(statusCode)
-            .headers(
-                logLevel == LogLevel.HEADERS || logLevel == LogLevel.FULL
-                    ? obfuscator.maskHeaders(headers) : new HttpHeaders()
-            );
+        HttpLog.HttpLogBuilder logBuilder = initLogBuilder(
+            HttpLogType.RESPONSE, method, uri, headers, source
+        ).statusCode(statusCode);
 
         HttpStatus status = HttpStatus.valueOf(statusCode);
-        if (logLevel == LogLevel.FULL && status.is2xxSuccessful()) {
+
+        if (isLogLevel(LogLevel.FULL) && status.is2xxSuccessful()) {
             logBuilder.body(obfuscator.maskBody(new String(responseBody, StandardCharsets.UTF_8)));
-        } else if (status == HttpStatus.UNAUTHORIZED || status == HttpStatus.FORBIDDEN
-            || status == HttpStatus.TOO_MANY_REQUESTS) {
-            logBuilder.body(null); // Log these responses without body
+        } else if (shouldLogWithoutBody(status)) {
+            logBuilder.body(null);
         } else if (status.is4xxClientError() || status.is5xxServerError()) {
-            logBuilder.body(obfuscator.maskBody(
-                new String(responseBody, StandardCharsets.UTF_8))); // Log other 4xx and 5xx errors with body
+            logBuilder.body(obfuscator.maskBody(new String(responseBody, StandardCharsets.UTF_8)));
         }
 
-        String formattedLog = logFormatter.format(logBuilder.build());
-        if (formattedLog != null) {
-            log.info(formattedLog);
-        }
+        log("HTTP Response: {}", logFormatter.format(logBuilder.build()));
     }
 
-    private boolean shouldLog(String path, String method) {
-        return pathFilter.shouldInclude(path, method) && !pathFilter.shouldExclude(path, method);
+    private HttpLog.HttpLogBuilder initLogBuilder(HttpLogType type, String method, URI uri,
+                                                  HttpHeaders headers, Source source) {
+        return HttpLog.builder()
+            .type(type)
+            .method(method)
+            .uri(uri)
+            .headers(isLogLevel(LogLevel.HEADERS) ? obfuscator.maskHeaders(headers) : new HttpHeaders())
+            .source(source);
+    }
+
+    private boolean isLogLevel(LogLevel level) {
+        return loggingProperties.getHttp().getLevel().ordinal() >= level.ordinal();
+    }
+
+    private boolean shouldLogWithoutBody(HttpStatus status) {
+        return status == HttpStatus.UNAUTHORIZED || status == HttpStatus.FORBIDDEN
+            || status == HttpStatus.TOO_MANY_REQUESTS;
+    }
+
+    private void log(String message, String formattedLog) {
+        log.info(message, formattedLog);
+    }
+
+    @Override
+    public boolean shouldNotLog(String path, String method) {
+        LogLevel logLevel = loggingProperties.getHttp().getLevel();
+        return logLevel == LogLevel.NONE
+            || !pathFilter.shouldInclude(path, method)
+            || pathFilter.shouldExclude(path, method);
     }
 }
