@@ -43,7 +43,6 @@ class RestClientConfigTest {
 
         when(httpLoggingWrapperProvider.getIfAvailable()).thenReturn(httpLoggingWrapper);
         when(httpLoggingWrapper.createRestClientInterceptor()).thenReturn(interceptor);
-        RestClient.Builder builder = RestClient.builder();
         when(restClientBuilderConfigurer.configure(any(RestClient.Builder.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         RestClient.Builder resultBuilder = restClientConfig.restClientBuilder(restClientBuilderConfigurer, httpLoggingWrapperProvider);
@@ -56,7 +55,6 @@ class RestClientConfigTest {
     @Test
     void testRestClientBuilder_WithoutLoggingWrapper() {
         when(httpLoggingWrapperProvider.getIfAvailable()).thenReturn(null);
-        RestClient.Builder builder = RestClient.builder();
         when(restClientBuilderConfigurer.configure(any(RestClient.Builder.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         RestClient.Builder resultBuilder = restClientConfig.restClientBuilder(restClientBuilderConfigurer, httpLoggingWrapperProvider);
