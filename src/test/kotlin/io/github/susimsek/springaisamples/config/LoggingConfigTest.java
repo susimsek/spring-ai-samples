@@ -1,23 +1,28 @@
 package io.github.susimsek.springaisamples.config;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.susimsek.springaisamples.logging.config.LoggingProperties;
+import io.github.susimsek.springaisamples.logging.filter.LoggingFilter;
 import io.github.susimsek.springaisamples.logging.formatter.JsonLogFormatter;
 import io.github.susimsek.springaisamples.logging.formatter.LogFormatter;
 import io.github.susimsek.springaisamples.logging.handler.HttpLoggingHandler;
+import io.github.susimsek.springaisamples.logging.handler.LoggingHandler;
 import io.github.susimsek.springaisamples.logging.strategy.DefaultObfuscationStrategy;
 import io.github.susimsek.springaisamples.logging.strategy.NoOpObfuscationStrategy;
 import io.github.susimsek.springaisamples.logging.strategy.ObfuscationStrategy;
 import io.github.susimsek.springaisamples.logging.utils.Obfuscator;
 import io.github.susimsek.springaisamples.logging.utils.PathFilter;
 import io.github.susimsek.springaisamples.logging.wrapper.HttpLoggingWrapper;
+import jakarta.servlet.Filter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.ObjectProvider;
 
 class LoggingConfigTest {
@@ -125,6 +130,19 @@ class LoggingConfigTest {
         PathFilter pathFilter = loggingConfig.pathFilter(loggingPropertiesMock);
         assertNotNull(pathFilter);
         assertEquals(PathFilter.class, pathFilter.getClass());
+    }
+
+    @Test
+    void testLoggingFilter_ShouldReturnInstanceOfLoggingFilter() {
+        // Arrange
+        LoggingHandler loggingHandler = Mockito.mock(LoggingHandler.class);
+
+        // Act
+        Filter filter = loggingConfig.loggingFilter(loggingHandler);
+
+        // Assert
+        assertNotNull(filter);
+        assertInstanceOf(LoggingFilter.class, filter);
     }
 
 
