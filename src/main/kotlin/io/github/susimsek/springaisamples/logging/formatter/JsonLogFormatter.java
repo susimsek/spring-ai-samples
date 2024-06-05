@@ -2,6 +2,8 @@ package io.github.susimsek.springaisamples.logging.formatter;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.github.susimsek.springaisamples.logging.model.HttpLog;
 import java.io.IOException;
 import java.util.Optional;
@@ -16,16 +18,16 @@ public class JsonLogFormatter implements LogFormatter {
 
     @Override
     public String format(HttpLog httpLog) {
-        var logNode = objectMapper.createObjectNode()
-            .put("source", httpLog.getSource().toString().toLowerCase())
-            .put("type", httpLog.getType().toString().toLowerCase())
-            .put("method", httpLog.getMethod())
-            .put("uri", httpLog.getUri().toString())
-            .put("host", httpLog.getUri().getHost())
-            .put("path", httpLog.getUri().getPath());
+        ObjectNode logNode = objectMapper.createObjectNode();
+        logNode.set("source", JsonNodeFactory.instance.textNode(httpLog.getSource().toString().toLowerCase()));
+        logNode.set("type", JsonNodeFactory.instance.textNode(httpLog.getType().toString().toLowerCase()));
+        logNode.set("method", JsonNodeFactory.instance.textNode(httpLog.getMethod()));
+        logNode.set("uri", JsonNodeFactory.instance.textNode(httpLog.getUri().toString()));
+        logNode.set("host", JsonNodeFactory.instance.textNode(httpLog.getUri().getHost()));
+        logNode.set("path", JsonNodeFactory.instance.textNode(httpLog.getUri().getPath()));
 
         Optional.ofNullable(httpLog.getStatusCode())
-            .ifPresent(statusCode -> logNode.put("statusCode", statusCode));
+            .ifPresent(statusCode -> logNode.set("statusCode", JsonNodeFactory.instance.numberNode(statusCode)));
 
         Optional.ofNullable(httpLog.getHeaders())
             .ifPresent(headers -> logNode.set("headers", parseHeaders(headers)));
@@ -45,7 +47,9 @@ public class JsonLogFormatter implements LogFormatter {
         try {
             return objectMapper.readTree(bodyString);
         } catch (IOException e) {
-            return objectMapper.createObjectNode().put("body", bodyString); // Not a JSON body, log as plain text
+            ObjectNode node = objectMapper.createObjectNode();
+            node.set("body", JsonNodeFactory.instance.textNode(bodyString)); // Not a JSON body, log as plain text
+            return node;
         }
     }
 }
