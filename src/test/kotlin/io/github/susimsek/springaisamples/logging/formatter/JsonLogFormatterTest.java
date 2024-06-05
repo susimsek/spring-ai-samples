@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import io.github.susimsek.springaisamples.logging.enums.HttpLogType;
 import io.github.susimsek.springaisamples.logging.enums.Source;
 import io.github.susimsek.springaisamples.logging.model.HttpLog;
 import java.net.URI;
@@ -126,15 +125,7 @@ class JsonLogFormatterTest {
     void testParseBody_WhenValidJsonBody_ShouldReturnJsonNode() {
         // Arrange
         String validJsonBody = "{\"key\":\"value\"}";
-        HttpLog httpLog = HttpLog.builder()
-            .type(HttpLogType.REQUEST)
-            .method("GET")
-            .uri(URI.create("https://example.com"))
-            .statusCode(200)
-            .headers(new HttpHeaders())
-            .body(validJsonBody)
-            .source(Source.CLIENT)
-            .build();
+        httpLog.setBody(validJsonBody);
 
         // Act
         String result = jsonLogFormatter.format(httpLog);
