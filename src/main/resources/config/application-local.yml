@@ -61,12 +61,15 @@ logging:
         - $.apiKey
     exclude:
       rules:
-        - path-pattern: "/actuator/info"
-        - path-pattern: "/actuator/health/**"
+        - path-pattern: "/actuator/**"
         - pathPattern: "/error"
         - pathPattern: "/static/**"
         - pathPattern: "/public/**"
         - pathPattern: "/resources/**"
+        - pathPattern: "/css/**"
+        - pathPattern: "/js/**"
+        - path-pattern: "/images/**"
+        - path-pattern: "/favicon.ico"
         - pathPattern: "/webjars/**"
         - pathPattern: "/v3/api-docs/**"
         - pathPattern: "/swagger-ui/**"

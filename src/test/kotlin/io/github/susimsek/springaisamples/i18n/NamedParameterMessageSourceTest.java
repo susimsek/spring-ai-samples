@@ -3,6 +3,7 @@ package io.github.susimsek.springaisamples.i18n;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.HashMap;
 import java.util.Locale;
@@ -139,5 +140,34 @@ class NamedParameterMessageSourceTest {
 
         String result = messageSource.getMessageWithNamedArgs("greeting.fullname", args, Locale.ENGLISH);
         assertEquals("Hello, John {lastName}!", result);
+    }
+
+    @Test
+    void testGetMessagesStartingWith() {
+        Locale locale = Locale.ENGLISH;
+
+        Map<String, String> messages = messageSource.getMessagesStartingWith("api-docs", locale);
+        assertNotNull(messages);
+        assertEquals("API Documentation Title", messages.get("api-docs.title"));
+        assertEquals("API Documentation Description", messages.get("api-docs.description"));
+    }
+
+    @Test
+    void testGetMessagesStartingWith_NoMatchingKeys() {
+        Locale locale = Locale.ENGLISH;
+
+        Map<String, String> messages = messageSource.getMessagesStartingWith("nonexistent-prefix", locale);
+        assertNotNull(messages);
+        assertTrue(messages.isEmpty());
+    }
+
+    @Test
+    void testGetMessagesStartingWith_EmptyPrefix() {
+        Locale locale = Locale.ENGLISH;
+
+        Map<String, String> messages = messageSource.getMessagesStartingWith("", locale);
+        assertNotNull(messages);
+        // Assuming i18n/messages contains more than 2 entries
+        assertTrue(messages.size() > 2);
     }
 }

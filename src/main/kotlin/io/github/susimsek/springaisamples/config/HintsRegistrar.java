@@ -16,6 +16,7 @@ public class HintsRegistrar implements RuntimeHintsRegistrar {
         hints.resources().registerPattern("data/*.json");
         hints.resources().registerPattern("images/*.png");
         hints.resources().registerPattern("prompts/*.st");
+        hints.resources().registerPattern("i18n/*.properties");
         hints.resources().registerPattern("*.txt");
     }
 }

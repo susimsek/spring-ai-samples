@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title id="api-docs-title">API Documentation</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:300,400,700|Roboto:300,400,700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" rel="stylesheet">
+    <link href="/css/styles.css" rel="stylesheet">
+</head>
+<body class="theme-light">
+<nav class="navbar navbar-expand-lg">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="#">
+            <img src="https://avatars.githubusercontent.com/u/317776?s=200&v=4" alt="Spring Logo" height="40">
+            <span id="api-docs-topbar-title">Spring API Documentation</span>
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto form-container">
+                <li class="nav-item">
+                    <div class="language-dropdown">
+                        <i class="fas fa-globe language-icon"></i>
+                        <div class="language-dropdown-content">
+                            <a href="#" onclick="changeLanguage('en')">English</a>
+                            <a href="#" onclick="changeLanguage('tr')">Türkçe</a>
+                        </div>
+                    </div>
+                </li>
+                <li class="nav-item">
+                    <div class="theme-toggle" id="theme-toggle" onclick="toggleTheme()">
+                        <i class="fas fa-sun theme-icon sun"></i>
+                        <i class="fas fa-moon theme-icon moon"></i>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+<div id="redoc-container-parent">
+    <div class="content container" id="redoc-container"></div>
+</div>
+<div class="loader" id="loader"></div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.redoc.ly/redoc/latest/bundles/redoc.standalone.js"></script>
+<script src="/js/utils.js"></script>
+<script src="/js/theme.js"></script>
+<script src="/js/language.js"></script>
+<script src="/js/redoc-init.js"></script>
+</body>
+</html>

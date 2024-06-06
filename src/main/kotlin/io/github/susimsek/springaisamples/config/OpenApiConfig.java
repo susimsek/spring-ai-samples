@@ -1,38 +1,36 @@
 package io.github.susimsek.springaisamples.config;
 
-import io.swagger.v3.oas.annotations.OpenAPIDefinition;
-import io.swagger.v3.oas.annotations.info.Contact;
-import io.swagger.v3.oas.annotations.info.Info;
-import io.swagger.v3.oas.annotations.info.License;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.media.StringSchema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import java.util.Arrays;
-import lombok.Generated;
+import org.springdoc.core.customizers.OpenApiCustomizer;
 import org.springdoc.core.customizers.OperationCustomizer;
+import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.web.method.HandlerMethod;
 
-@Configuration(proxyBeanMethods = false)
-@OpenAPIDefinition(
-    info = @Info(
-        title = "Spring AI Samples REST API Documentation",
-        description = "Spring AI Samples REST API Documentation",
-        version = "v1",
-        contact = @Contact(
-            name = "Şuayb Şimşek",
-            email = "suaybsimsek58@gmail.com",
-            url = "https://www.susimsek.github.io"
-        ),
-        license = @License(
-            name = "Apache 2.0",
-            url = "https://www.apache.org/licenses/LICENSE-2.0"
-        )
-    )
-)
-@Generated
+@Configuration
 public class OpenApiConfig {
+
+    @Bean
+    public OpenApiCustomizer customizeOpenApi(MessageSource messageSource) {
+        return openApi -> {
+            var locale = LocaleContextHolder.getLocale();
+            openApi.getInfo()
+                .title(messageSource.getMessage("api-docs.title", null, locale))
+                .description(messageSource.getMessage("api-docs.description", null, locale))
+                .contact(new io.swagger.v3.oas.models.info.Contact()
+                    .name(messageSource.getMessage("api-docs.contact.name", null, locale))
+                    .email(messageSource.getMessage("api-docs.contact.email", null, locale))
+                    .url(messageSource.getMessage("api-docs.contact.url", null, locale)))
+                .license(new io.swagger.v3.oas.models.info.License()
+                    .name(messageSource.getMessage("api-docs.license.name", null, locale))
+                    .url(messageSource.getMessage("api-docs.license.url", null, locale)));
+        };
+    }
 
     @Bean
     public OperationCustomizer operationCustomizer() {

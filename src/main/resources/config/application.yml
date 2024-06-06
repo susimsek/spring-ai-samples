@@ -14,7 +14,7 @@ spring:
   web:
     locale: en
     resources:
-      add-mappings: false
+      add-mappings: true
   messages:
     basename: i18n/messages
     fallback-to-system-locale: false

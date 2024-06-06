@@ -30,6 +30,8 @@ class HintsRegistrarTest {
         // Check that the resource patterns are registered
         assertThat(RuntimeHintsPredicates.resource().forResource("data/*.json"))
             .accepts(runtimeHints);
+        assertThat(RuntimeHintsPredicates.resource().forResource("i18n/*.properties"))
+            .accepts(runtimeHints);
         assertThat(RuntimeHintsPredicates.resource().forResource("images/*.png"))
             .accepts(runtimeHints);
         assertThat(RuntimeHintsPredicates.resource().forResource("prompts/*.st"))

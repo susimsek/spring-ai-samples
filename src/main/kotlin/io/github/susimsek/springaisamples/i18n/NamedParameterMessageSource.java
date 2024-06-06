@@ -2,8 +2,10 @@ package io.github.susimsek.springaisamples.i18n;
 
 import java.util.Locale;
 import java.util.Map;
+import java.util.ResourceBundle;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.context.support.ResourceBundleMessageSource;
@@ -90,5 +92,20 @@ public class NamedParameterMessageSource extends ResourceBundleMessageSource imp
             message = replaceNamedParameters(message, args);
         }
         return message;
+    }
+
+    /**
+     * Retrieve messages starting with the given prefix.
+     *
+     * @param prefix the prefix of the messages to retrieve
+     * @param locale the locale for which to retrieve the messages
+     * @return a map of messages with keys starting with the given prefix
+     */
+    @Override
+    public Map<String, String> getMessagesStartingWith(String prefix, Locale locale) {
+        ResourceBundle bundle = ResourceBundle.getBundle(getBasenameSet().iterator().next(), locale);
+        return bundle.keySet().stream()
+            .filter(key -> key.startsWith(prefix))
+            .collect(Collectors.toMap(key -> key, key -> getMessage(key, null, locale)));
     }
 }

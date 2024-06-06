@@ -58,4 +58,13 @@ public interface ParameterMessageSource extends MessageSource {
      */
     String getMessageWithNamedArgs(String code, @Nullable Map<String, String> namedArgs,
                                    Locale locale) throws NoSuchMessageException;
+
+    /**
+     * Retrieve messages starting with the given prefix.
+     *
+     * @param prefix the prefix of the messages to retrieve
+     * @param locale the locale for which to retrieve the messages
+     * @return a map of messages with keys starting with the given prefix
+     */
+    Map<String, String> getMessagesStartingWith(String prefix, Locale locale);
 }
