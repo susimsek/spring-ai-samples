@@ -26,13 +26,13 @@ class WebConfigTest {
     void addResourceHandlers_ShouldAddResourceHandler() {
         // Arrange
         ResourceHandlerRegistration registration = mock(ResourceHandlerRegistration.class);
-        when(resourceHandlerRegistry.addResourceHandler("/**")).thenReturn(registration);
+        when(resourceHandlerRegistry.addResourceHandler("/api-docs/**")).thenReturn(registration);
 
         // Act
         webConfig.addResourceHandlers(resourceHandlerRegistry);
 
         // Assert
-        verify(registration).addResourceLocations("classpath:/static/");
+        verify(registration).addResourceLocations("classpath:/static/api-docs/");
     }
 
     @Test
