@@ -73,6 +73,7 @@ logging:
         - pathPattern: "/webjars/**"
         - pathPattern: "/v3/api-docs/**"
         - pathPattern: "/swagger-ui/**"
+        - pathPattern: "/api-docs/**"
     include:
       rules:
         - pathPattern: "/**"

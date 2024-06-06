@@ -11,7 +11,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistration;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
-import org.springframework.web.servlet.config.annotation.ViewControllerRegistration;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 
 @ExtendWith(MockitoExtension.class)
@@ -19,9 +18,6 @@ class WebConfigTest {
 
     @Mock
     private ResourceHandlerRegistry resourceHandlerRegistry;
-
-    @Mock
-    private ViewControllerRegistry viewControllerRegistry;
 
     @InjectMocks
     private WebConfig webConfig;
@@ -40,15 +36,15 @@ class WebConfigTest {
     }
 
     @Test
-    void addViewControllers_ShouldAddViewController() {
+    void addViewControllers_ShouldAddRedirectViewController() {
         // Arrange
-        ViewControllerRegistration registration = mock(ViewControllerRegistration.class);
-        when(viewControllerRegistry.addViewController("/api-docs")).thenReturn(registration);
+        ViewControllerRegistry registry = mock(ViewControllerRegistry.class);
+        WebConfig webConfig = new WebConfig();
 
         // Act
-        webConfig.addViewControllers(viewControllerRegistry);
+        webConfig.addViewControllers(registry);
 
         // Assert
-        verify(registration).setViewName("forward:/index.html");
+        verify(registry).addRedirectViewController("/api-docs", "/api-docs/index.html");
     }
 }
