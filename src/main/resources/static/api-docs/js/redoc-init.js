@@ -77,7 +77,9 @@ function initRedoc(spec) {
                     scrollYOffset: 50,
                     theme: getSelectedRedocTheme(),
                     hideDownloadButton: true,
-                    hideLoading: true
+                    hideLoading: true,
+                    hideLogo: true, // Hide the Redocly logo
+                    hideSingleRequestSampleTab: true // Hide the single request sample tab
                 }, newContainer);
                 hideLoader();
             });

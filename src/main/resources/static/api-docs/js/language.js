@@ -17,14 +17,12 @@ function updateTextContent(lang) {
             document.getElementById('api-docs-title').textContent = messages['api-docs.title'];
             document.getElementById('api-docs-topbar-title').textContent = messages['api-docs.topbar.title'];
 
-            const apiSelect = document.getElementById('api-select');
-            apiSelect.options[0].textContent = messages['api-docs.api.ai'];
+            // Update language selection options
+            const languageDropdownContent = document.querySelector('.language-dropdown-content');
+            languageDropdownContent.querySelector('a[onclick="changeLanguage(\'en\')"]').textContent = messages['api-docs.language.english'];
+            languageDropdownContent.querySelector('a[onclick="changeLanguage(\'tr\')"]').textContent = messages['api-docs.language.turkish'];
 
-            const languageSelect = document.getElementById('language-select');
-            languageSelect.options[0].textContent = messages['api-docs.language.english'];
-            languageSelect.options[1].textContent = messages['api-docs.language.turkish'];
-
-            const themeToggle = document.getElementById('theme-toggle');
+            // Update theme selection options
             themeToggle.querySelector('.sun').title = messages['api-docs.theme.light'];
             themeToggle.querySelector('.moon').title = messages['api-docs.theme.dark'];
         }).catch((error) => {
