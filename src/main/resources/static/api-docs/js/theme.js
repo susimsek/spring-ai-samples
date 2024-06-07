@@ -13,11 +13,13 @@ function applyTheme(theme) {
 function toggleTheme() {
     const currentTheme = document.body.classList.contains('theme-dark') ? 'dark' : 'light';
     const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-    document.cookie = `theme=${newTheme};path=/`;
+    setCookie('theme', newTheme, 7);
     applyTheme(newTheme);
+    const apiSelect = document.getElementById('api-select');
+    const selectedApi = apiSelect ? apiSelect.value : '/v3/api-docs';
     showLoader();
     setTimeout(() => {
-        initRedoc();
+        initRedoc(selectedApi);
         hideLoader();
     }, 100);
 }

@@ -1,4 +1,54 @@
-function initRedoc() {
+document.addEventListener('DOMContentLoaded', () => {
+    const langCookie = getCookie('lang');
+    const lang = langCookie || navigator.language || 'en';
+    document.documentElement.lang = lang;
+
+    const languageSelect = document.getElementById('language-select');
+    if (languageSelect) {
+        languageSelect.value = lang.split('-')[0];
+    }
+
+    const themeSelect = document.getElementById('theme-select');
+    const theme = getCookie('theme') || 'light';
+    if (themeSelect) {
+        applyTheme(theme);
+        themeSelect.value = theme;
+    }
+
+    // Ensure the theme is applied correctly after page load
+    setTimeout(() => {
+        const apiSelect = document.getElementById('api-select');
+        const selectedApi = apiSelect ? apiSelect.value : '/v3/api-docs';
+        initRedoc(selectedApi);
+    }, 100);
+
+    updateTextContent(lang);
+});
+
+function changeLanguage(lang) {
+    setCookie('lang', lang, 7);
+    updateTextContent(lang);
+    const apiSelect = document.getElementById('api-select');
+    const selectedApi = apiSelect ? apiSelect.value : '/v3/api-docs';
+    showLoader();
+    setTimeout(() => {
+        initRedoc(selectedApi);
+        hideLoader();
+    }, 100);
+}
+
+function changeApi() {
+    const apiSelect = document.getElementById('api-select');
+    const selectedApi = apiSelect ? apiSelect.value : '/v3/api-docs';
+    showLoader();
+    setTimeout(() => {
+        initRedoc(selectedApi);
+        hideLoader();
+    }, 100);
+}
+
+function initRedoc(spec) {
+    showLoader();
     const lang = getCookie('lang') || 'en';
     const containerParent = document.getElementById('redoc-container-parent');
     const oldContainer = document.getElementById('redoc-container');
@@ -16,7 +66,7 @@ function initRedoc() {
     // Append the new container
     containerParent.appendChild(newContainer);
 
-    fetch('/v3/api-docs', {
+    fetch(spec, {
         headers: { 'Accept-Language': lang }
     })
         .then(response => response.json())
@@ -37,12 +87,6 @@ function initRedoc() {
             hideLoader();
         });
 }
-
-document.addEventListener('DOMContentLoaded', () => {
-    setTimeout(() => {
-        initRedoc();
-    }, 100);
-});
 
 function getSelectedRedocTheme() {
     const selectedTheme = document.body.classList.contains('theme-dark') ? 'dark' : 'light';

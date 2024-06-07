@@ -13,13 +13,21 @@
     <div class="container-fluid">
         <a class="navbar-brand" href="#">
             <img src="https://avatars.githubusercontent.com/u/317776?s=200&v=4" alt="Spring Logo" height="40">
-            <span id="api-docs-topbar-title">Spring API Documentation</span>
+            <span id="api-docs-topbar-title">API Documentation</span>
         </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto form-container">
+                <li class="nav-item">
+                    <div class="api-select-container">
+                        <i class="fas fa-network-wired"></i>
+                        <select id="api-select" class="api-select" onchange="changeApi()">
+                            <option value="/v3/api-docs">artificial intelligence</option>
+                        </select>
+                    </div>
+                </li>
                 <li class="nav-item">
                     <div class="language-dropdown">
                         <i class="fas fa-globe language-icon"></i>
