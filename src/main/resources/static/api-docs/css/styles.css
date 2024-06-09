@@ -6,12 +6,24 @@
     --light-bg-color: #f4f4f4;
     --light-text-color: #000000;
     --light-secondary-bg-color: #ffffff;
-    --light-icon-color: #6C757D; /* Neutral grey tone for light theme */
+    --light-icon-color: #6C757D;
+    --light-link-color: #0056b3;
+    --dark-link-color: #66afe9;
+    --light-value-color: #343a40;
+    --dark-value-color: #b0bec5;
+    --light-keyword-color: #d73a49;
+    --dark-keyword-color: #ff79c6;
+    --light-punctuation-color: #6a737d;
+    --dark-punctuation-color: #6272a4;
 }
 
 body {
     font-family: 'Roboto', sans-serif;
     transition: background-color 0.3s, color 0.3s;
+}
+
+.theme-dark, .theme-light {
+    font-family: 'Roboto', sans-serif;
 }
 
 .theme-dark {
@@ -280,5 +292,200 @@ body {
     appearance: none; /* Remove default select arrow */
 }
 
+a[href="https://redocly.com/redoc/"],
+a[href="https://redocly.com/redoc/"] img {
+    display: none !important;
+}
 
+.theme-light .redoc-wrap .right-panel,
+.theme-light .redoc-wrap .right-panel .api-info,
+.theme-light .redoc-wrap .right-panel .api-info h1,
+.theme-light .redoc-wrap .right-panel .api-info p,
+.theme-light .redoc-wrap .right-panel .api-info small,
+.theme-light .redoc-wrap .right-panel .api-info .response-samples,
+.theme-light .redoc-wrap .right-panel .api-info .response-samples .response-sample,
+.theme-light .redoc-wrap .right-panel .api-info .response-samples .response-sample .tab-header,
+.theme-light .redoc-wrap .right-panel .api-info .content-type,
+.theme-light .redoc-wrap .redoc-json code,
+.theme-light .redoc-wrap .redoc-json .token.string,
+.theme-light .redoc-wrap .redoc-json .token.property,
+.theme-light .redoc-wrap .redoc-json .token.number,
+.theme-light .redoc-wrap .redoc-json .token.punctuation,
+.theme-light .redoc-wrap .redoc-json .token.keyword,
+.theme-light .redoc-wrap .redoc-json .token.ellipsis {
+    color: var(--light-text-color) !important;
+    font-family: 'Roboto', sans-serif;
+}
 
+.theme-light .redoc-wrap .redoc-json a {
+    color: var(--light-link-color) !important;
+}
+
+.theme-light .redoc-wrap .redoc-json .token.string:not(a) {
+    color: var(--light-value-color) !important;
+}
+
+.theme-light .redoc-wrap .redoc-json .token.keyword {
+    color: var(--light-keyword-color) !important;
+}
+
+.theme-light .redoc-wrap .redoc-json .token.punctuation {
+    color: var(--light-punctuation-color) !important;
+}
+
+.theme-light .redoc-wrap .right-panel {
+    background-color: var(--light-secondary-bg-color) !important;
+}
+
+.theme-dark .redoc-wrap .right-panel,
+.theme-dark .redoc-wrap .right-panel .api-info,
+.theme-dark .redoc-wrap .right-panel .api-info h1,
+.theme-dark .redoc-wrap .right-panel .api-info p,
+.theme-dark .redoc-wrap .right-panel .api-info small,
+.theme-dark .redoc-wrap .right-panel .api-info .response-samples,
+.theme-dark .redoc-wrap .right-panel .api-info .response-samples .response-sample,
+.theme-dark .redoc-wrap .right-panel .api-info .response-samples .response-sample .tab-header,
+.theme-dark .redoc-wrap .right-panel .api-info .content-type,
+.theme-dark .redoc-wrap .redoc-json code,
+.theme-dark .redoc-wrap .redoc-json .token.string,
+.theme-dark .redoc-wrap .redoc-json .token.property,
+.theme-dark .redoc-wrap .redoc-json .token.number,
+.theme-dark .redoc-wrap .redoc-json .token.punctuation,
+.theme-dark .redoc-wrap .redoc-json .token.keyword,
+.theme-dark .redoc-wrap .redoc-json .token.ellipsis {
+    color: var(--dark-text-color) !important;
+    font-family: 'Roboto', sans-serif;
+}
+
+.theme-dark .redoc-wrap .redoc-json a {
+    color: var(--dark-link-color) !important;
+}
+
+.theme-dark .redoc-wrap .redoc-json .token.string:not(a) {
+    color: var(--dark-value-color) !important;
+}
+
+.theme-dark .redoc-wrap .redoc-json .token.keyword {
+    color: var(--dark-keyword-color) !important;
+}
+
+.theme-dark .redoc-wrap .redoc-json .token.punctuation {
+    color: var(--dark-punctuation-color) !important;
+}
+
+.theme-dark .redoc-wrap .right-panel {
+    background-color: var(--dark-secondary-bg-color) !important;
+}
+
+/* Styles for the Try It button */
+.try-it-button {
+    margin-top: 10px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    background-color: var(--primary-color);
+    color: #fff;
+    border: none;
+    padding: 5px 10px; /* Adjusted padding for smaller button */
+    border-radius: 5px;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.theme-dark .try-it-button {
+    background-color: var(--primary-color);
+    color: var(--dark-text-color);
+}
+
+.theme-light .try-it-button {
+    background-color: var(--primary-color);
+    color: var(--light-text-color);
+}
+
+.try-it-button:hover {
+    background-color: #0056b3;
+    color: #fff;
+}
+
+.theme-dark .try-it-button:hover {
+    background-color: #66afe9;
+    color: var(--dark-text-color);
+}
+
+/* Styles for the Try It form container */
+.try-it-form-container {
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 10px; /* Adjusted padding */
+    background-color: var(--light-secondary-bg-color);
+}
+
+.theme-dark .try-it-form-container {
+    background-color: var(--dark-secondary-bg-color);
+    border-color: #444;
+}
+
+/* Styles for the heading in the Try It form */
+.try-it-form-container h4 {
+    margin-bottom: 10px; /* Adjusted margin */
+}
+
+/* Styles for the textarea in the Try It form */
+.try-it-form-container textarea {
+    width: 100%;
+    height: 80px; /* Adjusted height */
+    margin-bottom: 10px;
+}
+
+/* Styles for the submit button in the Try It form */
+.try-it-form-container .btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: #fff;
+    transition: background-color 0.3s, border-color 0.3s;
+}
+
+.theme-dark .try-it-form-container .btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.theme-light .try-it-form-container .btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+/* Styles for the response area in the Try It form */
+.response {
+    margin-top: 15px; /* Adjusted margin */
+}
+
+.response .response-content {
+    background-color: var(--light-bg-color);
+    border: 1px solid #ddd;
+    color: var(--light-text-color);
+    padding: 15px;
+    border-radius: 5px;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-size: 0.9em;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Dark mode specific styles for response */
+.theme-dark .response .response-content {
+    background-color: var(--dark-bg-color);
+    border: 1px solid #444;
+    color: var(--dark-text-color);
+    padding: 15px;
+    border-radius: 5px;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-size: 0.9em;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Styles for the query parameters section in the Try It form */
+.try-it-form-container .query-params {
+    width: 100%;
+    height: 80px; /* Adjusted height */
+    margin-bottom: 10px;
+}

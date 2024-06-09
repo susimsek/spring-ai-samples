@@ -16,6 +16,12 @@ spring:
       chat:
         options:
           model: gpt-4o
+  devtools:
+    restart:
+      enabled: true
+    livereload:
+      enabled: true
+
 
 management:
   tracing:

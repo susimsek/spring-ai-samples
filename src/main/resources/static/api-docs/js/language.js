@@ -1,10 +1,11 @@
-function changeLanguage(language) {
-    document.cookie = `lang=${language};path=/`;
-    updateTextContent(language);
+function changeLanguage(lang) {
+    setCookie('lang', lang, 7);
+    updateTextContent(lang);
+    const apiSelect = document.getElementById('api-select');
+    const selectedApi = apiSelect ? apiSelect.value : '/v3/api-docs';
     showLoader();
     setTimeout(() => {
-        initRedoc();
-        hideLoader();
+        initRedoc(selectedApi);
     }, 100);
 }
 
@@ -34,5 +35,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const langCookie = getCookie('lang');
     const lang = langCookie || navigator.language || 'en';
     document.documentElement.lang = lang;
+    const languageSelect = document.getElementById('language-select');
+    if (languageSelect) {
+        languageSelect.value = lang.split('-')[0];
+    }
     updateTextContent(lang);
 });

@@ -25,6 +25,10 @@ function toggleTheme() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+    const themeSelect = document.getElementById('theme-select');
     const theme = getCookie('theme') || 'light';
-    applyTheme(theme);
+    if (themeSelect) {
+        applyTheme(theme);
+        themeSelect.value = theme;
+    }
 });

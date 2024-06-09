@@ -1,41 +1,11 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const langCookie = getCookie('lang');
-    const lang = langCookie || navigator.language || 'en';
-    document.documentElement.lang = lang;
-
-    const languageSelect = document.getElementById('language-select');
-    if (languageSelect) {
-        languageSelect.value = lang.split('-')[0];
-    }
-
-    const themeSelect = document.getElementById('theme-select');
-    const theme = getCookie('theme') || 'light';
-    if (themeSelect) {
-        applyTheme(theme);
-        themeSelect.value = theme;
-    }
-
     // Ensure the theme is applied correctly after page load
     setTimeout(() => {
         const apiSelect = document.getElementById('api-select');
         const selectedApi = apiSelect ? apiSelect.value : '/v3/api-docs';
         initRedoc(selectedApi);
     }, 100);
-
-    updateTextContent(lang);
 });
-
-function changeLanguage(lang) {
-    setCookie('lang', lang, 7);
-    updateTextContent(lang);
-    const apiSelect = document.getElementById('api-select');
-    const selectedApi = apiSelect ? apiSelect.value : '/v3/api-docs';
-    showLoader();
-    setTimeout(() => {
-        initRedoc(selectedApi);
-        hideLoader();
-    }, 100);
-}
 
 function changeApi() {
     const apiSelect = document.getElementById('api-select');
@@ -43,7 +13,6 @@ function changeApi() {
     showLoader();
     setTimeout(() => {
         initRedoc(selectedApi);
-        hideLoader();
     }, 100);
 }
 
@@ -81,7 +50,11 @@ function initRedoc(spec) {
                     hideLogo: true, // Hide the Redocly logo
                     hideSingleRequestSampleTab: true // Hide the single request sample tab
                 }, newContainer);
-                hideLoader();
+                // Wait until the next frame to ensure Redoc is fully loaded
+                requestAnimationFrame(() => {
+                    addTryItButton(); // Call addTryItButton function
+                    hideLoader();
+                });
             });
         })
         .catch((error) => {
@@ -89,6 +62,7 @@ function initRedoc(spec) {
             hideLoader();
         });
 }
+
 
 function getSelectedRedocTheme() {
     const selectedTheme = document.body.classList.contains('theme-dark') ? 'dark' : 'light';
