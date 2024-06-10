@@ -15,6 +15,9 @@
     --dark-keyword-color: #ff79c6;
     --light-punctuation-color: #6a737d;
     --dark-punctuation-color: #6272a4;
+    --light-border-color: #ddd; /* Added for light theme border */
+    --dark-border-color: #4a4a4a; /* Updated to a lighter color for better contrast */
+    --dark-border-glow: rgba(255, 255, 255, 0.1); /* Glow effect for dark theme */
 }
 
 body {
@@ -412,15 +415,25 @@ a[href="https://redocly.com/redoc/"] img {
 
 /* Styles for the Try It form container */
 .try-it-form-container {
-    border: 1px solid #ddd;
+    border: 1px solid var(--light-border-color);
     border-radius: 5px;
-    padding: 10px; /* Adjusted padding */
+    padding: 10px;
     background-color: var(--light-secondary-bg-color);
+    color: var(--light-text-color);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .theme-dark .try-it-form-container {
     background-color: var(--dark-secondary-bg-color);
-    border-color: #444;
+    border-color: var(--dark-border-color);
+    color: var(--dark-text-color);
+    box-shadow: 0 4px 8px var(--dark-border-glow);
+}
+
+.theme-light .try-it-form-container {
+    background-color: var(--light-secondary-bg-color);
+    border-color: var(--light-border-color);
+    color: var(--light-text-color);
 }
 
 /* Styles for the heading in the Try It form */
