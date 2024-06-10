@@ -49,10 +49,8 @@ function initRedoc(spec) {
                     hideLoading: true,
                     hideLogo: true, // Hide the Redocly logo
                     hideSingleRequestSampleTab: true // Hide the single request sample tab
-                }, newContainer);
-                // Wait until the next frame to ensure Redoc is fully loaded
-                requestAnimationFrame(() => {
-                    addTryItButton(); // Call addTryItButton function
+                }, newContainer, () => {
+                    addTryItButton(); // Call addTryItButton function immediately after Redoc initialization
                     hideLoader();
                 });
             });

@@ -38,6 +38,7 @@ function setupFormSubmission(form) {
         const method = form.getAttribute('data-method');
         const url = form.getAttribute('data-endpoint');
         const headersTextarea = form.querySelector('textarea.headers');
+        const pathParamsTextarea = form.querySelector('textarea.path-params');
         const queryTextarea = form.querySelector('textarea.query-params');
         const bodyTextarea = form.querySelector('textarea.body');
         const responseContainer = form.querySelector('.response-content');
@@ -52,18 +53,26 @@ function setupFormSubmission(form) {
             });
         }
 
-        // Add Content-Type header if not present and method requires a body
         if (!headers['Content-Type'] && method !== 'GET' && method !== 'HEAD') {
             headers['Content-Type'] = 'application/json';
         }
 
-        // Add Accept header if not present
         if (!headers['Accept']) {
             headers['Accept'] = 'application/json';
         }
 
+        let pathParams = {};
+        if (pathParamsTextarea && pathParamsTextarea.value) {
+            pathParamsTextarea.value.split('\n').forEach(line => {
+                const [key, value] = line.split('=').map(part => part.trim());
+                if (key && value) {
+                    pathParams[key] = value;
+                }
+            });
+        }
+
         let queryParams = '';
-        if (queryTextarea.value) {
+        if (queryTextarea && queryTextarea.value) {
             queryTextarea.value.split('\n').forEach(line => {
                 const [key, value] = line.split('=').map(part => part.trim());
                 if (key && value) {
@@ -74,6 +83,11 @@ function setupFormSubmission(form) {
         }
 
         let requestUrl = url;
+        if (Object.keys(pathParams).length > 0) {
+            Object.keys(pathParams).forEach(param => {
+                requestUrl = requestUrl.replace(`{${param}}`, pathParams[param]);
+            });
+        }
         if (queryParams) {
             requestUrl += `?${queryParams}`;
         }
@@ -137,14 +151,47 @@ function populateForm(section, form) {
                     const key = keyElement.textContent.trim();
                     let value = '';
                     if (exampleElement) {
-                        value = exampleElement.textContent.split('=')[1].replace(/"/g, '').trim();  // Remove double quotes
+                        const valueElement = exampleElement.nextElementSibling;
+                        if (valueElement) {
+                            value = valueElement.textContent.split('=')[1].replace(/"/g, '').trim();
+                        }
                     } else if (defaultElement) {
-                        value = defaultElement.textContent.replace(/Default:/, '').replace(/"/g, '').trim();
+                        const valueElement = defaultElement.nextElementSibling;
+                        if (valueElement) {
+                            value = valueElement.textContent.replace(/Default:/, '').replace(/"/g, '').trim();
+                        }
                     }
                     queryContent += `${key}=${value}\n`;
                 }
             });
             queryParamsTextarea.value = queryContent;
+        }
+    }
+
+    // Populate path parameters
+    const pathParamsTextarea = form.querySelector('textarea.path-params');
+    if (pathParamsTextarea) {
+        const pathSection = Array.from(section.querySelectorAll('h5')).find(header => header.textContent.includes('path Parameters'));
+        if (pathSection) {
+            const pathTable = pathSection.nextElementSibling;
+            const pathRows = pathTable.querySelectorAll('tr');
+            let pathContent = '';
+            pathRows.forEach(row => {
+                const keyElement = row.querySelector('.property-name');
+                const exampleElement = Array.from(row.querySelectorAll('span')).find(span => span.textContent.includes('Example:'));
+                const defaultElement = Array.from(row.querySelectorAll('span')).find(span => span.textContent.includes('Default:'));
+                if (keyElement) {
+                    const key = keyElement.textContent.trim();
+                    let value = '';
+                    if (exampleElement) {
+                        value = exampleElement.nextElementSibling ? exampleElement.nextElementSibling.textContent.split('=')[1].replace(/"/g, '').trim() : '';
+                    } else if (defaultElement) {
+                        value = defaultElement.nextElementSibling ? defaultElement.nextElementSibling.textContent.replace(/Default:/, '').replace(/"/g, '').trim() : '';
+                    }
+                    pathContent += `${key}=${value}\n`;
+                }
+            });
+            pathParamsTextarea.value = pathContent;
         }
     }
 
