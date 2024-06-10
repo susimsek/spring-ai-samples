@@ -35,10 +35,13 @@ function addTryItButton() {
 function setupFormSubmission(form) {
     form.addEventListener('submit', event => {
         event.preventDefault();
+
+        const submitButton = form.querySelector('button[type="submit"]');
+        submitButton.disabled = true; // Disable the submit button
+
         const method = form.getAttribute('data-method');
         const url = form.getAttribute('data-endpoint');
         const headersTextarea = form.querySelector('textarea.headers');
-        const pathParamsTextarea = form.querySelector('textarea.path-params');
         const queryTextarea = form.querySelector('textarea.query-params');
         const bodyTextarea = form.querySelector('textarea.body');
         const responseContainer = form.querySelector('.response-content');
@@ -53,26 +56,18 @@ function setupFormSubmission(form) {
             });
         }
 
+        // Add Content-Type header if not present and method requires a body
         if (!headers['Content-Type'] && method !== 'GET' && method !== 'HEAD') {
             headers['Content-Type'] = 'application/json';
         }
 
+        // Add Accept header if not present
         if (!headers['Accept']) {
             headers['Accept'] = 'application/json';
         }
 
-        let pathParams = {};
-        if (pathParamsTextarea && pathParamsTextarea.value) {
-            pathParamsTextarea.value.split('\n').forEach(line => {
-                const [key, value] = line.split('=').map(part => part.trim());
-                if (key && value) {
-                    pathParams[key] = value;
-                }
-            });
-        }
-
         let queryParams = '';
-        if (queryTextarea && queryTextarea.value) {
+        if (queryTextarea.value) {
             queryTextarea.value.split('\n').forEach(line => {
                 const [key, value] = line.split('=').map(part => part.trim());
                 if (key && value) {
@@ -83,11 +78,6 @@ function setupFormSubmission(form) {
         }
 
         let requestUrl = url;
-        if (Object.keys(pathParams).length > 0) {
-            Object.keys(pathParams).forEach(param => {
-                requestUrl = requestUrl.replace(`{${param}}`, pathParams[param]);
-            });
-        }
         if (queryParams) {
             requestUrl += `?${queryParams}`;
         }
@@ -104,6 +94,9 @@ function setupFormSubmission(form) {
             .catch(error => {
                 console.error('Error:', error);
                 responseContainer.textContent = 'Error: ' + error.message;
+            })
+            .finally(() => {
+                submitButton.disabled = false; // Re-enable the submit button
             });
     });
 }
@@ -115,6 +108,16 @@ function populateForm(section, form) {
     }
 
     // Populate headers
+    populateHeaders(section, form);
+    // Populate path parameters
+    populatePathParams(section, form);
+    // Populate query parameters
+    populateQueryParams(section, form);
+    // Populate body
+    populateBody(section, form);
+}
+
+function populateHeaders(section, form) {
     const headersTextarea = form.querySelector('textarea.headers');
     if (headersTextarea) {
         const headersSection = Array.from(section.querySelectorAll('h5')).find(header => header.textContent.includes('header Parameters'));
@@ -132,10 +135,37 @@ function populateForm(section, form) {
                 }
             });
             headersTextarea.value = headersContent;
+        } else {
+            headersTextarea.parentElement.style.display = 'none';
         }
     }
+}
 
-    // Populate query parameters
+function populatePathParams(section, form) {
+    const pathParamsTextarea = form.querySelector('textarea.path-params');
+    if (pathParamsTextarea) {
+        const pathParamsSection = Array.from(section.querySelectorAll('h5')).find(header => header.textContent.includes('path Parameters'));
+        if (pathParamsSection) {
+            const pathParamsTable = pathParamsSection.nextElementSibling;
+            const pathParamsRows = pathParamsTable.querySelectorAll('tr');
+            let pathParamsContent = '';
+            pathParamsRows.forEach(row => {
+                const keyElement = row.querySelector('.property-name');
+                const valueElement = row.querySelector('.sc-ddjGPC.lmPAIU.fGykvj') || row.querySelector('.sc-ddjGPC.lmPAIU');
+                if (keyElement && valueElement) {
+                    const key = keyElement.textContent.trim();
+                    const value = valueElement.textContent.replace(/"/g, '').trim();  // Remove double quotes
+                    pathParamsContent += `${key}=${value}\n`;
+                }
+            });
+            pathParamsTextarea.value = pathParamsContent;
+        } else {
+            pathParamsTextarea.parentElement.style.display = 'none';
+        }
+    }
+}
+
+function populateQueryParams(section, form) {
     const queryParamsTextarea = form.querySelector('textarea.query-params');
     if (queryParamsTextarea) {
         const querySection = Array.from(section.querySelectorAll('h5')).find(header => header.textContent.includes('query Parameters'));
@@ -151,51 +181,21 @@ function populateForm(section, form) {
                     const key = keyElement.textContent.trim();
                     let value = '';
                     if (exampleElement) {
-                        const valueElement = exampleElement.nextElementSibling;
-                        if (valueElement) {
-                            value = valueElement.textContent.split('=')[1].replace(/"/g, '').trim();
-                        }
+                        value = exampleElement.nextElementSibling ? exampleElement.nextElementSibling.textContent.split('=')[1].replace(/"/g, '').trim() : '';
                     } else if (defaultElement) {
-                        const valueElement = defaultElement.nextElementSibling;
-                        if (valueElement) {
-                            value = valueElement.textContent.replace(/Default:/, '').replace(/"/g, '').trim();
-                        }
+                        value = defaultElement.nextElementSibling ? defaultElement.nextElementSibling.textContent.replace(/Default:/, '').replace(/"/g, '').trim() : '';
                     }
                     queryContent += `${key}=${value}\n`;
                 }
             });
             queryParamsTextarea.value = queryContent;
+        } else {
+            queryParamsTextarea.parentElement.style.display = 'none';
         }
     }
+}
 
-    // Populate path parameters
-    const pathParamsTextarea = form.querySelector('textarea.path-params');
-    if (pathParamsTextarea) {
-        const pathSection = Array.from(section.querySelectorAll('h5')).find(header => header.textContent.includes('path Parameters'));
-        if (pathSection) {
-            const pathTable = pathSection.nextElementSibling;
-            const pathRows = pathTable.querySelectorAll('tr');
-            let pathContent = '';
-            pathRows.forEach(row => {
-                const keyElement = row.querySelector('.property-name');
-                const exampleElement = Array.from(row.querySelectorAll('span')).find(span => span.textContent.includes('Example:'));
-                const defaultElement = Array.from(row.querySelectorAll('span')).find(span => span.textContent.includes('Default:'));
-                if (keyElement) {
-                    const key = keyElement.textContent.trim();
-                    let value = '';
-                    if (exampleElement) {
-                        value = exampleElement.nextElementSibling ? exampleElement.nextElementSibling.textContent.split('=')[1].replace(/"/g, '').trim() : '';
-                    } else if (defaultElement) {
-                        value = defaultElement.nextElementSibling ? defaultElement.nextElementSibling.textContent.replace(/Default:/, '').replace(/"/g, '').trim() : '';
-                    }
-                    pathContent += `${key}=${value}\n`;
-                }
-            });
-            pathParamsTextarea.value = pathContent;
-        }
-    }
-
-    // Populate body
+function populateBody(section, form) {
     const bodyTextarea = form.querySelector('textarea.body');
     if (bodyTextarea) {
         const requestSampleSection = Array.from(section.querySelectorAll('h3')).find(header => header.textContent.includes('Request samples'));
@@ -205,6 +205,8 @@ function populateForm(section, form) {
             if (sampleCode) {
                 bodyTextarea.value = sampleCode.textContent;
             }
+        } else {
+            bodyTextarea.parentElement.style.display = 'none';
         }
     }
 }
