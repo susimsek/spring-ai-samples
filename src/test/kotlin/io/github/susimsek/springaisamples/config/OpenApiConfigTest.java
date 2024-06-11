@@ -1,10 +1,10 @@
 package io.github.susimsek.springaisamples.config;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.isNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -12,7 +12,10 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.info.License;
 import io.swagger.v3.oas.models.media.StringSchema;
+import io.swagger.v3.oas.models.parameters.Parameter;
+import java.util.Arrays;
 import java.util.Locale;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,51 +37,45 @@ class OpenApiConfigTest {
     private OpenApiConfig openApiConfig;
 
     @Test
-    void customizeOpenApi_ShouldSetApiInfo() {
-        // Arrange
-        OpenAPI openAPI = new OpenAPI();
-        openAPI.setInfo(new Info());
-
-        when(messageSource.getMessage(eq("api-docs.title"), isNull(), any(Locale.class))).thenReturn("Sample API Title");
-        when(messageSource.getMessage(eq("api-docs.description"), isNull(), any(Locale.class))).thenReturn("Sample API Description");
-        when(messageSource.getMessage(eq("api-docs.contact.name"), isNull(), any(Locale.class))).thenReturn("John Doe");
-        when(messageSource.getMessage(eq("api-docs.contact.email"), isNull(), any(Locale.class))).thenReturn("john@example.com");
-        when(messageSource.getMessage(eq("api-docs.contact.url"), isNull(), any(Locale.class))).thenReturn("https://example.com");
-        when(messageSource.getMessage(eq("api-docs.license.name"), isNull(), any(Locale.class))).thenReturn("Apache 2.0");
-        when(messageSource.getMessage(eq("api-docs.license.url"), isNull(), any(Locale.class))).thenReturn("https://www.apache.org/licenses/LICENSE-2.0");
-
-        // Act
+    void testCustomizeOpenApi() {
+        when(messageSource.getMessage(anyString(), eq(null), any(Locale.class)))
+            .thenAnswer(invocation -> invocation.getArgument(0) + ".localized");
         OpenApiCustomizer customizer = openApiConfig.customizeOpenApi(messageSource);
-        customizer.customise(openAPI);
+        OpenAPI openApi = new OpenAPI().info(new Info());
+        customizer.customise(openApi);
 
-        // Assert
-        assertEquals("Sample API Title", openAPI.getInfo().getTitle());
-        assertEquals("Sample API Description", openAPI.getInfo().getDescription());
+        Info info = openApi.getInfo();
+        assertEquals("api-docs.title.localized", info.getTitle());
+        assertEquals("api-docs.description.localized", info.getDescription());
 
-        Contact contact = openAPI.getInfo().getContact();
-        assertEquals("John Doe", contact.getName());
-        assertEquals("john@example.com", contact.getEmail());
-        assertEquals("https://example.com", contact.getUrl());
+        Contact contact = info.getContact();
+        assertNotNull(contact);
+        assertEquals("api-docs.contact.name.localized", contact.getName());
+        assertEquals("api-docs.contact.email.localized", contact.getEmail());
+        assertEquals("api-docs.contact.url.localized", contact.getUrl());
 
-        assertEquals("Apache 2.0", openAPI.getInfo().getLicense().getName());
-        assertEquals("https://www.apache.org/licenses/LICENSE-2.0", openAPI.getInfo().getLicense().getUrl());
+        License license = info.getLicense();
+        assertNotNull(license);
+        assertEquals("api-docs.license.name.localized", license.getName());
+        assertEquals("api-docs.license.url.localized", license.getUrl());
     }
 
     @Test
-    void operationCustomizer_ShouldAddAcceptLanguageHeader() {
-        // Arrange
+    void testOperationCustomizer() {
+        OperationCustomizer customizer = openApiConfig.operationCustomizer();
         Operation operation = new Operation();
         HandlerMethod handlerMethod = mock(HandlerMethod.class);
 
-        // Act
-        OperationCustomizer customizer = openApiConfig.operationCustomizer();
         customizer.customize(operation, handlerMethod);
 
-        // Assert
-        assertEquals(1, operation.getParameters().size());
-        assertEquals("header", operation.getParameters().get(0).getIn());
-        assertEquals("Accept-Language", operation.getParameters().get(0).getName());
-        assertEquals("Language preference", operation.getParameters().get(0).getDescription());
-        assertInstanceOf(StringSchema.class, operation.getParameters().get(0).getSchema());
+        Parameter parameter = operation.getParameters().stream()
+            .filter(p -> "Accept-Language".equals(p.getName()))
+            .findFirst()
+            .orElse(null);
+
+        assertNotNull(parameter);
+        assertEquals("header", parameter.getIn());
+        assertEquals("Language preference", parameter.getDescription());
+        assertEquals(Arrays.asList("en", "tr"), ((StringSchema) parameter.getSchema()).getEnum());
     }
 }

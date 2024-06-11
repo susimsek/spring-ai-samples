@@ -26,7 +26,8 @@ public class LocalizationController {
 
     private final ParameterMessageSource messageSource;
 
-    @Operation(summary = "Get localization information", description = "Get information about localizations based on user queries.")
+    @Operation(summary = "{api-docs.api.localization.summary}",
+        description = "{api-docs.api.localization.description}")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successfully retrieved localization information",
             content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE,

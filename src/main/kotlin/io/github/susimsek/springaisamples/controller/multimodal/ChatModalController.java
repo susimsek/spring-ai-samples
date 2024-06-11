@@ -46,8 +46,8 @@ public class ChatModalController {
     @GetMapping("/dad-jokes")
     public ResponseEntity<String> jokes(
         @RequestParam(value = "topic", defaultValue = "Dogs")
-        @NotBlank(message = "Topic must not be blank")
-        @Size(min = 2, max = 50, message = "Topic must be between 2 and 50 characters")
+        @NotBlank(message = "{validation.field.notBlank}")
+        @Size(min = 2, max = 50, message = "{validation.field.size}")
         String topic) {
 
         PromptTemplate promptTemplate = new PromptTemplate("Tell me a dad joke about {topic}");
