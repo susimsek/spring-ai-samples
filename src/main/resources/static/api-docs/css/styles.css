@@ -496,17 +496,16 @@ a[href="https://redocly.com/redoc/"] img {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
-/* Styles for the query parameters section in the Try It form */
-.try-it-form-container .query-params {
-    width: 100%;
-    height: 80px; /* Adjusted height */
-    margin-bottom: 10px;
+.swagger-icon {
+    height: 40px;
+    width: 40px;
+    border-radius: 50%; /* Ensure the icon is circular */
 }
 
-/* Styles for the small helper text */
-.form-text {
-    margin-top: -10px;
-    margin-bottom: 10px;
-    font-size: 0.8em;
-    color: #6c757d;
+.theme-dark .swagger-icon {
+    background-color: var(--dark-secondary-bg-color); /* Match the dark theme */
+}
+
+.theme-light .swagger-icon {
+    background-color: var(--light-secondary-bg-color); /* Match the light theme */
 }
