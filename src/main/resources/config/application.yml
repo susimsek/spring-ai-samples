@@ -53,6 +53,12 @@ endpoints:
   shutdown:
     enabled: true
 
+openapi:
+  priority-tags:
+    - security
+    - auth
+    - localization
+    - ai
 springdoc:
   cache:
     disabled: true

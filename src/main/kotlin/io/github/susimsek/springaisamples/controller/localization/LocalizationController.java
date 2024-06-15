@@ -10,11 +10,11 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.Locale;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -30,7 +30,7 @@ public class LocalizationController {
         description = "{api-docs.api.localization.description}")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successfully retrieved localization information",
-            content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE,
+            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                 schema = @Schema(implementation = String.class))),
         @ApiResponse(responseCode = "400", description = "Invalid input",
             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
@@ -40,7 +40,8 @@ public class LocalizationController {
                 schema = @Schema(implementation = ProblemDetail.class)))
     })
     @GetMapping
-    public ResponseEntity<Map<String, String>> getTranslations(@RequestHeader("Accept-Language") Locale locale) {
+    public ResponseEntity<Map<String, String>> getTranslations() {
+        Locale locale = LocaleContextHolder.getLocale();
         Map<String, String> messages = messageSource.getMessagesStartingWith("api-docs", locale);
         return ResponseEntity.ok(messages);
     }

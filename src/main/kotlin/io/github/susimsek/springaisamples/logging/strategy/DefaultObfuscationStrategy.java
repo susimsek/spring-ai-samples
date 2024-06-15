@@ -84,6 +84,7 @@ public class DefaultObfuscationStrategy implements ObfuscationStrategy {
     }
 
     private boolean shouldMask(List<String> list, String key) {
-        return list.contains(key);
+        return list.stream()
+            .anyMatch(item -> item.equalsIgnoreCase(key));
     }
 }

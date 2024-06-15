@@ -1,6 +1,10 @@
 package io.github.susimsek.springaisamples.config;
 
-import io.github.susimsek.springaisamples.customizer.OpenApiLocalizationCustomizer;
+import io.github.susimsek.springaisamples.openapi.LocalizedOpenApiCustomizer;
+import io.github.susimsek.springaisamples.openapi.OpenApiProperties;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.media.StringSchema;
 import io.swagger.v3.oas.models.parameters.Parameter;
@@ -8,18 +12,33 @@ import java.util.Arrays;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.customizers.OpenApiCustomizer;
 import org.springdoc.core.customizers.OperationCustomizer;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.method.HandlerMethod;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
 @Configuration
 @RequiredArgsConstructor
+@SecurityScheme(
+    name = "bearerAuth",
+    type = SecuritySchemeType.HTTP,
+    bearerFormat = "JWT",
+    scheme = "bearer",
+    in = SecuritySchemeIn.HEADER
+)
+@EnableConfigurationProperties(OpenApiProperties.class)
 public class OpenApiConfig {
 
+    private final OpenApiProperties openApiProperties;
+
     @Bean
-    public OpenApiCustomizer customizeOpenApi(MessageSource messageSource) {
-        return new OpenApiLocalizationCustomizer(messageSource);
+    public OpenApiCustomizer openApiCustomizer(
+        MessageSource messageSource,
+        RequestMappingHandlerMapping requestMappingHandlerMapping) {
+        return new LocalizedOpenApiCustomizer(messageSource, openApiProperties,
+            requestMappingHandlerMapping);
     }
 
     @Bean

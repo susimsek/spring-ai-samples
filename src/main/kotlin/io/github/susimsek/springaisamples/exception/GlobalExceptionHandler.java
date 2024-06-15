@@ -1,5 +1,6 @@
 package io.github.susimsek.springaisamples.exception;
 
+import io.github.susimsek.springaisamples.exception.security.JwsException;
 import io.github.susimsek.springaisamples.i18n.ParameterMessageSource;
 import jakarta.validation.ConstraintViolationException;
 import java.util.List;
@@ -12,6 +13,9 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
@@ -83,6 +87,34 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, errorMessage);
         problem.setProperty(ErrorConstants.PROBLEM_VIOLATION_KEY, violations);
         return handleExceptionInternal(ex, problem, new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    protected ResponseEntity<Object> handleAuthentication(@NonNull AuthenticationException ex,
+                                                          @NonNull WebRequest request) {
+        return createProblemDetailResponse(ex, HttpStatus.UNAUTHORIZED,
+            ErrorConstants.AUTHENTICATION, new HttpHeaders(), request);
+    }
+
+    @ExceptionHandler(JwtException.class)
+    protected ResponseEntity<Object> handleJwtException(@NonNull JwtException ex,
+                                                        @NonNull WebRequest request) {
+        return createProblemDetailResponse(ex, HttpStatus.UNAUTHORIZED,
+            ErrorConstants.AUTHENTICATION, new HttpHeaders(), request);
+    }
+
+    @ExceptionHandler(JwsException.class)
+    protected ResponseEntity<Object> handleJwsException(@NonNull JwsException ex,
+                                                        @NonNull WebRequest request) {
+        return createProblemDetailResponse(ex, HttpStatus.UNAUTHORIZED,
+            ErrorConstants.SIGNATURE, new HttpHeaders(), request);
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    protected ResponseEntity<Object> handleAccessDenied(@NonNull AccessDeniedException ex,
+                                                        @NonNull WebRequest request) {
+        return createProblemDetailResponse(ex, HttpStatus.FORBIDDEN,
+            ErrorConstants.ACCESS_DENIED, new HttpHeaders(), request);
     }
 
     @Override

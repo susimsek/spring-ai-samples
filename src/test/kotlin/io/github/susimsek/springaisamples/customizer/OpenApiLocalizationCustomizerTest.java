@@ -3,6 +3,7 @@ package io.github.susimsek.springaisamples.customizer;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
+import io.github.susimsek.springaisamples.openapi.LocalizedOpenApiCustomizer;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
@@ -25,7 +26,7 @@ class OpenApiLocalizationCustomizerTest {
     private MessageSource messageSource;
 
     @InjectMocks
-    private OpenApiLocalizationCustomizer customizer;
+    private LocalizedOpenApiCustomizer customizer;
 
     @BeforeEach
     void setUp() {

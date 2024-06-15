@@ -40,7 +40,7 @@ class OpenApiConfigTest {
     void testCustomizeOpenApi() {
         when(messageSource.getMessage(anyString(), eq(null), any(Locale.class)))
             .thenAnswer(invocation -> invocation.getArgument(0) + ".localized");
-        OpenApiCustomizer customizer = openApiConfig.customizeOpenApi(messageSource);
+        OpenApiCustomizer customizer = openApiConfig.openApiCustomizer(messageSource, null);
         OpenAPI openApi = new OpenAPI().info(new Info());
         customizer.customise(openApi);
 

@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -29,6 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @Tag(name = "ai", description = "Spring AI Sample Rest Apis")
+@SecurityRequirement(name = "bearerAuth")
 @RequestMapping("/api/ai/cities")
 @Validated
 public class CityController {
@@ -43,6 +45,12 @@ public class CityController {
         @ApiResponse(responseCode = "400", description = "Invalid input",
             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                 schema = @Schema(implementation = ProblemDetail.class))),
+        @ApiResponse(responseCode = "401", description = "Unauthorized",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                schema = @Schema(implementation = ProblemDetail.class))),
+        @ApiResponse(responseCode = "403", description = "Forbidden",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(responseCode = "500", description = "Internal server error",
             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                 schema = @Schema(implementation = ProblemDetail.class)))
@@ -54,7 +62,6 @@ public class CityController {
         @NotBlank(message = "{validation.field.notBlank}")
         @Size(min = 2, max = 200, message = "{validation.field.size}")
         String message) {
-
         SystemMessage systemMessage =
             new SystemMessage("You are a helpful AI Assistant answering questions about cities around the world.");
         UserMessage userMessage = new UserMessage(message);
