@@ -5,6 +5,7 @@ import static io.github.susimsek.springaisamples.security.SignatureConstants.JWS
 import io.github.susimsek.springaisamples.exception.security.JwsException;
 import io.github.susimsek.springaisamples.exception.security.MissingJwsException;
 import io.github.susimsek.springaisamples.exception.security.SignatureExceptionHandler;
+import io.github.susimsek.springaisamples.logging.utils.CachedBodyHttpServletRequestWrapper;
 import io.github.susimsek.springaisamples.service.SignatureService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -23,7 +24,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.lang.NonNull;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
-import org.springframework.util.StreamUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 @Slf4j
@@ -56,14 +56,15 @@ public class SignatureVerificationFilter extends OncePerRequestFilter implements
                 request, response, new MissingJwsException("JWS token is missing"));
             return;
         }
+        CachedBodyHttpServletRequestWrapper wrappedRequest = new CachedBodyHttpServletRequestWrapper(request);
         String jwsToken = optionalJwsToken.get();
-        String requestBody = StreamUtils.copyToString(request.getInputStream(), StandardCharsets.UTF_8);
+        String requestBody = new String(wrappedRequest.getBody(), StandardCharsets.UTF_8);
         try {
             signatureService.validateJws(jwsToken, requestBody);
-            filterChain.doFilter(request, response);
+            filterChain.doFilter(wrappedRequest, response);
         } catch (JwsException e) {
             log.error("Invalid JWS signature: {}", e.getMessage());
-            signatureExceptionHandler.handle(request, response, e);
+            signatureExceptionHandler.handle(wrappedRequest, response, e);
         }
     }
 
@@ -109,7 +110,8 @@ public class SignatureVerificationFilter extends OncePerRequestFilter implements
         }
 
         public SignatureVerificationFilter build() {
-            return new SignatureVerificationFilter(signatureService, signatureExceptionHandler, requestMatchers, order);
+            return new SignatureVerificationFilter(signatureService,
+                signatureExceptionHandler, requestMatchers, order);
         }
     }
 }

@@ -2,6 +2,8 @@ package io.github.susimsek.springaisamples.logging.filter;
 
 import io.github.susimsek.springaisamples.logging.enums.Source;
 import io.github.susimsek.springaisamples.logging.handler.LoggingHandler;
+import io.github.susimsek.springaisamples.logging.utils.CachedBodyHttpServletRequestWrapper;
+import io.github.susimsek.springaisamples.logging.utils.CachedBodyHttpServletResponseWrapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -11,17 +13,14 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpHeaders;
 import org.springframework.lang.NonNull;
 import org.springframework.web.filter.OncePerRequestFilter;
-import org.springframework.web.util.ContentCachingRequestWrapper;
-import org.springframework.web.util.ContentCachingResponseWrapper;
 
 @Slf4j
 @RequiredArgsConstructor
-@Order(Ordered.LOWEST_PRECEDENCE)
+@Order()
 public class LoggingFilter extends OncePerRequestFilter {
 
     private final LoggingHandler loggingHandler;
@@ -31,20 +30,19 @@ public class LoggingFilter extends OncePerRequestFilter {
                                     @NonNull HttpServletResponse response,
                                     @NonNull FilterChain filterChain) throws ServletException, IOException {
         if (!loggingHandler.shouldNotLog(request.getRequestURI(), request.getMethod())) {
-            ContentCachingRequestWrapper wrappedRequest = new ContentCachingRequestWrapper(request);
-            ContentCachingResponseWrapper wrappedResponse = new ContentCachingResponseWrapper(response);
+            CachedBodyHttpServletRequestWrapper wrappedRequest = new CachedBodyHttpServletRequestWrapper(request);
+            CachedBodyHttpServletResponseWrapper wrappedResponse = new CachedBodyHttpServletResponseWrapper(response);
 
             filterChain.doFilter(wrappedRequest, wrappedResponse);
             logRequestAndResponse(wrappedRequest, wrappedResponse);
-
             wrappedResponse.copyBodyToResponse();
         } else {
             filterChain.doFilter(request, response);
         }
     }
 
-    private void logRequestAndResponse(ContentCachingRequestWrapper request,
-                                       ContentCachingResponseWrapper response) {
+    private void logRequestAndResponse(CachedBodyHttpServletRequestWrapper request,
+                                       CachedBodyHttpServletResponseWrapper response) {
         try {
             URI uri = new URI(request.getRequestURL().toString());
             HttpHeaders requestHeaders = getHeaders(request);
@@ -54,7 +52,7 @@ public class LoggingFilter extends OncePerRequestFilter {
                 request.getMethod(),
                 uri,
                 requestHeaders,
-                request.getContentAsByteArray(),
+                request.getBody(),
                 Source.SERVER
             );
             loggingHandler.logResponse(
@@ -62,7 +60,7 @@ public class LoggingFilter extends OncePerRequestFilter {
                 uri,
                 response.getStatus(),
                 responseHeaders,
-                response.getContentAsByteArray(),
+                response.getBody(),
                 Source.SERVER
             );
         } catch (URISyntaxException e) {
