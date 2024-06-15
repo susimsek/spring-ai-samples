@@ -183,11 +183,12 @@ public class SecurityConfig {
 
     @Bean
     public SignatureVerificationFilter signatureVerificationFilter(
+        MvcRequestMatcher.Builder mvc,
         SignatureService signatureService,
         SecurityProblemSupport problemSupport) {
         return SignatureVerificationFilter.builder(signatureService, problemSupport)
             .order(Ordered.HIGHEST_PRECEDENCE)
-            .requestMatchers(HttpMethod.POST, "/api/auth/**")
+            .requestMatchers(mvc.pattern(HttpMethod.POST, "/api/auth/**"))
             .build();
     }
 }

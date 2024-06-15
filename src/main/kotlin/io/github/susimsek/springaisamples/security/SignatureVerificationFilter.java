@@ -13,6 +13,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -66,7 +67,8 @@ public class SignatureVerificationFilter extends OncePerRequestFilter implements
         }
     }
 
-    public static Builder builder(SignatureService signatureService, SignatureExceptionHandler signatureExceptionHandler) {
+    public static Builder builder(SignatureService signatureService,
+                                  SignatureExceptionHandler signatureExceptionHandler) {
         return new Builder(signatureService, signatureExceptionHandler);
     }
 
@@ -93,6 +95,11 @@ public class SignatureVerificationFilter extends OncePerRequestFilter implements
             for (String pattern : patterns) {
                 this.requestMatchers.add(new AntPathRequestMatcher(pattern));
             }
+            return this;
+        }
+
+        public Builder requestMatchers(RequestMatcher... requestMatchers) {
+            this.requestMatchers.addAll(Arrays.asList(requestMatchers));
             return this;
         }
 
