@@ -10,7 +10,6 @@ import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 import io.github.susimsek.springaisamples.exception.security.SecurityProblemSupport;
-import io.github.susimsek.springaisamples.exception.security.SignatureExceptionHandler;
 import io.github.susimsek.springaisamples.security.AuthoritiesConstants;
 import io.github.susimsek.springaisamples.security.InMemoryTokenStore;
 import io.github.susimsek.springaisamples.security.SecurityProperties;
@@ -25,11 +24,12 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -50,10 +50,7 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.servlet.util.matcher.MvcRequestMatcher;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
-import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
 
 @Configuration(proxyBeanMethods = false)
@@ -69,11 +66,7 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(
         HttpSecurity http,
         MvcRequestMatcher.Builder mvc,
-        SecurityProblemSupport problemSupport,
-        SignatureService signatureService) throws Exception {
-        List<RequestMatcher> signatureVerificationMatchers = List.of(
-            new AntPathRequestMatcher("/api/auth/**", "POST")
-        );
+        SecurityProblemSupport problemSupport) throws Exception {
         http
             .csrf(AbstractHttpConfigurer::disable)
             .httpBasic(AbstractHttpConfigurer::disable)
@@ -103,11 +96,7 @@ public class SecurityConfig {
             .oauth2ResourceServer(oauth2 -> oauth2
                 .authenticationEntryPoint(problemSupport)
                 .accessDeniedHandler(problemSupport)
-                .jwt(withDefaults()))
-            .addFilterBefore(
-                signatureVerificationFilter(signatureService, signatureVerificationMatchers, problemSupport),
-                UsernamePasswordAuthenticationFilter.class
-            );
+                .jwt(withDefaults()));
         return http.build();
     }
 
@@ -192,11 +181,13 @@ public class SecurityConfig {
         return tokenProvider::parseToken;
     }
 
-    private SignatureVerificationFilter signatureVerificationFilter(
+    @Bean
+    public SignatureVerificationFilter signatureVerificationFilter(
         SignatureService signatureService,
-        List<RequestMatcher> requestMatchers,
-        SignatureExceptionHandler signatureExceptionHandler) {
-        return new SignatureVerificationFilter(signatureService,
-            requestMatchers, signatureExceptionHandler);
+        SecurityProblemSupport problemSupport) {
+        return SignatureVerificationFilter.builder(signatureService, problemSupport)
+            .order(Ordered.HIGHEST_PRECEDENCE)
+            .requestMatchers(HttpMethod.POST, "/api/auth/**")
+            .build();
     }
 }

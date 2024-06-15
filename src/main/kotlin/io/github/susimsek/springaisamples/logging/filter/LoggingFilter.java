@@ -11,6 +11,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpHeaders;
 import org.springframework.lang.NonNull;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -19,6 +21,7 @@ import org.springframework.web.util.ContentCachingResponseWrapper;
 
 @Slf4j
 @RequiredArgsConstructor
+@Order(Ordered.LOWEST_PRECEDENCE)
 public class LoggingFilter extends OncePerRequestFilter {
 
     private final LoggingHandler loggingHandler;
