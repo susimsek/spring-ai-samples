@@ -152,7 +152,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         String messageKey,
         HttpHeaders headers,
         WebRequest request) {
-        String errorMessage = messageSource.getMessage(messageKey, request.getLocale());
+        String errorMessage = messageSource.getMessage(messageKey, null, request.getLocale());
         ProblemDetail problem = ProblemDetail.forStatusAndDetail(status, errorMessage);
         return handleExceptionInternal(ex, problem, headers, status, request);
     }
