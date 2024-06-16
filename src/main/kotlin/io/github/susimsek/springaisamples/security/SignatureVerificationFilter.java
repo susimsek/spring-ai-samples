@@ -43,15 +43,13 @@ public class SignatureVerificationFilter extends OncePerRequestFilter implements
         return order;
     }
 
-
     @Override
     protected boolean shouldNotFilter(@NonNull HttpServletRequest request) {
-        for (RequestMatcherConfig config : requestMatcherConfigs) {
-            if (config.requestMatcher.matches(request)) {
-                return !config.signed;
-            }
-        }
-        return !defaultSigned;
+        return requestMatcherConfigs.stream()
+            .filter(config -> config.requestMatcher.matches(request))
+            .map(config -> !config.signed)
+            .findFirst()
+            .orElse(!defaultSigned);
     }
 
     @Override
@@ -62,8 +60,7 @@ public class SignatureVerificationFilter extends OncePerRequestFilter implements
         if (!shouldNotFilter(request)) {
             Optional<String> optionalJwsToken = Optional.ofNullable(request.getHeader(JWS_SIGNATURE_HEADER_NAME));
             if (optionalJwsToken.isEmpty()) {
-                signatureExceptionHandler.handle(
-                    request, response, new MissingJwsException("JWS token is missing"));
+                handleMissingJws(request, response);
                 return;
             }
             CachedBodyHttpServletRequestWrapper wrappedRequest = new CachedBodyHttpServletRequestWrapper(request);
@@ -73,14 +70,29 @@ public class SignatureVerificationFilter extends OncePerRequestFilter implements
                 signatureService.validateJws(jwsToken, requestBody);
                 filterChain.doFilter(wrappedRequest, response);
             } catch (JwsException e) {
-                log.error("Invalid JWS signature: {}", e.getMessage());
-                signatureExceptionHandler.handle(wrappedRequest, response, e);
+                handleInvalidJws(wrappedRequest, response, e);
             }
         } else {
             filterChain.doFilter(request, response);
         }
     }
 
+    private void handleMissingJws(HttpServletRequest request, HttpServletResponse response)
+        throws IOException, ServletException {
+        signatureExceptionHandler.handle(request, response, new MissingJwsException("JWS token is missing"));
+    }
+
+    private void handleInvalidJws(HttpServletRequest request, HttpServletResponse response, JwsException e)
+        throws IOException, ServletException {
+        log.error("Invalid JWS signature: {}", e.getMessage());
+        signatureExceptionHandler.handle(request, response, e);
+    }
+
+    @AllArgsConstructor
+    private static class RequestMatcherConfig {
+        private final RequestMatcher requestMatcher;
+        private boolean signed;
+    }
 
     public interface InitialBuilder {
         InitialBuilder order(int order);
@@ -100,12 +112,6 @@ public class SignatureVerificationFilter extends OncePerRequestFilter implements
         InitialBuilder permitAll();
 
         InitialBuilder signed();
-    }
-
-    @AllArgsConstructor
-    private static class RequestMatcherConfig {
-        private final RequestMatcher requestMatcher;
-        private boolean signed;
     }
 
     public static InitialBuilder builder(SignatureService signatureService,
