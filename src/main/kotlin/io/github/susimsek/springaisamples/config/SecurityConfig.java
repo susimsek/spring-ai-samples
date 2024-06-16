@@ -50,6 +50,7 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
 import org.springframework.security.web.servlet.util.matcher.MvcRequestMatcher;
 import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
 
@@ -74,7 +75,11 @@ public class SecurityConfig {
             .cors(withDefaults())
             .headers(headers -> headers
                 .contentSecurityPolicy(csp -> csp.policyDirectives(securityProperties.getContentSecurityPolicy()))
-                .frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
+                .frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin)
+                .referrerPolicy(
+                    referrer -> referrer.policy(
+                        ReferrerPolicyHeaderWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN)
+                ))
             .exceptionHandling(exceptionHandling -> exceptionHandling
                 .authenticationEntryPoint(problemSupport)
                 .accessDeniedHandler(problemSupport))
