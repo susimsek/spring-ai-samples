@@ -196,7 +196,7 @@ public class SecurityConfig {
             .requestMatchers(mvc.pattern("/api-docs/**")).permitAll()
             .requestMatchers(mvc.pattern("/actuator/**")).permitAll()
             .requestMatchers(mvc.pattern("/api/security/sign")).permitAll()
-            .anyRequest().permitAll()
+            .anyRequest().signed()
             .build();
     }
 }

@@ -2,7 +2,6 @@ package io.github.susimsek.springaisamples.controller.auth;
 
 import io.github.susimsek.springaisamples.model.LoginRequest;
 import io.github.susimsek.springaisamples.model.RefreshTokenRequest;
-import io.github.susimsek.springaisamples.openapi.annotation.SignatureRequired;
 import io.github.susimsek.springaisamples.security.Token;
 import io.github.susimsek.springaisamples.service.AuthenticationService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -25,7 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @Tag(name = "auth", description = "Authentication APIs")
-@SignatureRequired
+@SecurityRequirement(name = "jwsSignature")
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
 public class AuthController {

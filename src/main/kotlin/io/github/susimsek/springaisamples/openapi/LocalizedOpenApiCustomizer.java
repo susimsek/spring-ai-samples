@@ -1,16 +1,8 @@
 package io.github.susimsek.springaisamples.openapi;
 
-import io.github.susimsek.springaisamples.openapi.annotation.SignatureRequired;
-import io.github.susimsek.springaisamples.security.SignatureConstants;
-import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.v3.oas.models.Operation;
-import io.swagger.v3.oas.models.parameters.Parameter;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.regex.Matcher;
@@ -20,10 +12,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springdoc.core.customizers.OpenApiCustomizer;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.web.method.HandlerMethod;
-import org.springframework.web.servlet.mvc.condition.PathPatternsRequestCondition;
-import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
-import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -32,7 +20,6 @@ public class LocalizedOpenApiCustomizer implements OpenApiCustomizer {
     private static final Pattern MESSAGE_PATTERN = Pattern.compile("\\{(.+?)}");
     private final MessageSource messageSource;
     private final OpenApiProperties openApiProperties;
-    private final RequestMappingHandlerMapping requestMappingHandlerMapping;
 
     @Override
     public void customise(OpenAPI openApi) {
@@ -61,42 +48,9 @@ public class LocalizedOpenApiCustomizer implements OpenApiCustomizer {
                 pathItem.readOperations().forEach(operation -> {
                     localiseMessage(operation::getSummary, operation::setSummary);
                     localiseMessage(operation::getDescription, operation::setDescription);
-                    if (hasSignatureRequiredAnnotation(path)) {
-                        addJwsSignatureHeaderParameter(operation);
-                    }
                 })
             );
         }
-    }
-
-    private boolean hasSignatureRequiredAnnotation(String path) {
-        return requestMappingHandlerMapping.getHandlerMethods().entrySet().stream()
-            .flatMap(entry -> {
-                RequestMappingInfo mappingInfo = entry.getKey();
-                HandlerMethod handlerMethod = entry.getValue();
-
-                Set<String> patterns = Optional.ofNullable(mappingInfo.getPathPatternsCondition())
-                    .map(PathPatternsRequestCondition::getPatternValues)
-                    .orElse(Set.of());
-
-                return patterns.stream().map(pattern -> Map.entry(pattern, handlerMethod));
-            })
-            .anyMatch(entry -> entry.getKey().equals(path)
-                && (entry.getValue().hasMethodAnnotation(SignatureRequired.class)
-                || entry.getValue().getBeanType().isAnnotationPresent(SignatureRequired.class)));
-    }
-
-
-    private void addJwsSignatureHeaderParameter(Operation operation) {
-        Parameter jwsSignatureHeader = new Parameter()
-            .in(ParameterIn.HEADER.toString())
-            .name(SignatureConstants.JWS_SIGNATURE_HEADER_NAME)
-            .required(true)
-            .description("JWS Signature Header")
-            .example("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...")
-            .schema(new io.swagger.v3.oas.models.media.StringSchema());
-
-        operation.addParametersItem(jwsSignatureHeader);
     }
 
     private void localiseMessage(Supplier<String> getter, Consumer<String> setter) {

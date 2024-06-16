@@ -2,6 +2,7 @@ package io.github.susimsek.springaisamples.config;
 
 import io.github.susimsek.springaisamples.openapi.LocalizedOpenApiCustomizer;
 import io.github.susimsek.springaisamples.openapi.OpenApiProperties;
+import io.github.susimsek.springaisamples.security.SignatureConstants;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
@@ -26,7 +27,15 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
     type = SecuritySchemeType.HTTP,
     bearerFormat = "JWT",
     scheme = "bearer",
-    in = SecuritySchemeIn.HEADER
+    in = SecuritySchemeIn.HEADER,
+    description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\""
+)
+@SecurityScheme(
+    name = "jwsSignature",
+    type = SecuritySchemeType.APIKEY,
+    in = SecuritySchemeIn.HEADER,
+    paramName = SignatureConstants.JWS_SIGNATURE_HEADER_NAME,
+    description = "JWS Signature header using the X-JWS-Signature scheme. Example: \"X-JWS-Signature: {token}\""
 )
 @EnableConfigurationProperties(OpenApiProperties.class)
 public class OpenApiConfig {
@@ -37,8 +46,7 @@ public class OpenApiConfig {
     public OpenApiCustomizer openApiCustomizer(
         MessageSource messageSource,
         RequestMappingHandlerMapping requestMappingHandlerMapping) {
-        return new LocalizedOpenApiCustomizer(messageSource, openApiProperties,
-            requestMappingHandlerMapping);
+        return new LocalizedOpenApiCustomizer(messageSource, openApiProperties);
     }
 
     @Bean
