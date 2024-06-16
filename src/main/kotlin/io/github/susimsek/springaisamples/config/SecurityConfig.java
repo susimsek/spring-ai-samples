@@ -85,8 +85,9 @@ public class SecurityConfig {
                         mvc.pattern("/*.webapp")).permitAll()
                     .requestMatchers(mvc.pattern("/swagger-ui.html"), mvc.pattern("/swagger-ui/**"),
                         mvc.pattern("/v3/api-docs/**")).permitAll()
-                    .requestMatchers(mvc.pattern("/api-docs/**")).permitAll()
+                    .requestMatchers(mvc.pattern("/.well-known/jwks.json")).permitAll()
                     .requestMatchers(mvc.pattern("/actuator/**")).permitAll()
+                    .requestMatchers(mvc.pattern("/api-docs/**")).permitAll()
                     .requestMatchers(mvc.pattern("/api/auth/token")).permitAll()
                     .requestMatchers(mvc.pattern("/api/security/sign")).permitAll()
                     .requestMatchers(mvc.pattern("/api/locales")).permitAll()
