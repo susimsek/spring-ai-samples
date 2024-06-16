@@ -106,7 +106,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(JwsException.class)
     protected ResponseEntity<Object> handleJwsException(@NonNull JwsException ex,
                                                         @NonNull WebRequest request) {
-        return createProblemDetailResponse(ex, HttpStatus.UNAUTHORIZED,
+        return createProblemDetailResponse(ex, HttpStatus.FORBIDDEN,
             ErrorConstants.SIGNATURE, new HttpHeaders(), request);
     }
 
