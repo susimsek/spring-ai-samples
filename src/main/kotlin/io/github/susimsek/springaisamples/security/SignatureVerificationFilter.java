@@ -46,16 +46,11 @@ public class SignatureVerificationFilter extends OncePerRequestFilter implements
 
     @Override
     protected boolean shouldNotFilter(@NonNull HttpServletRequest request) {
-        String requestURI = request.getRequestURI();
-        log.info("Request URI: {}", requestURI);
         for (RequestMatcherConfig config : requestMatcherConfigs) {
-            log.info("Checking request matcher: {}", config.requestMatcher);
             if (config.requestMatcher.matches(request)) {
-                log.info("Request matched with: {} (signed: {})", config.requestMatcher, config.signed);
                 return !config.signed;
             }
         }
-        log.info("Default signed setting: {}", defaultSigned);
         return !defaultSigned;
     }
 
@@ -113,7 +108,8 @@ public class SignatureVerificationFilter extends OncePerRequestFilter implements
         private boolean signed;
     }
 
-    public static InitialBuilder builder(SignatureService signatureService, SignatureExceptionHandler signatureExceptionHandler) {
+    public static InitialBuilder builder(SignatureService signatureService,
+                                         SignatureExceptionHandler signatureExceptionHandler) {
         return new Builder(signatureService, signatureExceptionHandler);
     }
 
@@ -137,7 +133,8 @@ public class SignatureVerificationFilter extends OncePerRequestFilter implements
         public Builder requestMatchers(HttpMethod method, String... patterns) {
             lastIndex = requestMatcherConfigs.size();
             for (String pattern : patterns) {
-                this.requestMatcherConfigs.add(new RequestMatcherConfig(new AntPathRequestMatcher(pattern, method.name()), true));
+                this.requestMatcherConfigs.add(new RequestMatcherConfig(
+                    new AntPathRequestMatcher(pattern, method.name()), true));
             }
             return this;
         }
@@ -199,7 +196,8 @@ public class SignatureVerificationFilter extends OncePerRequestFilter implements
         }
 
         public SignatureVerificationFilter build() {
-            return new SignatureVerificationFilter(signatureService, signatureExceptionHandler, requestMatcherConfigs, defaultSigned, order);
+            return new SignatureVerificationFilter(signatureService, signatureExceptionHandler,
+                requestMatcherConfigs, defaultSigned, order);
         }
 
         @Override
