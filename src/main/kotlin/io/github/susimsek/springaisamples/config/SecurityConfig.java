@@ -29,7 +29,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -188,7 +187,16 @@ public class SecurityConfig {
         SecurityProblemSupport problemSupport) {
         return SignatureVerificationFilter.builder(signatureService, problemSupport)
             .order(Ordered.HIGHEST_PRECEDENCE)
-            .requestMatchers(mvc.pattern(HttpMethod.POST, "/api/auth/**"))
+            .requestMatchers(mvc.pattern("/webjars/**"), mvc.pattern("/*.js"),
+                mvc.pattern("/*.css")).permitAll()
+            .requestMatchers(mvc.pattern("/*.ico"), mvc.pattern("/*.png"), mvc.pattern("/*.svg"),
+                mvc.pattern("/*.webapp")).permitAll()
+            .requestMatchers(mvc.pattern("/swagger-ui.html"), mvc.pattern("/swagger-ui/**"),
+                mvc.pattern("/v3/api-docs/**")).permitAll()
+            .requestMatchers(mvc.pattern("/api-docs/**")).permitAll()
+            .requestMatchers(mvc.pattern("/actuator/**")).permitAll()
+            .requestMatchers(mvc.pattern("/api/security/sign")).permitAll()
+            .anyRequest().permitAll()
             .build();
     }
 }
