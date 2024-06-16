@@ -73,6 +73,7 @@ public class SecurityConfig {
             .logout(AbstractHttpConfigurer::disable)
             .cors(withDefaults())
             .headers(headers -> headers
+                .contentSecurityPolicy(csp -> csp.policyDirectives(securityProperties.getContentSecurityPolicy()))
                 .frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
             .exceptionHandling(exceptionHandling -> exceptionHandling
                 .authenticationEntryPoint(problemSupport)

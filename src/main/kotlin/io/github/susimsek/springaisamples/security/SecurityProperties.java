@@ -12,6 +12,7 @@ public class SecurityProperties {
     private JwtProperties jwt;
     private JwsProperties jws;
     private AdminProperties admin;
+    private String contentSecurityPolicy;
 
     @Getter
     @Setter

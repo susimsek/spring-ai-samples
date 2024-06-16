@@ -90,6 +90,7 @@ weather:
     api-url: http://api.weatherapi.com/v1
 
 security:
+  content-security-policy: "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdn.redoc.ly; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com https://cdnjs.cloudflare.com; worker-src 'self' blob:; img-src 'self' https://avatars.githubusercontent.com data: https://cdn.redoc.ly; frame-src 'self' data:; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com data:"
   jwt:
     issuer: localhost
     public-key: MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAvjmNBc/Yzx2gFZmd6DhCoSUf1BnlIczVR7lxKJwCla6n9tIj3x6YXIwvZgjIb2A1I2CaqBIy7Ud6eUILJ3PHwuXGCOBCOcX7xm/a95A3NTEZKpNDNHpIISh6FF9rSR3+D52+LOuDO2kL9/aE5hwFkPk4Z/DLA8+cxuFIGuSJXStuGM6MG1vtpStKdzdt8EE+1l1vNmnpkiBnMWYZEBkmflyZB7/C53zcRttdtNBOPOHktfvEWR2JwSYctnqNXU+eE4VvVIWBvY/HhzURzAQst6GPLF7pKDjg8wpN4Dn/eSDhg7A4S9tUVPCFYzK+c+4M75ZAk31dXEkBw7nuCdEYLwIDAQAB
