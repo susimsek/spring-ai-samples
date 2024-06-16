@@ -60,8 +60,14 @@ openapi:
     - localization
     - ai
 springdoc:
-  cache:
-    disabled: true
+  swagger-ui:
+    operationsSorter: method
+    defaultModelsExpandDepth: -1
+    display-request-duration: true
+    filter: true
+    show-extensions: true
+    try-it-out-enabled: true
+    persist-authorization: true
 
 logging:
   level:

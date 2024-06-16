@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@Tag(name = "ai", description = "Spring AI Sample Rest Apis")
+@Tag(name = "ai", description = "Spring AI related APIS")
 @SecurityRequirement(name = "bearerAuth")
 public class SimplePromptController {
 

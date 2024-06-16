@@ -34,7 +34,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/ai/olympics")
 @RequiredArgsConstructor
-@Tag(name = "ai", description = "Spring AI Sample Rest Apis")
+@Tag(name = "ai", description = "Spring AI related APIS")
 @SecurityRequirement(name = "bearerAuth")
 @Validated
 public class OlympicController {
