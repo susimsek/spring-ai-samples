@@ -26,12 +26,26 @@ public class JwksController {
 
     private final KeyPair jwsKeyPair;
 
-    @Operation(summary = "Get JWKS", description = "Provides the JSON Web Key Set (JWKS) "
-        + "containing the public key for JWS signature verification.")
+    @Operation(summary = "Get JWKS",
+        description = "Provides the JSON Web Key Set (JWKS) containing the public key for JWS signature verification.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successfully retrieved JWKS",
             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                schema = @Schema(implementation = JWKSet.class))),
+                schema = @Schema(example = """
+                    {
+                      "keys": [
+                        {
+                          "kty": "RSA",
+                          "e": "AQAB",
+                          "use": "sig",
+                          "kid": "1",
+                          "alg": "RS256",
+                          "n": "uSw55Oz_Q4GWJmnh5mJujvFwvoyPG5CBLEnRi2HzrBHMNtSt6avonGRo9x3GeO..."
+                        }
+                      ]
+                    }
+                    """)
+            )),
         @ApiResponse(responseCode = "500", description = "Internal server error",
             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                 schema = @Schema(implementation = ProblemDetail.class)))
