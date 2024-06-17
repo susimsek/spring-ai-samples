@@ -13,6 +13,7 @@ import java.nio.charset.StandardCharsets;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 
 @Slf4j
@@ -25,7 +26,7 @@ public class HttpLoggingHandler implements LoggingHandler {
     private final PathFilter pathFilter;
 
     @Override
-    public void logRequest(String method, URI uri, HttpHeaders headers, byte[] body, Source source) {
+    public void logRequest(HttpMethod method, URI uri, HttpHeaders headers, byte[] body, Source source) {
         if (shouldNotLog(uri.getPath(), method)) {
             return;
         }
@@ -41,7 +42,7 @@ public class HttpLoggingHandler implements LoggingHandler {
     }
 
     @Override
-    public void logResponse(String method, URI uri, Integer statusCode, HttpHeaders headers,
+    public void logResponse(HttpMethod method, URI uri, Integer statusCode, HttpHeaders headers,
                             byte[] responseBody, Source source) {
         if (shouldNotLog(uri.getPath(), method)) {
             return;
@@ -64,7 +65,7 @@ public class HttpLoggingHandler implements LoggingHandler {
         log("HTTP Response: {}", logFormatter.format(logBuilder.build()));
     }
 
-    private HttpLog.HttpLogBuilder initLogBuilder(HttpLogType type, String method, URI uri,
+    private HttpLog.HttpLogBuilder initLogBuilder(HttpLogType type, HttpMethod method, URI uri,
                                                   HttpHeaders headers, Source source) {
         return HttpLog.builder()
             .type(type)
@@ -88,10 +89,10 @@ public class HttpLoggingHandler implements LoggingHandler {
     }
 
     @Override
-    public boolean shouldNotLog(String path, String method) {
+    public boolean shouldNotLog(String path, HttpMethod method) {
         LogLevel logLevel = loggingProperties.getHttp().getLevel();
         return logLevel == LogLevel.NONE
-            || !pathFilter.shouldInclude(path, method)
-            || pathFilter.shouldExclude(path, method);
+            || !pathFilter.shouldInclude(path, method.name())
+            || pathFilter.shouldExclude(path, method.name());
     }
 }

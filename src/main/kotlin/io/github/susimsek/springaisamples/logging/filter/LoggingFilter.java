@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.lang.NonNull;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -29,7 +30,7 @@ public class LoggingFilter extends OncePerRequestFilter {
     protected void doFilterInternal(@NonNull HttpServletRequest request,
                                     @NonNull HttpServletResponse response,
                                     @NonNull FilterChain filterChain) throws ServletException, IOException {
-        if (!loggingHandler.shouldNotLog(request.getRequestURI(), request.getMethod())) {
+        if (!loggingHandler.shouldNotLog(request.getRequestURI(), HttpMethod.valueOf(request.getMethod()))) {
             CachedBodyHttpServletRequestWrapper wrappedRequest = new CachedBodyHttpServletRequestWrapper(request);
             CachedBodyHttpServletResponseWrapper wrappedResponse = new CachedBodyHttpServletResponseWrapper(response);
 
@@ -49,14 +50,14 @@ public class LoggingFilter extends OncePerRequestFilter {
             HttpHeaders responseHeaders = getHeaders(response);
 
             loggingHandler.logRequest(
-                request.getMethod(),
+                HttpMethod.valueOf(request.getMethod()),
                 uri,
                 requestHeaders,
                 request.getBody(),
                 Source.SERVER
             );
             loggingHandler.logResponse(
-                request.getMethod(),
+                HttpMethod.valueOf(request.getMethod()),
                 uri,
                 response.getStatus(),
                 responseHeaders,

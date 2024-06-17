@@ -46,14 +46,14 @@ public class RestClientLoggingInterceptor implements ClientHttpRequestIntercepto
 
     private void logRequest(HttpRequest request, byte[] body) {
         loggingHandler.logRequest(
-            request.getMethod().name(), request.getURI(), request.getHeaders(), body, Source.CLIENT
+            request.getMethod(), request.getURI(), request.getHeaders(), body, Source.CLIENT
         );
     }
 
     private void logResponse(HttpRequest request, ClientHttpResponse response) throws IOException {
         byte[] responseBody = StreamUtils.copyToByteArray(response.getBody());
         loggingHandler.logResponse(
-            request.getMethod().name(),
+            request.getMethod(),
             request.getURI(),
             response.getStatusCode().value(),
             response.getHeaders(),
@@ -64,11 +64,11 @@ public class RestClientLoggingInterceptor implements ClientHttpRequestIntercepto
 
     private void logErrorResponse(HttpRequest request) {
         loggingHandler.logResponse(
-            request.getMethod().name(), request.getURI(), 0, request.getHeaders(), null, Source.CLIENT
+            request.getMethod(), request.getURI(), 0, request.getHeaders(), null, Source.CLIENT
         );
     }
 
     private boolean shouldNotLog(HttpRequest request) {
-        return loggingHandler.shouldNotLog(request.getURI().getPath(), request.getMethod().name());
+        return loggingHandler.shouldNotLog(request.getURI().getPath(), request.getMethod());
     }
 }

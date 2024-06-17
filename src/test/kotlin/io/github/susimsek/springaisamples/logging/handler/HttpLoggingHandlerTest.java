@@ -25,6 +25,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 
 @ExtendWith(MockitoExtension.class)
 class HttpLoggingHandlerTest {
@@ -66,12 +67,12 @@ class HttpLoggingHandlerTest {
         when(pathFilter.shouldExclude(anyString(), anyString())).thenReturn(false);
 
         // Act
-        httpLoggingHandler.logRequest("GET", uri, headers, body, Source.CLIENT);
+        httpLoggingHandler.logRequest(HttpMethod.GET, uri, headers, body, Source.CLIENT);
 
         // Assert
         verify(logFormatter).format(any(HttpLog.class));
-        verify(pathFilter).shouldInclude(uri.getPath(), "GET");
-        verify(pathFilter).shouldExclude(uri.getPath(), "GET");
+        verify(pathFilter).shouldInclude(uri.getPath(), HttpMethod.GET.name());
+        verify(pathFilter).shouldExclude(uri.getPath(), HttpMethod.GET.name());
     }
 
     @Test
@@ -92,12 +93,12 @@ class HttpLoggingHandlerTest {
         when(pathFilter.shouldExclude(anyString(), anyString())).thenReturn(false);
 
         // Act
-        httpLoggingHandler.logResponse("GET", uri, statusCode, headers, responseBody, Source.CLIENT);
+        httpLoggingHandler.logResponse(HttpMethod.GET, uri, statusCode, headers, responseBody, Source.CLIENT);
 
         // Assert
         verify(logFormatter).format(any(HttpLog.class));
-        verify(pathFilter).shouldInclude(uri.getPath(), "GET");
-        verify(pathFilter).shouldExclude(uri.getPath(), "GET");
+        verify(pathFilter).shouldInclude(uri.getPath(), HttpMethod.GET.name());
+        verify(pathFilter).shouldExclude(uri.getPath(), HttpMethod.GET.name());
     }
 
     @Test
@@ -113,7 +114,7 @@ class HttpLoggingHandlerTest {
         when(pathFilter.shouldInclude(anyString(), anyString())).thenReturn(false);
 
         // Act
-        httpLoggingHandler.logRequest("GET", uri, headers, body, Source.CLIENT);
+        httpLoggingHandler.logRequest(HttpMethod.GET, uri, headers, body, Source.CLIENT);
 
         // Assert
         verify(logFormatter, never()).format(any(HttpLog.class));
@@ -133,7 +134,7 @@ class HttpLoggingHandlerTest {
         when(pathFilter.shouldInclude(anyString(), anyString())).thenReturn(false);
 
         // Act
-        httpLoggingHandler.logResponse("GET", uri, statusCode, headers, responseBody, Source.CLIENT);
+        httpLoggingHandler.logResponse(HttpMethod.GET, uri, statusCode, headers, responseBody, Source.CLIENT);
 
         // Assert
         verify(logFormatter, never()).format(any(HttpLog.class));
@@ -157,12 +158,12 @@ class HttpLoggingHandlerTest {
         lenient().when(pathFilter.shouldExclude(anyString(), anyString())).thenReturn(false);
 
         // Act
-        httpLoggingHandler.logResponse("GET", uri, statusCode, headers, responseBody, Source.CLIENT);
+        httpLoggingHandler.logResponse(HttpMethod.GET, uri, statusCode, headers, responseBody, Source.CLIENT);
 
         // Assert
         verify(logFormatter).format(any(HttpLog.class));
-        verify(pathFilter).shouldInclude(uri.getPath(), "GET");
-        verify(pathFilter).shouldExclude(uri.getPath(), "GET");
+        verify(pathFilter).shouldInclude(uri.getPath(), HttpMethod.GET.name());
+        verify(pathFilter).shouldExclude(uri.getPath(), HttpMethod.GET.name());
     }
 
     @Test
@@ -182,12 +183,12 @@ class HttpLoggingHandlerTest {
         when(pathFilter.shouldExclude(anyString(), anyString())).thenReturn(false);
 
         // Act
-        httpLoggingHandler.logResponse("GET", uri, statusCode, headers, responseBody, Source.CLIENT);
+        httpLoggingHandler.logResponse(HttpMethod.GET, uri, statusCode, headers, responseBody, Source.CLIENT);
 
         // Assert
         verify(logFormatter).format(any(HttpLog.class));
-        verify(pathFilter).shouldInclude(uri.getPath(), "GET");
-        verify(pathFilter).shouldExclude(uri.getPath(), "GET");
+        verify(pathFilter).shouldInclude(uri.getPath(), HttpMethod.GET.name());
+        verify(pathFilter).shouldExclude(uri.getPath(), HttpMethod.GET.name());
     }
 
     @Test
@@ -208,12 +209,12 @@ class HttpLoggingHandlerTest {
         when(pathFilter.shouldExclude(anyString(), anyString())).thenReturn(false);
 
         // Act
-        httpLoggingHandler.logResponse("GET", uri, statusCode, headers, responseBody, Source.CLIENT);
+        httpLoggingHandler.logResponse(HttpMethod.GET, uri, statusCode, headers, responseBody, Source.CLIENT);
 
         // Assert
         verify(logFormatter).format(any(HttpLog.class));
-        verify(pathFilter).shouldInclude(uri.getPath(), "GET");
-        verify(pathFilter).shouldExclude(uri.getPath(), "GET");
+        verify(pathFilter).shouldInclude(uri.getPath(), HttpMethod.GET.name());
+        verify(pathFilter).shouldExclude(uri.getPath(), HttpMethod.GET.name());
     }
 
     @Test
@@ -232,12 +233,12 @@ class HttpLoggingHandlerTest {
         when(pathFilter.shouldExclude(anyString(), anyString())).thenReturn(false);
 
         // Act
-        httpLoggingHandler.logResponse("GET", uri, statusCode, headers, responseBody, Source.CLIENT);
+        httpLoggingHandler.logResponse(HttpMethod.GET, uri, statusCode, headers, responseBody, Source.CLIENT);
 
         // Assert
         verify(logFormatter).format(any(HttpLog.class));
-        verify(pathFilter).shouldInclude(uri.getPath(), "GET");
-        verify(pathFilter).shouldExclude(uri.getPath(), "GET");
+        verify(pathFilter).shouldInclude(uri.getPath(), HttpMethod.GET.name());
+        verify(pathFilter).shouldExclude(uri.getPath(), HttpMethod.GET.name());
     }
 
     @Test
@@ -257,12 +258,12 @@ class HttpLoggingHandlerTest {
         when(pathFilter.shouldExclude(anyString(), anyString())).thenReturn(false);
 
         // Act
-        httpLoggingHandler.logResponse("GET", uri, statusCode, headers, responseBody, Source.CLIENT);
+        httpLoggingHandler.logResponse(HttpMethod.GET, uri, statusCode, headers, responseBody, Source.CLIENT);
 
         // Assert
         verify(logFormatter).format(any(HttpLog.class));
-        verify(pathFilter).shouldInclude(uri.getPath(), "GET");
-        verify(pathFilter).shouldExclude(uri.getPath(), "GET");
+        verify(pathFilter).shouldInclude(uri.getPath(), HttpMethod.GET.name());
+        verify(pathFilter).shouldExclude(uri.getPath(), HttpMethod.GET.name());
     }
 
     @Test
@@ -277,7 +278,7 @@ class HttpLoggingHandlerTest {
         when(loggingProperties.getHttp()).thenReturn(httpProperties);
 
         // Act
-        httpLoggingHandler.logRequest("GET", uri, headers, body, Source.CLIENT);
+        httpLoggingHandler.logRequest(HttpMethod.GET, uri, headers, body, Source.CLIENT);
 
         // Assert
         verify(logFormatter, never()).format(any(HttpLog.class));
@@ -297,7 +298,7 @@ class HttpLoggingHandlerTest {
         when(pathFilter.shouldExclude(anyString(), anyString())).thenReturn(true);
 
         // Act
-        httpLoggingHandler.logRequest("GET", uri, headers, body, Source.CLIENT);
+        httpLoggingHandler.logRequest(HttpMethod.GET, uri, headers, body, Source.CLIENT);
 
         // Assert
         verify(logFormatter, never()).format(any(HttpLog.class));
@@ -318,7 +319,7 @@ class HttpLoggingHandlerTest {
         when(pathFilter.shouldExclude(anyString(), anyString())).thenReturn(true);
 
         // Act
-        httpLoggingHandler.logResponse("GET", uri, statusCode, headers, responseBody, Source.CLIENT);
+        httpLoggingHandler.logResponse(HttpMethod.GET, uri, statusCode, headers, responseBody, Source.CLIENT);
 
         // Assert
         verify(logFormatter, never()).format(any(HttpLog.class));
@@ -338,7 +339,7 @@ class HttpLoggingHandlerTest {
         when(pathFilter.shouldExclude(anyString(), anyString())).thenReturn(false);
 
         // Act
-        httpLoggingHandler.logRequest("GET", uri, headers, body, Source.CLIENT);
+        httpLoggingHandler.logRequest(HttpMethod.GET, uri, headers, body, Source.CLIENT);
 
         // Assert
         verify(obfuscator, never()).maskHeaders(any(HttpHeaders.class));

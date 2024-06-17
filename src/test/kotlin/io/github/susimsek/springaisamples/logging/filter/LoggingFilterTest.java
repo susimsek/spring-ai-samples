@@ -29,6 +29,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.web.util.ContentCachingRequestWrapper;
 import org.springframework.web.util.ContentCachingResponseWrapper;
 
@@ -61,10 +62,10 @@ class LoggingFilterTest {
         // Arrange
         when(request.getRequestURI()).thenReturn("/test");
         when(request.getRequestURL()).thenReturn(new StringBuffer("http://localhost/test"));
-        when(request.getMethod()).thenReturn("GET");
+        when(request.getMethod()).thenReturn(HttpMethod.GET.name());
         when(request.getHeaderNames()).thenReturn(Collections.enumeration(Collections.emptyList()));
         when(response.getHeaderNames()).thenReturn(Collections.emptyList());
-        when(loggingHandler.shouldNotLog("/test", "GET")).thenReturn(false);
+        when(loggingHandler.shouldNotLog("/test", HttpMethod.GET)).thenReturn(false);
 
         ContentCachingRequestWrapper wrappedRequest = new ContentCachingRequestWrapper(request);
         ContentCachingResponseWrapper wrappedResponse = new ContentCachingResponseWrapper(response);
@@ -76,14 +77,14 @@ class LoggingFilterTest {
         verify(filterChain, times(1)).doFilter(any(ContentCachingRequestWrapper.class),
             any(ContentCachingResponseWrapper.class));
         verify(loggingHandler, times(1)).logRequest(
-            anyString(),
+            any(HttpMethod.class),
             any(URI.class),
             any(HttpHeaders.class),
             requestContentCaptor.capture(),
             any(Source.class)
         );
         verify(loggingHandler, times(1)).logResponse(
-            anyString(),
+            any(HttpMethod.class),
             any(URI.class),
             anyInt(), // default status code for wrappedResponse
             any(HttpHeaders.class),
@@ -99,17 +100,17 @@ class LoggingFilterTest {
     void testDoFilterInternal_ShouldNotLog() throws ServletException, IOException {
         // Arrange
         when(request.getRequestURI()).thenReturn("/test");
-        when(request.getMethod()).thenReturn("GET");
-        when(loggingHandler.shouldNotLog("/test", "GET")).thenReturn(true);
+        when(request.getMethod()).thenReturn(HttpMethod.GET.name());
+        when(loggingHandler.shouldNotLog("/test", HttpMethod.GET)).thenReturn(true);
 
         // Act
         loggingFilter.doFilterInternal(request, response, filterChain);
 
         // Assert
         verify(filterChain, times(1)).doFilter(any(HttpServletRequest.class), any(HttpServletResponse.class));
-        verify(loggingHandler, never()).logRequest(any(String.class), any(URI.class), any(HttpHeaders.class),
+        verify(loggingHandler, never()).logRequest(any(HttpMethod.class), any(URI.class), any(HttpHeaders.class),
             any(byte[].class), any(Source.class));
-        verify(loggingHandler, never()).logResponse(any(String.class), any(URI.class), anyInt(), any(HttpHeaders.class),
+        verify(loggingHandler, never()).logResponse(any(HttpMethod.class), any(URI.class), anyInt(), any(HttpHeaders.class),
             any(byte[].class), any(Source.class));
     }
 
@@ -118,8 +119,8 @@ class LoggingFilterTest {
         // Arrange
         when(request.getRequestURI()).thenReturn("/test");
         when(request.getRequestURL()).thenReturn(new StringBuffer("http://localhost:8080/invalid uri"));
-        when(request.getMethod()).thenReturn("GET");
-        when(loggingHandler.shouldNotLog(anyString(), anyString())).thenReturn(false);
+        when(request.getMethod()).thenReturn(HttpMethod.GET.name());
+        when(loggingHandler.shouldNotLog(anyString(), any(HttpMethod.class))).thenReturn(false);
 
         ContentCachingRequestWrapper wrappedRequest = new ContentCachingRequestWrapper(request);
         ContentCachingResponseWrapper wrappedResponse = new ContentCachingResponseWrapper(response);
@@ -136,8 +137,8 @@ class LoggingFilterTest {
     void testDoFilterInternal_ExceptionThrown() throws ServletException, IOException {
         // Arrange
         when(request.getRequestURI()).thenReturn("/test");
-        when(request.getMethod()).thenReturn("GET");
-        when(loggingHandler.shouldNotLog("/test", "GET")).thenReturn(false);
+        when(request.getMethod()).thenReturn(HttpMethod.GET.name());
+        when(loggingHandler.shouldNotLog("/test", HttpMethod.GET)).thenReturn(false);
 
         ContentCachingRequestWrapper wrappedRequest = new ContentCachingRequestWrapper(request);
         ContentCachingResponseWrapper wrappedResponse = new ContentCachingResponseWrapper(response);
@@ -155,9 +156,9 @@ class LoggingFilterTest {
 
         verify(filterChain, times(1)).doFilter(any(ContentCachingRequestWrapper.class),
             any(ContentCachingResponseWrapper.class));
-        verify(loggingHandler, never()).logRequest(any(String.class), any(URI.class), any(HttpHeaders.class),
+        verify(loggingHandler, never()).logRequest(any(HttpMethod.class), any(URI.class), any(HttpHeaders.class),
             any(byte[].class), any(Source.class));
-        verify(loggingHandler, never()).logResponse(any(String.class), any(URI.class), anyInt(), any(HttpHeaders.class),
+        verify(loggingHandler, never()).logResponse(any(HttpMethod.class), any(URI.class), anyInt(), any(HttpHeaders.class),
             any(byte[].class), any(Source.class));
     }
 
@@ -166,10 +167,10 @@ class LoggingFilterTest {
         // Arrange
         when(request.getRequestURI()).thenReturn("/test");
         when(request.getRequestURL()).thenReturn(new StringBuffer("http://localhost/test"));
-        when(request.getMethod()).thenReturn("GET");
+        when(request.getMethod()).thenReturn(HttpMethod.GET.name());
         when(request.getHeaderNames()).thenReturn(Collections.enumeration(Collections.emptyList()));
         when(response.getHeaderNames()).thenReturn(Collections.emptyList());
-        when(loggingHandler.shouldNotLog("/test", "GET")).thenReturn(false);
+        when(loggingHandler.shouldNotLog("/test", HttpMethod.GET)).thenReturn(false);
 
         ContentCachingRequestWrapper wrappedRequest = new ContentCachingRequestWrapper(request);
         ContentCachingResponseWrapper wrappedResponse = new ContentCachingResponseWrapper(response);
@@ -182,14 +183,14 @@ class LoggingFilterTest {
         verify(filterChain, times(1)).doFilter(any(ContentCachingRequestWrapper.class),
             any(ContentCachingResponseWrapper.class));
         verify(loggingHandler, times(1)).logRequest(
-            anyString(),
+            any(HttpMethod.class),
             any(URI.class),
             any(HttpHeaders.class),
             requestContentCaptor.capture(),
             any(Source.class)
         );
         verify(loggingHandler, times(1)).logResponse(
-            anyString(),
+            any(HttpMethod.class),
             any(URI.class),
             anyInt(), // explicitly set status code
             any(HttpHeaders.class),
@@ -209,9 +210,9 @@ class LoggingFilterTest {
         when(request.getHeader("Header-Name")).thenReturn("Header-Value");
         when(request.getRequestURI()).thenReturn("/test");
         when(request.getRequestURL()).thenReturn(new StringBuffer("http://localhost/test"));
-        when(request.getMethod()).thenReturn("GET");
+        when(request.getMethod()).thenReturn(HttpMethod.GET.name());
         when(response.getHeaderNames()).thenReturn(Collections.emptyList());
-        when(loggingHandler.shouldNotLog("/test", "GET")).thenReturn(false);
+        when(loggingHandler.shouldNotLog("/test", HttpMethod.GET)).thenReturn(false);
 
         ContentCachingRequestWrapper wrappedRequest = new ContentCachingRequestWrapper(request);
         ContentCachingResponseWrapper wrappedResponse = new ContentCachingResponseWrapper(response);
@@ -223,14 +224,14 @@ class LoggingFilterTest {
         verify(filterChain, times(1)).doFilter(any(ContentCachingRequestWrapper.class),
             any(ContentCachingResponseWrapper.class));
         verify(loggingHandler, times(1)).logRequest(
-            anyString(),
+            any(HttpMethod.class),
             any(URI.class),
             any(HttpHeaders.class),
             requestContentCaptor.capture(),
             any(Source.class)
         );
         verify(loggingHandler, times(1)).logResponse(
-            anyString(),
+            any(HttpMethod.class),
             any(URI.class),
             anyInt(), // explicitly set status code
             any(HttpHeaders.class),
@@ -247,11 +248,11 @@ class LoggingFilterTest {
         // Arrange
         when(request.getRequestURI()).thenReturn("/test");
         when(request.getRequestURL()).thenReturn(new StringBuffer("http://localhost/test"));
-        when(request.getMethod()).thenReturn("GET");
+        when(request.getMethod()).thenReturn(HttpMethod.GET.name());
         when(request.getHeaderNames()).thenReturn(Collections.enumeration(Collections.emptyList()));
         when(response.getHeaderNames()).thenReturn(Collections.singletonList("Authorization"));
         when(response.getHeader("Authorization")).thenReturn("Header-Value");
-        when(loggingHandler.shouldNotLog("/test", "GET")).thenReturn(false);
+        when(loggingHandler.shouldNotLog("/test", HttpMethod.GET)).thenReturn(false);
 
         ContentCachingRequestWrapper wrappedRequest = new ContentCachingRequestWrapper(request);
         ContentCachingResponseWrapper wrappedResponse = new ContentCachingResponseWrapper(response);
@@ -263,14 +264,14 @@ class LoggingFilterTest {
         verify(filterChain, times(1)).doFilter(
             any(ContentCachingRequestWrapper.class), any(ContentCachingResponseWrapper.class));
         verify(loggingHandler, times(1)).logRequest(
-            anyString(),
+            any(HttpMethod.class),
             any(URI.class),
             any(HttpHeaders.class),
             requestContentCaptor.capture(),
             any(Source.class)
         );
         verify(loggingHandler, times(1)).logResponse(
-            anyString(),
+            any(HttpMethod.class),
             any(URI.class),
             anyInt(), // explicitly set status code
             any(HttpHeaders.class),

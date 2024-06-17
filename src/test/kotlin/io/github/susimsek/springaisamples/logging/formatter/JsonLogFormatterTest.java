@@ -14,6 +14,7 @@ import java.net.URISyntaxException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 
 class JsonLogFormatterTest {
 
@@ -29,7 +30,7 @@ class JsonLogFormatterTest {
         httpLog = HttpLog.builder()
             .source(Source.CLIENT)
             .type(REQUEST)
-            .method("GET")
+            .method(HttpMethod.GET)
             .uri(new URI("https://example.com/path"))
             .statusCode(200)
             .headers(new HttpHeaders())
@@ -44,7 +45,7 @@ class JsonLogFormatterTest {
         ObjectNode expectedLogNode = objectMapper.createObjectNode()
             .put("source", "client")
             .put("type", "request")
-            .put("method", "GET")
+            .put("method", HttpMethod.GET.name())
             .put("uri", "https://example.com/path")
             .put("host", "example.com")
             .put("path", "/path")
@@ -66,7 +67,7 @@ class JsonLogFormatterTest {
         ObjectNode expectedLogNode = objectMapper.createObjectNode()
             .put("source", "client")
             .put("type", "request")
-            .put("method", "GET")
+            .put("method", HttpMethod.GET.name())
             .put("uri", "https://example.com/path")
             .put("host", "example.com")
             .put("path", "/path");
@@ -87,7 +88,7 @@ class JsonLogFormatterTest {
         ObjectNode expectedLogNode = objectMapper.createObjectNode()
             .put("source", "client")
             .put("type", "request")
-            .put("method", "GET")
+            .put("method", HttpMethod.GET.name())
             .put("uri", "https://example.com/path")
             .put("host", "example.com")
             .put("path", "/path")
@@ -108,7 +109,7 @@ class JsonLogFormatterTest {
         ObjectNode expectedLogNode = objectMapper.createObjectNode()
             .put("source", "client")
             .put("type", "request")
-            .put("method", "GET")
+            .put("method", HttpMethod.GET.name())
             .put("uri", "https://example.com/path")
             .put("host", "example.com")
             .put("path", "/path")
