@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
@@ -45,7 +46,7 @@ public class SignatureController {
     @PostMapping("/sign")
     public ResponseEntity<SignatureResponse> createJws(
         @Parameter(description = "Payload for JWS token generation")
-        @RequestBody SignatureRequest signatureRequest) {
+        @Valid @RequestBody SignatureRequest signatureRequest) {
         String jws = signatureService.createJws(signatureRequest.payload());
         return ResponseEntity.ok(new SignatureResponse(jws));
     }
