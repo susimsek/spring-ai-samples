@@ -3,7 +3,6 @@ package io.github.susimsek.springaisamples.logging.interceptor;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.anyInt;
-import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.isNull;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -60,7 +59,7 @@ class RestClientLoggingInterceptorTest {
         when(request.getMethod()).thenReturn(HttpMethod.GET);
         when(request.getURI()).thenReturn(new URI("http://localhost/test"));
         when(request.getHeaders()).thenReturn(new HttpHeaders());
-        when(loggingHandler.shouldNotLog(any(String.class), any(String.class))).thenReturn(false);
+        when(loggingHandler.shouldNotLog(any(String.class), any(HttpMethod.class))).thenReturn(false);
         when(execution.execute(any(HttpRequest.class), any(byte[].class))).thenReturn(response);
         when(response.getBody()).thenReturn(new ByteArrayInputStream("response body".getBytes()));
         when(response.getHeaders()).thenReturn(new HttpHeaders());
@@ -71,10 +70,10 @@ class RestClientLoggingInterceptorTest {
 
         // Assert
         verify(loggingHandler, times(1)).logRequest(
-            anyString(), any(URI.class), any(HttpHeaders.class), any(byte[].class), any(Source.class)
+            any(HttpMethod.class), any(URI.class), any(HttpHeaders.class), any(byte[].class), any(Source.class)
         );
         verify(loggingHandler, times(1)).logResponse(
-            anyString(), any(URI.class), anyInt(), any(HttpHeaders.class), any(byte[].class), any(Source.class)
+            any(HttpMethod.class), any(URI.class), anyInt(), any(HttpHeaders.class), any(byte[].class), any(Source.class)
         );
     }
 
@@ -83,15 +82,15 @@ class RestClientLoggingInterceptorTest {
         // Arrange
         when(request.getMethod()).thenReturn(HttpMethod.GET);
         when(request.getURI()).thenReturn(new URI("http://localhost/test"));
-        when(loggingHandler.shouldNotLog(any(String.class), any(String.class))).thenReturn(true);
+        when(loggingHandler.shouldNotLog(any(String.class), any(HttpMethod.class))).thenReturn(true);
         when(execution.execute(any(HttpRequest.class), any(byte[].class))).thenReturn(response);
 
         // Act
         interceptor.intercept(request, requestBody, execution);
 
         // Assert
-        verify(loggingHandler, never()).logRequest(anyString(), any(URI.class), any(HttpHeaders.class), any(byte[].class), any(Source.class));
-        verify(loggingHandler, never()).logResponse(anyString(), any(URI.class), anyInt(), any(HttpHeaders.class), any(byte[].class), any(Source.class));
+        verify(loggingHandler, never()).logRequest(any(HttpMethod.class), any(URI.class), any(HttpHeaders.class), any(byte[].class), any(Source.class));
+        verify(loggingHandler, never()).logResponse(any(HttpMethod.class), any(URI.class), anyInt(), any(HttpHeaders.class), any(byte[].class), any(Source.class));
     }
 
     @Test
@@ -100,17 +99,17 @@ class RestClientLoggingInterceptorTest {
         when(request.getMethod()).thenReturn(HttpMethod.GET);
         when(request.getURI()).thenReturn(new URI("http://localhost/test"));
         when(request.getHeaders()).thenReturn(new HttpHeaders());
-        when(loggingHandler.shouldNotLog(any(String.class), any(String.class))).thenReturn(false);
+        when(loggingHandler.shouldNotLog(any(String.class), any(HttpMethod.class))).thenReturn(false);
         when(execution.execute(any(HttpRequest.class), any(byte[].class))).thenThrow(new IOException("Test IOException"));
 
         // Act & Assert
         IOException exception = assertThrows(IOException.class, () -> interceptor.intercept(request, requestBody, execution));
 
         verify(loggingHandler, times(1)).logRequest(
-            anyString(), any(URI.class), any(HttpHeaders.class), any(byte[].class), any(Source.class)
+            any(HttpMethod.class), any(URI.class), any(HttpHeaders.class), any(byte[].class), any(Source.class)
         );
         verify(loggingHandler, times(1)).logResponse(
-            anyString(), any(URI.class), anyInt(), any(HttpHeaders.class), isNull(), any(Source.class)
+            any(HttpMethod.class), any(URI.class), anyInt(), any(HttpHeaders.class), isNull(), any(Source.class)
         );
         assert "Test IOException".equals(exception.getMessage());
     }
@@ -120,7 +119,7 @@ class RestClientLoggingInterceptorTest {
         // Arrange
         when(request.getMethod()).thenReturn(HttpMethod.GET);
         when(request.getURI()).thenReturn(new URI("http://localhost/test"));
-        when(loggingHandler.shouldNotLog(any(String.class), any(String.class))).thenReturn(false);
+        when(loggingHandler.shouldNotLog(any(String.class), any(HttpMethod.class))).thenReturn(false);
         when(execution.execute(any(HttpRequest.class), any(byte[].class))).thenReturn(response);
         when(response.getBody()).thenReturn(new ByteArrayInputStream("response body".getBytes()));
         when(response.getHeaders()).thenReturn(new HttpHeaders());
