@@ -16,7 +16,9 @@ import io.github.susimsek.springaisamples.security.SecurityProperties;
 import io.github.susimsek.springaisamples.security.SignatureVerificationFilter;
 import io.github.susimsek.springaisamples.security.TokenProvider;
 import io.github.susimsek.springaisamples.security.TokenStore;
+import io.github.susimsek.springaisamples.security.XssFilter;
 import io.github.susimsek.springaisamples.service.SignatureService;
+import io.github.susimsek.springaisamples.utils.SanitizationUtil;
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyPair;
@@ -194,7 +196,7 @@ public class SecurityConfig {
         SignatureService signatureService,
         SecurityProblemSupport problemSupport) {
         return SignatureVerificationFilter.builder(signatureService, problemSupport)
-            .order(Ordered.HIGHEST_PRECEDENCE)
+            .order(Ordered.HIGHEST_PRECEDENCE + 1)
             .requestMatchers(mvc.pattern("/webjars/**"), mvc.pattern("/*.js"),
                 mvc.pattern("/*.css")).permitAll()
             .requestMatchers(mvc.pattern("/*.ico"), mvc.pattern("/*.png"), mvc.pattern("/*.svg"),
@@ -211,6 +213,24 @@ public class SecurityConfig {
             .requestMatchers(mvc.pattern("/api-docs/**")).permitAll()
             .requestMatchers(mvc.pattern("/api/security/sign")).permitAll()
             .anyRequest().signed()
+            .build();
+    }
+
+    @Bean
+    public XssFilter xssFilter(
+        MvcRequestMatcher.Builder mvc,
+        SanitizationUtil sanitizationUtil) {
+        return XssFilter.builder(sanitizationUtil)
+            .order(Ordered.HIGHEST_PRECEDENCE)
+            .requestMatchers(mvc.pattern("/webjars/**"), mvc.pattern("/*.js"),
+                mvc.pattern("/*.css")).permitAll()
+            .requestMatchers(mvc.pattern("/*.ico"), mvc.pattern("/*.png"), mvc.pattern("/*.svg"),
+                mvc.pattern("/*.webapp")).permitAll()
+            .requestMatchers(mvc.pattern("/swagger-ui.html"), mvc.pattern("/swagger-ui/**"),
+                mvc.pattern("/v3/api-docs/**")).permitAll()
+            .requestMatchers(mvc.pattern("/actuator/**")).permitAll()
+            .requestMatchers(mvc.pattern("/api-docs/**")).permitAll()
+            .anyRequest().sanitized()
             .build();
     }
 }

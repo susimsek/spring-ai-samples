@@ -13,7 +13,7 @@ import org.springframework.util.StreamUtils;
 
 public class CachedBodyHttpServletRequestWrapper extends HttpServletRequestWrapper {
 
-    private final byte[] cachedBody;
+    private byte[] cachedBody;
 
     public CachedBodyHttpServletRequestWrapper(HttpServletRequest request) throws IOException {
         super(request);
@@ -33,6 +33,10 @@ public class CachedBodyHttpServletRequestWrapper extends HttpServletRequestWrapp
 
     public byte[] getBody() {
         return cachedBody;
+    }
+
+    protected void setBody(byte[] body) {
+        this.cachedBody = body;
     }
 
     private class CachedBodyServletInputStream extends ServletInputStream {
