@@ -8,6 +8,7 @@ import io.github.susimsek.springaisamples.logging.enums.Source;
 import java.net.URI;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 
 class HttpLogTest {
 
@@ -18,7 +19,7 @@ class HttpLogTest {
 
         HttpLog httpLog = HttpLog.builder()
             .type(HttpLogType.REQUEST)
-            .method("GET")
+            .method(HttpMethod.GET)
             .uri(URI.create("http://localhost"))
             .statusCode(200)
             .headers(headers)
@@ -26,7 +27,7 @@ class HttpLogTest {
             .build();
 
         assertEquals(HttpLogType.REQUEST, httpLog.getType());
-        assertEquals("GET", httpLog.getMethod());
+        assertEquals(HttpMethod.GET, httpLog.getMethod());
         assertEquals(URI.create("http://localhost"), httpLog.getUri());
         assertEquals(200, httpLog.getStatusCode());
         assertEquals(headers, httpLog.getHeaders());
@@ -40,7 +41,7 @@ class HttpLogTest {
 
         HttpLog httpLog = new HttpLog();
         httpLog.setType(HttpLogType.RESPONSE);
-        httpLog.setMethod("POST");
+        httpLog.setMethod(HttpMethod.POST);
         httpLog.setUri(URI.create("http://localhost"));
         httpLog.setStatusCode(201);
         httpLog.setHeaders(headers);
