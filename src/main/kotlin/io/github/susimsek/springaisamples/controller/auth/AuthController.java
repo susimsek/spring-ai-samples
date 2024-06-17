@@ -24,12 +24,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @Tag(name = "auth", description = "Authentication APIs")
-@SecurityRequirement(name = "jwsSignature")
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
 public class AuthController {
     private final AuthenticationService authenticationService;
 
+    @SecurityRequirement(name = "jwsSignature")
     @Operation(summary = "Authenticate user",
         description = "Authenticate user and return access, ID, and refresh tokens")
     @ApiResponses(value = {
@@ -58,6 +58,7 @@ public class AuthController {
     }
 
     @SecurityRequirement(name = "bearerAuth")
+    @SecurityRequirement(name = "jwsSignature")
     @Operation(summary = "Refresh token", description = "Refresh access, ID, and refresh tokens")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successfully refreshed token",
