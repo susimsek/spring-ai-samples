@@ -1,5 +1,8 @@
 package io.github.susimsek.springaisamples.config;
 
+import static io.github.susimsek.springaisamples.trace.TraceConstants.CORRELATION_ID_HEADER_NAME;
+import static io.github.susimsek.springaisamples.trace.TraceConstants.REQUEST_ID_HEADER_NAME;
+
 import io.github.susimsek.springaisamples.openapi.LocalizedOpenApiCustomizer;
 import io.github.susimsek.springaisamples.openapi.OpenApiProperties;
 import io.github.susimsek.springaisamples.security.SignatureConstants;
@@ -61,13 +64,13 @@ public class OpenApiConfig {
                 .example("tr"));
             operation.addParametersItem(new HeaderParameter()
                 .schema(new StringSchema())
-                .name("X-Request-ID")
+                .name(REQUEST_ID_HEADER_NAME)
                 .description("Unique request identifier")
                 .required(true)
                 .example("abcd-1234-efgh-5678"));
             operation.addParametersItem(new HeaderParameter()
                 .schema(new StringSchema())
-                .name("X-Correlation-ID")
+                .name(CORRELATION_ID_HEADER_NAME)
                 .description("Correlation identifier for request")
                 .required(true)
                 .example("ijkl-91011-mnop-1213"));

@@ -1,5 +1,8 @@
 package io.github.susimsek.springaisamples.trace;
 
+import static io.github.susimsek.springaisamples.trace.TraceConstants.CORRELATION_ID_HEADER_NAME;
+import static io.github.susimsek.springaisamples.trace.TraceConstants.REQUEST_ID_HEADER_NAME;
+
 import io.micrometer.tracing.Tracer;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -24,9 +27,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 @RequiredArgsConstructor
 public class TraceFilter extends OncePerRequestFilter implements Ordered {
-
-    private static final String REQUEST_ID_HEADER_NAME = "X-Request-ID";
-    private static final String CORRELATION_ID_HEADER_NAME = "X-Correlation-ID";
 
     private final Tracer tracer;
     private final List<RequestMatcherConfig> requestMatcherConfigs;
