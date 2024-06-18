@@ -31,7 +31,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -69,6 +68,7 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(
         HttpSecurity http,
         MvcRequestMatcher.Builder mvc,
+        RequestMatchersConfig requestMatchersConfig,
         SecurityProblemSupport problemSupport) throws Exception {
         http
             .csrf(AbstractHttpConfigurer::disable)
@@ -87,15 +87,10 @@ public class SecurityConfig {
                 .accessDeniedHandler(problemSupport))
             .authorizeHttpRequests(authz ->
                 authz
-                    .requestMatchers(mvc.pattern("/webjars/**"), mvc.pattern("/*.js"),
-                        mvc.pattern("/*.css")).permitAll()
-                    .requestMatchers(mvc.pattern("/*.ico"), mvc.pattern("/*.png"), mvc.pattern("/*.svg"),
-                        mvc.pattern("/*.webapp")).permitAll()
-                    .requestMatchers(mvc.pattern("/swagger-ui.html"), mvc.pattern("/swagger-ui/**"),
-                        mvc.pattern("/v3/api-docs/**")).permitAll()
+                    .requestMatchers(requestMatchersConfig.staticResources()).permitAll()
+                    .requestMatchers(requestMatchersConfig.swaggerPaths()).permitAll()
+                    .requestMatchers(requestMatchersConfig.actuatorPaths()).permitAll()
                     .requestMatchers(mvc.pattern("/.well-known/jwks.json")).permitAll()
-                    .requestMatchers(mvc.pattern("/actuator/**")).permitAll()
-                    .requestMatchers(mvc.pattern("/api-docs/**")).permitAll()
                     .requestMatchers(mvc.pattern("/api/auth/token")).permitAll()
                     .requestMatchers(mvc.pattern("/api/security/sign")).permitAll()
                     .requestMatchers(mvc.pattern("/api/locales")).permitAll()
@@ -112,6 +107,11 @@ public class SecurityConfig {
     @Bean
     MvcRequestMatcher.Builder mvc(HandlerMappingIntrospector introspector) {
         return new MvcRequestMatcher.Builder(introspector);
+    }
+
+    @Bean
+    RequestMatchersConfig requestMatchersConfig(MvcRequestMatcher.Builder mvc) {
+        return new RequestMatchersConfig(mvc);
     }
 
     @Bean
@@ -193,24 +193,15 @@ public class SecurityConfig {
     @Bean
     public SignatureVerificationFilter signatureVerificationFilter(
         MvcRequestMatcher.Builder mvc,
+        RequestMatchersConfig requestMatchersConfig,
         SignatureService signatureService,
         SecurityProblemSupport problemSupport) {
         return SignatureVerificationFilter.builder(signatureService, problemSupport)
             .order(Ordered.HIGHEST_PRECEDENCE + 1)
-            .requestMatchers(mvc.pattern("/webjars/**"), mvc.pattern("/*.js"),
-                mvc.pattern("/*.css")).permitAll()
-            .requestMatchers(mvc.pattern("/*.ico"), mvc.pattern("/*.png"), mvc.pattern("/*.svg"),
-                mvc.pattern("/*.webapp")).permitAll()
-            .requestMatchers(mvc.pattern("/swagger-ui.html"), mvc.pattern("/swagger-ui/**"),
-                mvc.pattern("/v3/api-docs/**")).permitAll()
-            .requestMatchers(
-                mvc.pattern(HttpMethod.GET, "/**"),
-                mvc.pattern(HttpMethod.HEAD, "/**"),
-                mvc.pattern(HttpMethod.OPTIONS, "/**"),
-                mvc.pattern(HttpMethod.TRACE, "/**")
-            ).permitAll()
-            .requestMatchers(mvc.pattern("/actuator/**")).permitAll()
-            .requestMatchers(mvc.pattern("/api-docs/**")).permitAll()
+            .requestMatchers(requestMatchersConfig.staticResources()).permitAll()
+            .requestMatchers(requestMatchersConfig.swaggerPaths()).permitAll()
+            .requestMatchers(requestMatchersConfig.actuatorPaths()).permitAll()
+            .requestMatchers(requestMatchersConfig.nonModifyingMethods()).permitAll()
             .requestMatchers(mvc.pattern("/api/security/sign")).permitAll()
             .anyRequest().signed()
             .build();
@@ -218,18 +209,13 @@ public class SecurityConfig {
 
     @Bean
     public XssFilter xssFilter(
-        MvcRequestMatcher.Builder mvc,
+        RequestMatchersConfig requestMatchersConfig,
         SanitizationUtil sanitizationUtil) {
         return XssFilter.builder(sanitizationUtil)
             .order(Ordered.HIGHEST_PRECEDENCE)
-            .requestMatchers(mvc.pattern("/webjars/**"), mvc.pattern("/*.js"),
-                mvc.pattern("/*.css")).permitAll()
-            .requestMatchers(mvc.pattern("/*.ico"), mvc.pattern("/*.png"), mvc.pattern("/*.svg"),
-                mvc.pattern("/*.webapp")).permitAll()
-            .requestMatchers(mvc.pattern("/swagger-ui.html"), mvc.pattern("/swagger-ui/**"),
-                mvc.pattern("/v3/api-docs/**")).permitAll()
-            .requestMatchers(mvc.pattern("/actuator/**")).permitAll()
-            .requestMatchers(mvc.pattern("/api-docs/**")).permitAll()
+            .requestMatchers(requestMatchersConfig.staticResources()).permitAll()
+            .requestMatchers(requestMatchersConfig.swaggerPaths()).permitAll()
+            .requestMatchers(requestMatchersConfig.actuatorPaths()).permitAll()
             .anyRequest().sanitized()
             .build();
     }
