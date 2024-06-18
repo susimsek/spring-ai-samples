@@ -1,10 +1,12 @@
 package io.github.susimsek.springaisamples.config;
 
+import static io.github.susimsek.springaisamples.idempotency.IdempotencyConstants.IDEMPOTENCY_HEADER_NAME;
 import static io.github.susimsek.springaisamples.trace.TraceConstants.CORRELATION_ID_HEADER_NAME;
 import static io.github.susimsek.springaisamples.trace.TraceConstants.REQUEST_ID_HEADER_NAME;
 
 import io.github.susimsek.springaisamples.openapi.LocalizedOpenApiCustomizer;
 import io.github.susimsek.springaisamples.openapi.OpenApiProperties;
+import io.github.susimsek.springaisamples.openapi.annotation.Idempotent;
 import io.github.susimsek.springaisamples.security.SignatureConstants;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
@@ -12,6 +14,8 @@ import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.media.StringSchema;
 import io.swagger.v3.oas.models.parameters.HeaderParameter;
+import io.swagger.v3.oas.models.parameters.Parameter;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.customizers.OpenApiCustomizer;
@@ -20,8 +24,8 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.web.method.HandlerMethod;
-import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
 @Configuration
 @RequiredArgsConstructor
@@ -47,8 +51,7 @@ public class OpenApiConfig {
 
     @Bean
     public OpenApiCustomizer openApiCustomizer(
-        MessageSource messageSource,
-        RequestMappingHandlerMapping requestMappingHandlerMapping) {
+        MessageSource messageSource) {
         return new LocalizedOpenApiCustomizer(messageSource, openApiProperties);
     }
 
@@ -60,21 +63,45 @@ public class OpenApiConfig {
                 .name("Accept-Language")
                 .description("Language preference")
                 .required(false)
-                .schema(new StringSchema())
                 .example("tr"));
+
             operation.addParametersItem(new HeaderParameter()
                 .schema(new StringSchema())
                 .name(REQUEST_ID_HEADER_NAME)
                 .description("Unique request identifier")
                 .required(true)
-                .example("abcd-1234-efgh-5678"));
+                .example("44fdd967-6d72-43e4-b027-febd9c8ecebc"));
+
             operation.addParametersItem(new HeaderParameter()
                 .schema(new StringSchema())
                 .name(CORRELATION_ID_HEADER_NAME)
                 .description("Correlation identifier for request")
                 .required(true)
-                .example("ijkl-91011-mnop-1213"));
+                .example("08637921-80c2-4281-ac27-bbf6b7376c4f"));
+
+            if (isIdempotent(handlerMethod.getMethod()) || isIdempotent(handlerMethod.getBeanType())) {
+                addIdempotentHeader(operation);
+            }
+
             return operation;
         };
+    }
+
+    private boolean isIdempotent(Method method) {
+        return AnnotatedElementUtils.hasAnnotation(method, Idempotent.class);
+    }
+
+    private boolean isIdempotent(Class<?> clazz) {
+        return AnnotatedElementUtils.hasAnnotation(clazz, Idempotent.class);
+    }
+
+    private void addIdempotentHeader(Operation operation) {
+        Parameter idempotentHeader = new HeaderParameter()
+            .schema(new StringSchema())
+            .name(IDEMPOTENCY_HEADER_NAME)
+            .description("Idempotency Key")
+            .required(true)
+            .example("831f5ed5-66e7-41bb-9db6-517ffa283b05");
+        operation.addParametersItem(idempotentHeader);
     }
 }

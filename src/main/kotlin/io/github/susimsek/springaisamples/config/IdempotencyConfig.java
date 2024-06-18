@@ -1,0 +1,28 @@
+package io.github.susimsek.springaisamples.config;
+
+import io.github.susimsek.springaisamples.exception.idempotency.IdempotencyProblemSupport;
+import io.github.susimsek.springaisamples.idempotency.IdempotencyFilter;
+import io.github.susimsek.springaisamples.service.IdempotencyService;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
+
+@Configuration
+public class IdempotencyConfig {
+
+    @Bean
+    public IdempotencyFilter idempotencyFilter(
+        IdempotencyService idempotencyService,
+        IdempotencyProblemSupport problemSupport,
+        RequestMatchersConfig requestMatchersConfig) {
+        return IdempotencyFilter.builder(idempotencyService, problemSupport)
+            .order(Ordered.HIGHEST_PRECEDENCE + 3)
+            .requestMatchers(requestMatchersConfig.staticResources()).permitAll()
+            .requestMatchers(requestMatchersConfig.swaggerPaths()).permitAll()
+            .requestMatchers(requestMatchersConfig.actuatorPaths()).permitAll()
+            .requestMatchers(requestMatchersConfig.actuatorPaths()).permitAll()
+            .requestMatchers("/api/security/sign").idempotent()
+            .anyRequest().permitAll()
+            .build();
+    }
+}

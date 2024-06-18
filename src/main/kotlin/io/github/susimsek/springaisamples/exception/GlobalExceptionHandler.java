@@ -1,5 +1,6 @@
 package io.github.susimsek.springaisamples.exception;
 
+import io.github.susimsek.springaisamples.exception.idempotency.MissingIdempotencyKeyException;
 import io.github.susimsek.springaisamples.exception.security.JwsException;
 import io.github.susimsek.springaisamples.i18n.ParameterMessageSource;
 import jakarta.validation.ConstraintViolationException;
@@ -87,6 +88,13 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, errorMessage);
         problem.setProperty(ErrorConstants.PROBLEM_VIOLATION_KEY, violations);
         return handleExceptionInternal(ex, problem, new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
+    }
+
+    @ExceptionHandler(MissingIdempotencyKeyException.class)
+    protected ResponseEntity<Object> handleMissingIdempotencyKeyException(@NonNull MissingIdempotencyKeyException ex,
+                                                        @NonNull WebRequest request) {
+        return createProblemDetailResponse(ex, HttpStatus.BAD_REQUEST,
+            ErrorConstants.IDEMPOTENCY_KEY_MISSING, new HttpHeaders(), request);
     }
 
     @ExceptionHandler(AuthenticationException.class)

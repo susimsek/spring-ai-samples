@@ -15,4 +15,5 @@ public final class ErrorConstants {
     public static final String ACCESS_DENIED = "error.accessDenied";
     public static final String NO_HANDLER_FOUND = "error.noHandlerFound";
     public static final String INTERNAL_SERVER_ERROR = "error.internalServerError";
+    public static final String IDEMPOTENCY_KEY_MISSING = "error.idempotencyKey.missing";
 }
