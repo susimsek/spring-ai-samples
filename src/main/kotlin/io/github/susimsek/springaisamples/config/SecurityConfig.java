@@ -197,7 +197,7 @@ public class SecurityConfig {
         SignatureService signatureService,
         SecurityProblemSupport problemSupport) {
         return SignatureVerificationFilter.builder(signatureService, problemSupport)
-            .order(Ordered.HIGHEST_PRECEDENCE + 1)
+            .order(Ordered.HIGHEST_PRECEDENCE + 2)
             .requestMatchers(requestMatchersConfig.staticResources()).permitAll()
             .requestMatchers(requestMatchersConfig.swaggerPaths()).permitAll()
             .requestMatchers(requestMatchersConfig.actuatorPaths()).permitAll()
@@ -212,7 +212,7 @@ public class SecurityConfig {
         RequestMatchersConfig requestMatchersConfig,
         SanitizationUtil sanitizationUtil) {
         return XssFilter.builder(sanitizationUtil)
-            .order(Ordered.HIGHEST_PRECEDENCE)
+            .order(Ordered.HIGHEST_PRECEDENCE + 1)
             .requestMatchers(requestMatchersConfig.staticResources()).permitAll()
             .requestMatchers(requestMatchersConfig.swaggerPaths()).permitAll()
             .requestMatchers(requestMatchersConfig.actuatorPaths()).permitAll()

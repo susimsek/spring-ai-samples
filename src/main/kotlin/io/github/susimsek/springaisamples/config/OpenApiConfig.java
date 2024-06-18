@@ -8,7 +8,7 @@ import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.media.StringSchema;
-import io.swagger.v3.oas.models.parameters.Parameter;
+import io.swagger.v3.oas.models.parameters.HeaderParameter;
 import java.util.Arrays;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.customizers.OpenApiCustomizer;
@@ -52,13 +52,25 @@ public class OpenApiConfig {
     @Bean
     public OperationCustomizer operationCustomizer() {
         return (Operation operation, HandlerMethod handlerMethod) -> {
-            Parameter acceptLanguageHeader = new Parameter()
-                .in("header")
+            operation.addParametersItem(new HeaderParameter()
                 .schema(new StringSchema()._enum(Arrays.asList("en", "tr")))
                 .name("Accept-Language")
                 .description("Language preference")
-                .required(false);
-            operation.addParametersItem(acceptLanguageHeader);
+                .required(false)
+                .schema(new StringSchema())
+                .example("tr"));
+            operation.addParametersItem(new HeaderParameter()
+                .schema(new StringSchema())
+                .name("X-Request-ID")
+                .description("Unique request identifier")
+                .required(true)
+                .example("abcd-1234-efgh-5678"));
+            operation.addParametersItem(new HeaderParameter()
+                .schema(new StringSchema())
+                .name("X-Correlation-ID")
+                .description("Correlation identifier for request")
+                .required(true)
+                .example("ijkl-91011-mnop-1213"));
             return operation;
         };
     }
