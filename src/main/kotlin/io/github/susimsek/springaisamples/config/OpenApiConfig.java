@@ -7,7 +7,7 @@ import static io.github.susimsek.springaisamples.trace.TraceConstants.REQUEST_ID
 import io.github.susimsek.springaisamples.openapi.LocalizedOpenApiCustomizer;
 import io.github.susimsek.springaisamples.openapi.OpenApiProperties;
 import io.github.susimsek.springaisamples.openapi.annotation.Idempotent;
-import io.github.susimsek.springaisamples.security.SignatureConstants;
+import io.github.susimsek.springaisamples.security.signature.SignatureConstants;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;

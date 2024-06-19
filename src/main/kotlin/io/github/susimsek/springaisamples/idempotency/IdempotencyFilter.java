@@ -4,8 +4,9 @@ import static io.github.susimsek.springaisamples.idempotency.IdempotencyConstant
 
 import io.github.susimsek.springaisamples.exception.idempotency.IdempotencyExceptionHandler;
 import io.github.susimsek.springaisamples.exception.idempotency.MissingIdempotencyKeyException;
-import io.github.susimsek.springaisamples.utils.CachedBodyHttpServletResponseWrapper;
+import io.github.susimsek.springaisamples.enums.FilterOrder;
 import io.github.susimsek.springaisamples.service.IdempotencyService;
+import io.github.susimsek.springaisamples.utils.CachedBodyHttpServletResponseWrapper;
 import io.github.susimsek.springaisamples.utils.HttpHeadersUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -131,7 +132,7 @@ public class IdempotencyFilter extends OncePerRequestFilter implements Ordered {
         private final List<IdempotencyFilter.RequestMatcherConfig> requestMatcherConfigs = new ArrayList<>();
         private boolean anyRequestConfigured = false;
         private boolean defaultIdempotent = true;
-        private int order = Ordered.HIGHEST_PRECEDENCE;
+        private int order = FilterOrder.IDEMPOTENCY.order();
         private int lastIndex = 0;
 
         private Builder(IdempotencyService idempotencyService,

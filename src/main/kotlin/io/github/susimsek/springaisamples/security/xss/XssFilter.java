@@ -1,5 +1,6 @@
-package io.github.susimsek.springaisamples.security;
+package io.github.susimsek.springaisamples.security.xss;
 
+import io.github.susimsek.springaisamples.enums.FilterOrder;
 import io.github.susimsek.springaisamples.utils.SanitizationUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -91,7 +92,7 @@ public class XssFilter extends OncePerRequestFilter implements Ordered {
         private final List<RequestMatcherConfig> requestMatcherConfigs = new ArrayList<>();
         private boolean anyRequestConfigured = false;
         private boolean defaultSanitized = true;
-        private int order = Ordered.HIGHEST_PRECEDENCE;
+        private int order = FilterOrder.XSS.order();
         private int lastIndex = 0;
         private final List<String> nonSanitizedHeaders = new ArrayList<>();
 

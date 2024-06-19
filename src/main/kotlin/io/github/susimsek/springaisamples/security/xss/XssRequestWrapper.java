@@ -1,4 +1,4 @@
-package io.github.susimsek.springaisamples.security;
+package io.github.susimsek.springaisamples.security.xss;
 
 import io.github.susimsek.springaisamples.utils.CachedBodyHttpServletRequestWrapper;
 import io.github.susimsek.springaisamples.utils.SanitizationUtil;

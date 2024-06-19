@@ -108,3 +108,12 @@ security:
     password: password
     name: Admin User
     email: admin@example.com
+
+
+resilience4j:
+  ratelimiter:
+    instances:
+      default:
+        limit-for-period: 10
+        limit-refresh-period: 1s
+        timeout-duration: 0

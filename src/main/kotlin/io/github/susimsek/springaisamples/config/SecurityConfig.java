@@ -10,13 +10,14 @@ import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 import io.github.susimsek.springaisamples.exception.security.SecurityProblemSupport;
+import io.github.susimsek.springaisamples.enums.FilterOrder;
 import io.github.susimsek.springaisamples.security.AuthoritiesConstants;
 import io.github.susimsek.springaisamples.security.InMemoryTokenStore;
 import io.github.susimsek.springaisamples.security.SecurityProperties;
-import io.github.susimsek.springaisamples.security.SignatureVerificationFilter;
+import io.github.susimsek.springaisamples.security.signature.SignatureVerificationFilter;
 import io.github.susimsek.springaisamples.security.TokenProvider;
 import io.github.susimsek.springaisamples.security.TokenStore;
-import io.github.susimsek.springaisamples.security.XssFilter;
+import io.github.susimsek.springaisamples.security.xss.XssFilter;
 import io.github.susimsek.springaisamples.service.SignatureService;
 import io.github.susimsek.springaisamples.utils.SanitizationUtil;
 import java.io.ByteArrayInputStream;
@@ -30,7 +31,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.Ordered;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -198,7 +198,7 @@ public class SecurityConfig {
         SignatureService signatureService,
         SecurityProblemSupport problemSupport) {
         return SignatureVerificationFilter.builder(signatureService, problemSupport)
-            .order(Ordered.HIGHEST_PRECEDENCE + 2)
+            .order(FilterOrder.SIGNATURE.order())
             .requestMatchers(requestMatchersConfig.staticResources()).permitAll()
             .requestMatchers(requestMatchersConfig.swaggerPaths()).permitAll()
             .requestMatchers(requestMatchersConfig.actuatorPaths()).permitAll()
@@ -213,7 +213,7 @@ public class SecurityConfig {
         RequestMatchersConfig requestMatchersConfig,
         SanitizationUtil sanitizationUtil) {
         return XssFilter.builder(sanitizationUtil)
-            .order(Ordered.HIGHEST_PRECEDENCE + 1)
+            .order(FilterOrder.XSS.order())
             .requestMatchers(requestMatchersConfig.staticResources()).permitAll()
             .requestMatchers(requestMatchersConfig.swaggerPaths()).permitAll()
             .requestMatchers(requestMatchersConfig.actuatorPaths()).permitAll()

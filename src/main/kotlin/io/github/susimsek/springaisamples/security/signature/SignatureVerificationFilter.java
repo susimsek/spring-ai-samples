@@ -1,12 +1,13 @@
-package io.github.susimsek.springaisamples.security;
+package io.github.susimsek.springaisamples.security.signature;
 
-import static io.github.susimsek.springaisamples.security.SignatureConstants.JWS_SIGNATURE_HEADER_NAME;
+import static io.github.susimsek.springaisamples.security.signature.SignatureConstants.JWS_SIGNATURE_HEADER_NAME;
 
 import io.github.susimsek.springaisamples.exception.security.JwsException;
 import io.github.susimsek.springaisamples.exception.security.MissingJwsException;
 import io.github.susimsek.springaisamples.exception.security.SignatureExceptionHandler;
-import io.github.susimsek.springaisamples.utils.CachedBodyHttpServletRequestWrapper;
+import io.github.susimsek.springaisamples.enums.FilterOrder;
 import io.github.susimsek.springaisamples.service.SignatureService;
+import io.github.susimsek.springaisamples.utils.CachedBodyHttpServletRequestWrapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -84,7 +85,6 @@ public class SignatureVerificationFilter extends OncePerRequestFilter implements
 
     private void handleInvalidJws(HttpServletRequest request, HttpServletResponse response, JwsException e)
         throws IOException, ServletException {
-        log.error("Invalid JWS signature: {}", e.getMessage());
         signatureExceptionHandler.handle(request, response, e);
     }
 
@@ -127,7 +127,7 @@ public class SignatureVerificationFilter extends OncePerRequestFilter implements
         private final List<RequestMatcherConfig> requestMatcherConfigs = new ArrayList<>();
         private boolean anyRequestConfigured = false;
         private boolean defaultSigned = true;
-        private int order = Ordered.HIGHEST_PRECEDENCE;
+        private int order = FilterOrder.SIGNATURE.order();
         private int lastIndex = 0;
 
         private Builder(SignatureService signatureService, SignatureExceptionHandler signatureExceptionHandler) {

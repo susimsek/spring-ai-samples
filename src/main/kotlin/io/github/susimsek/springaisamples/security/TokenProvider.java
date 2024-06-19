@@ -17,6 +17,7 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import io.github.susimsek.springaisamples.exception.security.BadJwsException;
 import io.github.susimsek.springaisamples.exception.security.JwsEncodingException;
+import io.github.susimsek.springaisamples.security.signature.SignatureConstants;
 import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
 import java.security.interfaces.RSAPublicKey;

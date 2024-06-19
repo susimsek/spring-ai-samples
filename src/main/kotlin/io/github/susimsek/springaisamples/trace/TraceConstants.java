@@ -3,9 +3,6 @@ package io.github.susimsek.springaisamples.trace;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
-/**
- * Constants for Spring Security authorities.
- */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class TraceConstants {
 

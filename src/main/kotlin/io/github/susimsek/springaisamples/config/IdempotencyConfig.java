@@ -2,10 +2,10 @@ package io.github.susimsek.springaisamples.config;
 
 import io.github.susimsek.springaisamples.exception.idempotency.IdempotencyProblemSupport;
 import io.github.susimsek.springaisamples.idempotency.IdempotencyFilter;
+import io.github.susimsek.springaisamples.enums.FilterOrder;
 import io.github.susimsek.springaisamples.service.IdempotencyService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.Ordered;
 
 @Configuration
 public class IdempotencyConfig {
@@ -16,7 +16,7 @@ public class IdempotencyConfig {
         IdempotencyProblemSupport problemSupport,
         RequestMatchersConfig requestMatchersConfig) {
         return IdempotencyFilter.builder(idempotencyService, problemSupport)
-            .order(Ordered.HIGHEST_PRECEDENCE + 3)
+            .order(FilterOrder.IDEMPOTENCY.order())
             .requestMatchers(requestMatchersConfig.staticResources()).permitAll()
             .requestMatchers(requestMatchersConfig.swaggerPaths()).permitAll()
             .requestMatchers(requestMatchersConfig.actuatorPaths()).permitAll()

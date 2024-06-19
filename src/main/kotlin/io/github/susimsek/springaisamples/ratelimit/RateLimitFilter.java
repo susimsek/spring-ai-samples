@@ -1,37 +1,42 @@
-package io.github.susimsek.springaisamples.trace;
+package io.github.susimsek.springaisamples.ratelimit;
 
-import static io.github.susimsek.springaisamples.trace.TraceConstants.CORRELATION_ID_HEADER_NAME;
-import static io.github.susimsek.springaisamples.trace.TraceConstants.REQUEST_ID_HEADER_NAME;
+import static io.github.susimsek.springaisamples.ratelimit.RateLimitConstants.RATE_LIMIT_LIMIT_HEADER_NAME;
+import static io.github.susimsek.springaisamples.ratelimit.RateLimitConstants.RATE_LIMIT_REMAINING_HEADER_NAME;
+import static io.github.susimsek.springaisamples.ratelimit.RateLimitConstants.RATE_LIMIT_RESET_HEADER_NAME;
 
+import io.github.resilience4j.ratelimiter.RateLimiter;
+import io.github.resilience4j.ratelimiter.RateLimiterRegistry;
+import io.github.susimsek.springaisamples.exception.ratelimit.RateLimitExceededException;
+import io.github.susimsek.springaisamples.exception.ratelimit.RateLimitExceptionHandler;
 import io.github.susimsek.springaisamples.enums.FilterOrder;
-import io.micrometer.tracing.Tracer;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.MDC;
 import org.springframework.core.Ordered;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.lang.NonNull;
 import org.springframework.security.config.annotation.web.AbstractRequestMatcherRegistry;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 @RequiredArgsConstructor
-public class TraceFilter extends OncePerRequestFilter implements Ordered {
+public class RateLimitFilter extends OncePerRequestFilter implements Ordered {
 
-    private final Tracer tracer;
+    private final RateLimiter rateLimiter;
+    private final RateLimitExceptionHandler rateLimitExceptionHandler;
     private final List<RequestMatcherConfig> requestMatcherConfigs;
-    private final boolean defaultTraced;
+    private final boolean defaultRateLimited;
     private final int order;
 
     @Override
@@ -43,49 +48,50 @@ public class TraceFilter extends OncePerRequestFilter implements Ordered {
     protected boolean shouldNotFilter(@NonNull HttpServletRequest request) {
         return requestMatcherConfigs.stream()
             .filter(config -> config.requestMatcher.matches(request))
-            .map(config -> !config.traced)
+            .map(config -> !config.rateLimited)
             .findFirst()
-            .orElse(!defaultTraced);
+            .orElse(!defaultRateLimited);
     }
 
     @Override
-    protected void doFilterInternal(
-        @NonNull HttpServletRequest request,
-        @NonNull HttpServletResponse response,
-        @NonNull FilterChain filterChain)
-            throws ServletException, IOException {
-        String requestId = request.getHeader(REQUEST_ID_HEADER_NAME);
-        if (!StringUtils.hasText(requestId)) {
-            requestId = UUID.randomUUID().toString();
-        }
+    protected void doFilterInternal(@NonNull HttpServletRequest request,
+                                    @NonNull HttpServletResponse response,
+                                    @NonNull FilterChain filterChain)
+        throws ServletException, IOException {
+        RateLimiter.Metrics metrics = rateLimiter.getMetrics();
+        long availablePermissions = metrics.getAvailablePermissions();
+        Duration timeUntilReset = rateLimiter.getRateLimiterConfig().getLimitRefreshPeriod();
+        int limitForPeriod = rateLimiter.getRateLimiterConfig().getLimitForPeriod();
+        Instant nextReset = Instant.now().plus(timeUntilReset);
 
-        String correlationId = request.getHeader(CORRELATION_ID_HEADER_NAME);
-        if (!StringUtils.hasText(correlationId)) {
-            correlationId = UUID.randomUUID().toString();
-        }
+        response.setHeader(HttpHeaders.RETRY_AFTER, String.valueOf(nextReset.getEpochSecond()));
+        response.setHeader(RATE_LIMIT_LIMIT_HEADER_NAME, String.valueOf(limitForPeriod));
+        response.setHeader(RATE_LIMIT_REMAINING_HEADER_NAME, String.valueOf(availablePermissions));
+        response.setHeader(RATE_LIMIT_RESET_HEADER_NAME, String.valueOf(nextReset.getEpochSecond()));
 
-        io.micrometer.tracing.Span currentSpan = tracer.currentSpan();
-        if (currentSpan != null) {
-            currentSpan.tag("request.id", requestId);
-            currentSpan.tag("correlation.id", correlationId);
-        }
-
-        MDC.put("requestId", requestId);
-        MDC.put("correlationId", correlationId);
-        response.setHeader(REQUEST_ID_HEADER_NAME, requestId);
-        response.setHeader(CORRELATION_ID_HEADER_NAME, correlationId);
-
-        try {
+        if (rateLimiter.acquirePermission()) {
             filterChain.doFilter(request, response);
-        } finally {
-            MDC.clear();
+        } else {
+            handleRateLimitingException(request, response, limitForPeriod,
+                availablePermissions, nextReset.getEpochSecond());
         }
+    }
+
+    private void handleRateLimitingException(HttpServletRequest request,
+                                             HttpServletResponse response,
+                                             int limitForPeriod,
+                                             long availablePermissions,
+                                             long resetTime) throws IOException, ServletException {
+        String errorMessage = "Too many requests";
+        RateLimitExceededException exception = new RateLimitExceededException(errorMessage,
+            limitForPeriod, availablePermissions, resetTime);
+        rateLimitExceptionHandler.handle(request, response, exception);
     }
 
     @AllArgsConstructor
     private static class RequestMatcherConfig {
         private final RequestMatcher requestMatcher;
-        private boolean traced;
+        private boolean rateLimited;
     }
 
     public interface InitialBuilder {
@@ -99,31 +105,35 @@ public class TraceFilter extends OncePerRequestFilter implements Ordered {
 
         AfterRequestMatchersBuilder requestMatchers(RequestMatcher... requestMatchers);
 
-        TraceFilter build();
+        RateLimitFilter build();
     }
 
     public interface AfterRequestMatchersBuilder {
         InitialBuilder permitAll();
 
-        InitialBuilder traced();
+        InitialBuilder rateLimited();
     }
 
-    public static InitialBuilder builder(Tracer tracer) {
-        return new Builder(tracer);
+    public static InitialBuilder builder(RateLimiterRegistry rateLimiterRegistry,
+                                         RateLimitExceptionHandler rateLimitExceptionHandler) {
+        return new Builder(rateLimiterRegistry, rateLimitExceptionHandler);
     }
 
     private static class Builder extends AbstractRequestMatcherRegistry<Builder>
         implements InitialBuilder, AfterRequestMatchersBuilder {
 
-        private final Tracer tracer;
+        private final RateLimiter rateLimiter;
+        private final RateLimitExceptionHandler rateLimitExceptionHandler;
         private final List<RequestMatcherConfig> requestMatcherConfigs = new ArrayList<>();
         private boolean anyRequestConfigured = false;
-        private boolean defaultTraced = true;
-        private int order = FilterOrder.TRACE.order();
+        private boolean defaultRateLimited = true;
+        private int order = FilterOrder.RATE_LIMIT.order();
         private int lastIndex = 0;
 
-        private Builder(Tracer tracer) {
-            this.tracer = tracer;
+        private Builder(RateLimiterRegistry rateLimiterRegistry,
+                        RateLimitExceptionHandler rateLimitExceptionHandler) {
+            this.rateLimiter = rateLimiterRegistry.rateLimiter("default");
+            this.rateLimitExceptionHandler = rateLimitExceptionHandler;
         }
 
         @Override
@@ -165,24 +175,24 @@ public class TraceFilter extends OncePerRequestFilter implements Ordered {
             Assert.state(anyRequestConfigured || !requestMatcherConfigs.isEmpty(),
                 "permitAll() can only be called after requestMatchers() or anyRequest()");
             if (anyRequestConfigured) {
-                this.defaultTraced = false;
+                this.defaultRateLimited = false;
             } else {
                 requestMatcherConfigs.stream()
                     .skip(lastIndex)
-                    .forEach(config -> config.traced = false);
+                    .forEach(config -> config.rateLimited = false);
             }
             return this;
         }
 
-        public Builder traced() {
+        public Builder rateLimited() {
             Assert.state(anyRequestConfigured || !requestMatcherConfigs.isEmpty(),
-                "traced() can only be called after requestMatchers() or anyRequest())");
+                "rateLimited() can only be called after requestMatchers() or anyRequest())");
             if (anyRequestConfigured) {
-                this.defaultTraced = true;
+                this.defaultRateLimited = true;
             } else {
                 requestMatcherConfigs.stream()
                     .skip(lastIndex)
-                    .forEach(config -> config.traced = true);
+                    .forEach(config -> config.rateLimited = true);
             }
             return this;
         }
@@ -192,9 +202,10 @@ public class TraceFilter extends OncePerRequestFilter implements Ordered {
             return this;
         }
 
-        public TraceFilter build() {
-            return new TraceFilter(tracer,
-                requestMatcherConfigs, defaultTraced, order);
+        public RateLimitFilter build() {
+            return new RateLimitFilter(rateLimiter,
+                rateLimitExceptionHandler,
+                requestMatcherConfigs, defaultRateLimited, order);
         }
 
         @Override
