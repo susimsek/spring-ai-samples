@@ -4,8 +4,9 @@ import static io.github.susimsek.springaisamples.idempotency.IdempotencyConstant
 
 import io.github.susimsek.springaisamples.exception.idempotency.IdempotencyExceptionHandler;
 import io.github.susimsek.springaisamples.exception.idempotency.MissingIdempotencyKeyException;
-import io.github.susimsek.springaisamples.logging.utils.CachedBodyHttpServletResponseWrapper;
+import io.github.susimsek.springaisamples.utils.CachedBodyHttpServletResponseWrapper;
 import io.github.susimsek.springaisamples.service.IdempotencyService;
+import io.github.susimsek.springaisamples.utils.HttpHeadersUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -13,13 +14,12 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.Ordered;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.lang.NonNull;
 import org.springframework.security.config.annotation.web.AbstractRequestMatcherRegistry;
@@ -67,7 +67,8 @@ public class IdempotencyFilter extends OncePerRequestFilter implements Ordered {
         if (idempotencyService.containsKey(idempotencyKey)) {
             CachedResponse cachedResponse = idempotencyService.getResponse(idempotencyKey);
             response.setStatus(cachedResponse.status());
-            cachedResponse.headers().forEach(response::setHeader);
+            HttpHeadersUtil.setHttpHeadersToResponse(cachedResponse.headers(), response);
+            response.setCharacterEncoding(StandardCharsets.UTF_8.name());
             response.getWriter().write(cachedResponse.body());
             response.flushBuffer();
             return;
@@ -77,19 +78,12 @@ public class IdempotencyFilter extends OncePerRequestFilter implements Ordered {
         filterChain.doFilter(request, responseWrapper);
 
         String responseBody = new String(responseWrapper.getBody(), StandardCharsets.UTF_8);
-        int status = responseWrapper.getStatus();
 
-        Map<String, String> headers = new HashMap<>();
-        responseWrapper.getHeaderNames().forEach(
-            headerName -> headers.put(headerName, responseWrapper.getHeader(headerName)));
-
-        CachedResponse cachedResponse = new CachedResponse(status, headers, responseBody);
+        HttpHeaders headers = HttpHeadersUtil.convertToHttpHeaders(responseWrapper);
+        CachedResponse cachedResponse = new CachedResponse(responseWrapper.getStatus(),
+            headers, responseBody);
         idempotencyService.saveResponse(idempotencyKey, cachedResponse);
-
-        response.setStatus(status);
-        headers.forEach(response::setHeader);
-        response.getWriter().write(responseBody);
-        response.flushBuffer();
+        responseWrapper.copyBodyToResponse();
     }
 
     private void handleMissingIdempotencyKey(HttpServletRequest request, HttpServletResponse response)

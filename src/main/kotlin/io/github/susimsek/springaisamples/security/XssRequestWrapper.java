@@ -1,6 +1,6 @@
 package io.github.susimsek.springaisamples.security;
 
-import io.github.susimsek.springaisamples.logging.utils.CachedBodyHttpServletRequestWrapper;
+import io.github.susimsek.springaisamples.utils.CachedBodyHttpServletRequestWrapper;
 import io.github.susimsek.springaisamples.utils.SanitizationUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;

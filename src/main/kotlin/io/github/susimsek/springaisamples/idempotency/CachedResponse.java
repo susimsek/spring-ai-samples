@@ -1,9 +1,9 @@
 package io.github.susimsek.springaisamples.idempotency;
 
-import java.util.Map;
+import org.springframework.http.HttpHeaders;
 
 public record CachedResponse(
     int status,
-    Map<String, String> headers,
+    HttpHeaders headers,
     String body) {
 }

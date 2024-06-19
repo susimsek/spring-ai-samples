@@ -1,4 +1,4 @@
-package io.github.susimsek.springaisamples.logging.utils;
+package io.github.susimsek.springaisamples.utils;
 
 import jakarta.servlet.ReadListener;
 import jakarta.servlet.ServletInputStream;

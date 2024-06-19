@@ -5,7 +5,7 @@ import static io.github.susimsek.springaisamples.security.SignatureConstants.JWS
 import io.github.susimsek.springaisamples.exception.security.JwsException;
 import io.github.susimsek.springaisamples.exception.security.MissingJwsException;
 import io.github.susimsek.springaisamples.exception.security.SignatureExceptionHandler;
-import io.github.susimsek.springaisamples.logging.utils.CachedBodyHttpServletRequestWrapper;
+import io.github.susimsek.springaisamples.utils.CachedBodyHttpServletRequestWrapper;
 import io.github.susimsek.springaisamples.service.SignatureService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

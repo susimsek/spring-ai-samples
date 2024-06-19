@@ -1,4 +1,4 @@
-package io.github.susimsek.springaisamples.logging.utils;
+package io.github.susimsek.springaisamples.utils;
 
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.WriteListener;
@@ -16,7 +16,7 @@ public class CachedBodyHttpServletResponseWrapper extends HttpServletResponseWra
     private final PrintWriter writer;
     private final HttpServletResponse originalResponse;
 
-    public CachedBodyHttpServletResponseWrapper(HttpServletResponse response) throws IOException {
+    public CachedBodyHttpServletResponseWrapper(HttpServletResponse response) {
         super(response);
         originalResponse = response;
         cachedBody = new ByteArrayOutputStream();
