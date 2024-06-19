@@ -6,9 +6,9 @@ import static io.github.susimsek.springaisamples.ratelimit.RateLimitConstants.RA
 
 import io.github.resilience4j.ratelimiter.RateLimiter;
 import io.github.resilience4j.ratelimiter.RateLimiterRegistry;
+import io.github.susimsek.springaisamples.enums.FilterOrder;
 import io.github.susimsek.springaisamples.exception.ratelimit.RateLimitExceededException;
 import io.github.susimsek.springaisamples.exception.ratelimit.RateLimitExceptionHandler;
-import io.github.susimsek.springaisamples.enums.FilterOrder;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -18,6 +18,8 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.Ordered;
@@ -38,6 +40,7 @@ public class RateLimitFilter extends OncePerRequestFilter implements Ordered {
     private final List<RequestMatcherConfig> requestMatcherConfigs;
     private final boolean defaultRateLimited;
     private final int order;
+    private final Map<String, RateLimiter> rateLimiterMap = new ConcurrentHashMap<>();
 
     @Override
     public int getOrder() {
