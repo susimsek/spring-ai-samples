@@ -12,6 +12,7 @@ import java.security.KeyPair;
 import java.security.interfaces.RSAPublicKey;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -54,6 +55,7 @@ public class JwksController {
                 schema = @Schema(implementation = ProblemDetail.class)))
     })
     @GetMapping("/jwks.json")
+    @Cacheable("jwksCache")
     public Map<String, Object> getJwks() {
         RSAPublicKey publicKey = (RSAPublicKey) jwsKeyPair.getPublic();
         RSAKey jwk = new RSAKey.Builder(publicKey)

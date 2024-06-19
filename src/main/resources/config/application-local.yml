@@ -16,6 +16,12 @@ spring:
       chat:
         options:
           model: gpt-4o
+  cache:
+    caches:
+      default:
+        ttl: 1h
+      jwksCache:
+        ttl: 1h
   devtools:
     restart:
       enabled: true
