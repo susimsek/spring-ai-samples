@@ -1,13 +1,14 @@
 package io.github.susimsek.springaisamples.config;
 
 import static io.github.susimsek.springaisamples.idempotency.IdempotencyConstants.IDEMPOTENCY_HEADER_NAME;
+import static io.github.susimsek.springaisamples.security.signature.SignatureConstants.JWS_SIGNATURE_HEADER_NAME;
 import static io.github.susimsek.springaisamples.trace.TraceConstants.CORRELATION_ID_HEADER_NAME;
 import static io.github.susimsek.springaisamples.trace.TraceConstants.REQUEST_ID_HEADER_NAME;
 
 import io.github.susimsek.springaisamples.openapi.LocalizedOpenApiCustomizer;
 import io.github.susimsek.springaisamples.openapi.OpenApiProperties;
 import io.github.susimsek.springaisamples.openapi.annotation.Idempotent;
-import io.github.susimsek.springaisamples.security.signature.SignatureConstants;
+import io.github.susimsek.springaisamples.openapi.annotation.JwsSignatureRequired;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
@@ -36,13 +37,6 @@ import org.springframework.web.method.HandlerMethod;
     scheme = "bearer",
     in = SecuritySchemeIn.HEADER,
     description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\""
-)
-@SecurityScheme(
-    name = "jwsSignature",
-    type = SecuritySchemeType.APIKEY,
-    in = SecuritySchemeIn.HEADER,
-    paramName = SignatureConstants.JWS_SIGNATURE_HEADER_NAME,
-    description = "JWS Signature header using the X-JWS-Signature scheme. Example: \"X-JWS-Signature: {token}\""
 )
 @EnableConfigurationProperties(OpenApiProperties.class)
 public class OpenApiConfig {
@@ -83,12 +77,24 @@ public class OpenApiConfig {
                 addIdempotentHeader(operation);
             }
 
+            if (isJwsSignatureRequired(handlerMethod.getMethod()) || isJwsSignatureRequired(handlerMethod.getBeanType())) {
+                addJwsSignatureHeader(operation);
+            }
+
             return operation;
         };
     }
 
     private boolean isIdempotent(Method method) {
         return AnnotatedElementUtils.hasAnnotation(method, Idempotent.class);
+    }
+
+    private boolean isJwsSignatureRequired(Class<?> clazz) {
+        return AnnotatedElementUtils.hasAnnotation(clazz, JwsSignatureRequired.class);
+    }
+
+    private boolean isJwsSignatureRequired(Method method) {
+        return AnnotatedElementUtils.hasAnnotation(method, JwsSignatureRequired.class);
     }
 
     private boolean isIdempotent(Class<?> clazz) {
@@ -103,5 +109,14 @@ public class OpenApiConfig {
             .required(true)
             .example("831f5ed5-66e7-41bb-9db6-517ffa283b05");
         operation.addParametersItem(idempotentHeader);
+    }
+
+    private void addJwsSignatureHeader(Operation operation) {
+        Parameter jwsSignatureHeader = new HeaderParameter()
+            .schema(new StringSchema())
+            .name(JWS_SIGNATURE_HEADER_NAME)
+            .description("JWS Signature")
+            .required(true);
+        operation.addParametersItem(jwsSignatureHeader);
     }
 }

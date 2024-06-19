@@ -1,6 +1,7 @@
 package io.github.susimsek.springaisamples.config;
 
 import static io.github.susimsek.springaisamples.security.AuthoritiesConstants.ADMIN;
+import static io.github.susimsek.springaisamples.security.signature.SignatureConstants.JWS_SIGNATURE_HEADER_NAME;
 import static org.springframework.security.config.Customizer.withDefaults;
 
 import com.nimbusds.jose.jwk.JWK;
@@ -9,16 +10,20 @@ import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
-import io.github.susimsek.springaisamples.exception.security.SecurityProblemSupport;
 import io.github.susimsek.springaisamples.enums.FilterOrder;
+import io.github.susimsek.springaisamples.exception.security.SecurityProblemSupport;
+import io.github.susimsek.springaisamples.idempotency.IdempotencyFilter;
+import io.github.susimsek.springaisamples.logging.filter.LoggingFilter;
+import io.github.susimsek.springaisamples.ratelimit.RateLimitFilter;
 import io.github.susimsek.springaisamples.security.AuthoritiesConstants;
 import io.github.susimsek.springaisamples.security.InMemoryTokenStore;
 import io.github.susimsek.springaisamples.security.SecurityProperties;
-import io.github.susimsek.springaisamples.security.signature.SignatureVerificationFilter;
 import io.github.susimsek.springaisamples.security.TokenProvider;
 import io.github.susimsek.springaisamples.security.TokenStore;
+import io.github.susimsek.springaisamples.security.signature.SignatureVerificationFilter;
 import io.github.susimsek.springaisamples.security.xss.XssFilter;
 import io.github.susimsek.springaisamples.service.SignatureService;
+import io.github.susimsek.springaisamples.trace.TraceFilter;
 import io.github.susimsek.springaisamples.utils.SanitizationUtil;
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
@@ -50,6 +55,7 @@ import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
+import org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
@@ -70,7 +76,13 @@ public class SecurityConfig {
         HttpSecurity http,
         MvcRequestMatcher.Builder mvc,
         RequestMatchersConfig requestMatchersConfig,
-        SecurityProblemSupport problemSupport) throws Exception {
+        SecurityProblemSupport problemSupport,
+        SignatureVerificationFilter signatureVerificationFilter,
+        XssFilter xssFilter,
+        TraceFilter traceFilter,
+        IdempotencyFilter idempotencyFilter,
+        RateLimitFilter rateLimitFilter,
+        LoggingFilter loggingFilter) throws Exception {
         http
             .csrf(AbstractHttpConfigurer::disable)
             .httpBasic(AbstractHttpConfigurer::disable)
@@ -101,7 +113,13 @@ public class SecurityConfig {
             .oauth2ResourceServer(oauth2 -> oauth2
                 .authenticationEntryPoint(problemSupport)
                 .accessDeniedHandler(problemSupport)
-                .jwt(withDefaults()));
+                .jwt(withDefaults()))
+            .addFilterBefore(signatureVerificationFilter, BearerTokenAuthenticationFilter.class)
+            .addFilterAfter(xssFilter, BearerTokenAuthenticationFilter.class)
+            .addFilterAfter(idempotencyFilter, XssFilter.class)
+            .addFilterAfter(traceFilter, IdempotencyFilter.class)
+            .addFilterAfter(rateLimitFilter, IdempotencyFilter.class)
+            .addFilterAfter(loggingFilter, RateLimitFilter.class);
         return http.build();
     }
 
@@ -222,6 +240,7 @@ public class SecurityConfig {
                 HttpHeaders.CONTENT_LENGTH, HttpHeaders.AUTHORIZATION,
                 HttpHeaders.COOKIE, HttpHeaders.HOST, HttpHeaders.USER_AGENT,
                 HttpHeaders.REFERER, HttpHeaders.ACCEPT,
+                JWS_SIGNATURE_HEADER_NAME,
                 "sec-ch-ua",
                 "sec-ch-ua-mobile",
                 "sec-ch-ua-platform",
