@@ -31,6 +31,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -217,6 +218,17 @@ public class SecurityConfig {
             .requestMatchers(requestMatchersConfig.swaggerPaths()).permitAll()
             .requestMatchers(requestMatchersConfig.actuatorPaths()).permitAll()
             .anyRequest().sanitized()
+            .nonSanitizedHeaders(HttpHeaders.CONTENT_TYPE,
+                HttpHeaders.CONTENT_LENGTH, HttpHeaders.AUTHORIZATION,
+                HttpHeaders.COOKIE, HttpHeaders.HOST, HttpHeaders.USER_AGENT,
+                HttpHeaders.REFERER, HttpHeaders.ACCEPT,
+                "sec-ch-ua",
+                "sec-ch-ua-mobile",
+                "sec-ch-ua-platform",
+                "sec-fetch-site",
+                "sec-fetch-mode",
+                "sec-fetch-user",
+                "sec-fetch-dest")
             .build();
     }
 }

@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +27,7 @@ public class XssFilter extends OncePerRequestFilter implements Ordered {
     private final List<RequestMatcherConfig> requestMatcherConfigs;
     private final boolean defaultSanitized;
     private final int order;
+    private final List<String> nonSanitizedHeaders;
 
     @Override
     public int getOrder() {
@@ -46,7 +48,8 @@ public class XssFilter extends OncePerRequestFilter implements Ordered {
                                     @NonNull HttpServletResponse response,
                                     @NonNull FilterChain filterChain)
             throws ServletException, IOException {
-        XssRequestWrapper wrappedRequest = new XssRequestWrapper(request, sanitizationUtil);
+        XssRequestWrapper wrappedRequest = new XssRequestWrapper(
+            request, sanitizationUtil, nonSanitizedHeaders);
         filterChain.doFilter(wrappedRequest, response);
     }
 
@@ -59,6 +62,8 @@ public class XssFilter extends OncePerRequestFilter implements Ordered {
     public interface InitialBuilder {
         InitialBuilder order(int order);
 
+        InitialBuilder nonSanitizedHeaders(String... headerNames);
+
         AfterRequestMatchersBuilder anyRequest();
 
         AfterRequestMatchersBuilder requestMatchers(HttpMethod method, String... patterns);
@@ -66,7 +71,6 @@ public class XssFilter extends OncePerRequestFilter implements Ordered {
         AfterRequestMatchersBuilder requestMatchers(String... patterns);
 
         AfterRequestMatchersBuilder requestMatchers(RequestMatcher... requestMatchers);
-
         XssFilter build();
     }
 
@@ -89,6 +93,7 @@ public class XssFilter extends OncePerRequestFilter implements Ordered {
         private boolean defaultSanitized = true;
         private int order = Ordered.HIGHEST_PRECEDENCE;
         private int lastIndex = 0;
+        private final List<String> nonSanitizedHeaders = new ArrayList<>();
 
         private Builder(SanitizationUtil sanitizationUtil) {
             this.sanitizationUtil = sanitizationUtil;
@@ -156,6 +161,11 @@ public class XssFilter extends OncePerRequestFilter implements Ordered {
             return this;
         }
 
+        public Builder nonSanitizedHeaders(String... headerNames) {
+            this.nonSanitizedHeaders.addAll(Arrays.asList(headerNames));
+            return this;
+        }
+
         public Builder order(int order) {
             this.order = order;
             return this;
@@ -163,7 +173,7 @@ public class XssFilter extends OncePerRequestFilter implements Ordered {
 
         public XssFilter build() {
             return new XssFilter(sanitizationUtil,
-                requestMatcherConfigs, defaultSanitized, order);
+                requestMatcherConfigs, defaultSanitized, order, nonSanitizedHeaders);
         }
 
         @Override

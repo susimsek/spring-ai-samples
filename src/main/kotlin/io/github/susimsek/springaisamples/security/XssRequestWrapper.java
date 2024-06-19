@@ -7,16 +7,20 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
 public class XssRequestWrapper extends CachedBodyHttpServletRequestWrapper {
 
     private final SanitizationUtil sanitizationUtil;
+    private final List<String> nonSanitizedHeaders;
 
-    public XssRequestWrapper(HttpServletRequest request, SanitizationUtil sanitizationUtil) throws IOException {
+    public XssRequestWrapper(HttpServletRequest request, SanitizationUtil sanitizationUtil,
+                             List<String> nonSanitizedHeaders) throws IOException {
         super(request);
         this.sanitizationUtil = sanitizationUtil;
+        this.nonSanitizedHeaders = nonSanitizedHeaders;
         sanitizeBody();
     }
 
@@ -41,8 +45,8 @@ public class XssRequestWrapper extends CachedBodyHttpServletRequestWrapper {
             return new String[0];
         }
         return Stream.of(values)
-                     .map(sanitizationUtil::sanitizeInput)
-                     .toArray(String[]::new);
+            .map(sanitizationUtil::sanitizeInput)
+            .toArray(String[]::new);
     }
 
     @Override
@@ -50,32 +54,28 @@ public class XssRequestWrapper extends CachedBodyHttpServletRequestWrapper {
         Map<String, String[]> parameterMap = super.getParameterMap();
         parameterMap.replaceAll((key, values) ->
             Stream.of(values)
-                  .map(sanitizationUtil::sanitizeInput)
-                  .toArray(String[]::new)
+                .map(sanitizationUtil::sanitizeInput)
+                .toArray(String[]::new)
         );
         return parameterMap;
     }
 
     @Override
     public String getHeader(String name) {
+        if (isNonSanitized(name)) {
+            return super.getHeader(name);
+        }
         String value = super.getHeader(name);
         return value != null ? sanitizationUtil.sanitizeInput(value) : null;
     }
 
     @Override
     public Enumeration<String> getHeaders(String name) {
+        if (isNonSanitized(name)) {
+            return super.getHeaders(name);
+        }
         return Collections.enumeration(
             Collections.list(super.getHeaders(name)).stream()
-                .map(sanitizationUtil::sanitizeInput)
-                .toList()
-        );
-    }
-
-
-    @Override
-    public Enumeration<String> getHeaderNames() {
-        return Collections.enumeration(
-            Collections.list(super.getHeaderNames()).stream()
                 .map(sanitizationUtil::sanitizeInput)
                 .toList()
         );
@@ -109,5 +109,10 @@ public class XssRequestWrapper extends CachedBodyHttpServletRequestWrapper {
     public String getPathInfo() {
         String pathInfo = super.getPathInfo();
         return pathInfo != null ? sanitizationUtil.sanitizeInput(pathInfo) : null;
+    }
+
+    private boolean isNonSanitized(String headerName) {
+        return nonSanitizedHeaders.stream()
+            .anyMatch(item -> item.equalsIgnoreCase(headerName));
     }
 }
