@@ -2,10 +2,10 @@ package io.github.susimsek.springaisamples.security.signature;
 
 import static io.github.susimsek.springaisamples.security.signature.SignatureConstants.JWS_SIGNATURE_HEADER_NAME;
 
+import io.github.susimsek.springaisamples.enums.FilterOrder;
 import io.github.susimsek.springaisamples.exception.security.JwsException;
 import io.github.susimsek.springaisamples.exception.security.MissingJwsException;
 import io.github.susimsek.springaisamples.exception.security.SignatureExceptionHandler;
-import io.github.susimsek.springaisamples.enums.FilterOrder;
 import io.github.susimsek.springaisamples.service.SignatureService;
 import io.github.susimsek.springaisamples.utils.CachedBodyHttpServletRequestWrapper;
 import jakarta.servlet.FilterChain;
@@ -17,6 +17,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,6 +34,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
 @RequiredArgsConstructor
 public class SignatureVerificationFilter extends OncePerRequestFilter implements Ordered {
 
+    private static final Pattern JWS_PATTERN = Pattern.compile(
+        "^[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+$");
     private final SignatureService signatureService;
     private final SignatureExceptionHandler signatureExceptionHandler;
     private final List<RequestMatcherConfig> requestMatcherConfigs;
@@ -64,8 +67,12 @@ public class SignatureVerificationFilter extends OncePerRequestFilter implements
                 handleMissingJws(request, response);
                 return;
             }
-            CachedBodyHttpServletRequestWrapper wrappedRequest = new CachedBodyHttpServletRequestWrapper(request);
             String jwsToken = optionalJwsToken.get();
+            if (!JWS_PATTERN.matcher(jwsToken).matches()) {
+                handleInvalidJws(request, response, new JwsException("Invalid JWS token format"));
+                return;
+            }
+            CachedBodyHttpServletRequestWrapper wrappedRequest = new CachedBodyHttpServletRequestWrapper(request);
             String requestBody = new String(wrappedRequest.getBody(), StandardCharsets.UTF_8);
             try {
                 signatureService.validateJws(jwsToken, requestBody);
