@@ -115,5 +115,5 @@ resilience4j:
     instances:
       default:
         limit-for-period: 1
-        limit-refresh-period: 1s
+        limit-refresh-period: 10s
         timeout-duration: 200ms

@@ -1,9 +1,5 @@
 package io.github.susimsek.springaisamples.exception;
 
-import static io.github.susimsek.springaisamples.ratelimit.RateLimitConstants.RATE_LIMIT_LIMIT_HEADER_NAME;
-import static io.github.susimsek.springaisamples.ratelimit.RateLimitConstants.RATE_LIMIT_REMAINING_HEADER_NAME;
-import static io.github.susimsek.springaisamples.ratelimit.RateLimitConstants.RATE_LIMIT_RESET_HEADER_NAME;
-
 import io.github.susimsek.springaisamples.exception.idempotency.MissingIdempotencyKeyException;
 import io.github.susimsek.springaisamples.exception.ratelimit.RateLimitExceededException;
 import io.github.susimsek.springaisamples.exception.security.JwsException;
@@ -145,14 +141,8 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         @NonNull RateLimitExceededException ex,
         @NonNull WebRequest request) {
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.add(RATE_LIMIT_LIMIT_HEADER_NAME, String.valueOf(ex.getLimitForPeriod()));
-        headers.add(RATE_LIMIT_REMAINING_HEADER_NAME, String.valueOf(ex.getAvailablePermissions()));
-        headers.add(RATE_LIMIT_RESET_HEADER_NAME, String.valueOf(ex.getResetTime()));
-        headers.add(HttpHeaders.RETRY_AFTER, String.valueOf(ex.getResetTime()));
-
         return createProblemDetailResponse(ex, HttpStatus.TOO_MANY_REQUESTS,
-            ErrorConstants.RATE_LIMITING_ERROR, headers, request);
+            ErrorConstants.RATE_LIMITING_ERROR,  new HttpHeaders(), request);
     }
 
     @ExceptionHandler(Exception.class)
