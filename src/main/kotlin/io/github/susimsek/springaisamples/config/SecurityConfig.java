@@ -14,7 +14,7 @@ import io.github.susimsek.springaisamples.enums.FilterOrder;
 import io.github.susimsek.springaisamples.exception.security.SecurityProblemSupport;
 import io.github.susimsek.springaisamples.idempotency.IdempotencyFilter;
 import io.github.susimsek.springaisamples.logging.filter.LoggingFilter;
-import io.github.susimsek.springaisamples.ratelimit.RateLimitFilter;
+import io.github.susimsek.springaisamples.ratelimit.RateLimitingFilter;
 import io.github.susimsek.springaisamples.security.AuthoritiesConstants;
 import io.github.susimsek.springaisamples.security.InMemoryTokenStore;
 import io.github.susimsek.springaisamples.security.SecurityProperties;
@@ -81,7 +81,7 @@ public class SecurityConfig {
         XssFilter xssFilter,
         TraceFilter traceFilter,
         IdempotencyFilter idempotencyFilter,
-        RateLimitFilter rateLimitFilter,
+        RateLimitingFilter rateLimitFilter,
         LoggingFilter loggingFilter) throws Exception {
         http
             .csrf(AbstractHttpConfigurer::disable)
@@ -119,7 +119,7 @@ public class SecurityConfig {
             .addFilterAfter(idempotencyFilter, XssFilter.class)
             .addFilterAfter(traceFilter, IdempotencyFilter.class)
             .addFilterAfter(rateLimitFilter, IdempotencyFilter.class)
-            .addFilterAfter(loggingFilter, RateLimitFilter.class);
+            .addFilterAfter(loggingFilter, RateLimitingFilter.class);
         return http.build();
     }
 

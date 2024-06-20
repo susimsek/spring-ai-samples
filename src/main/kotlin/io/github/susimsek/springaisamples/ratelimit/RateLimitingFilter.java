@@ -18,8 +18,6 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.Ordered;
@@ -33,14 +31,18 @@ import org.springframework.util.Assert;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 @RequiredArgsConstructor
-public class RateLimitFilter extends OncePerRequestFilter implements Ordered {
+public class RateLimitingFilter extends OncePerRequestFilter implements Ordered {
 
-    private final RateLimiter rateLimiter;
+    private final RateLimiterRegistry rateLimiterRegistry;
     private final RateLimitExceptionHandler rateLimitExceptionHandler;
     private final List<RequestMatcherConfig> requestMatcherConfigs;
     private final boolean defaultRateLimited;
     private final int order;
-    private final Map<String, RateLimiter> rateLimiterMap = new ConcurrentHashMap<>();
+
+    private static final String DEFAULT_RATE_LIMITER_NAME = "default";
+    private static final String TOO_MANY_REQUESTS_MESSAGE = "Too many requests";
+
+    private String currentRateLimiterName = DEFAULT_RATE_LIMITER_NAME;
 
     @Override
     public int getOrder() {
@@ -51,8 +53,11 @@ public class RateLimitFilter extends OncePerRequestFilter implements Ordered {
     protected boolean shouldNotFilter(@NonNull HttpServletRequest request) {
         return requestMatcherConfigs.stream()
             .filter(config -> config.requestMatcher.matches(request))
-            .map(config -> !config.rateLimited)
             .findFirst()
+            .map(config -> {
+                currentRateLimiterName = config.rateLimiterName;
+                return !config.rateLimited;
+            })
             .orElse(!defaultRateLimited);
     }
 
@@ -61,6 +66,7 @@ public class RateLimitFilter extends OncePerRequestFilter implements Ordered {
                                     @NonNull HttpServletResponse response,
                                     @NonNull FilterChain filterChain)
         throws ServletException, IOException {
+        RateLimiter rateLimiter = rateLimiterRegistry.rateLimiter(currentRateLimiterName);
         RateLimiter.Metrics metrics = rateLimiter.getMetrics();
         long availablePermissions = metrics.getAvailablePermissions();
         Duration timeUntilReset = rateLimiter.getRateLimiterConfig().getLimitRefreshPeriod();
@@ -85,8 +91,7 @@ public class RateLimitFilter extends OncePerRequestFilter implements Ordered {
                                              int limitForPeriod,
                                              long availablePermissions,
                                              long resetTime) throws IOException, ServletException {
-        String errorMessage = "Too many requests";
-        RateLimitExceededException exception = new RateLimitExceededException(errorMessage,
+        RateLimitExceededException exception = new RateLimitExceededException(TOO_MANY_REQUESTS_MESSAGE,
             limitForPeriod, availablePermissions, resetTime);
         rateLimitExceptionHandler.handle(request, response, exception);
     }
@@ -94,6 +99,7 @@ public class RateLimitFilter extends OncePerRequestFilter implements Ordered {
     @AllArgsConstructor
     private static class RequestMatcherConfig {
         private final RequestMatcher requestMatcher;
+        private String rateLimiterName;
         private boolean rateLimited;
     }
 
@@ -108,12 +114,18 @@ public class RateLimitFilter extends OncePerRequestFilter implements Ordered {
 
         AfterRequestMatchersBuilder requestMatchers(RequestMatcher... requestMatchers);
 
-        RateLimitFilter build();
+        RateLimitingFilter build();
     }
 
     public interface AfterRequestMatchersBuilder {
         InitialBuilder permitAll();
 
+        InitialBuilder rateLimited();
+
+        RateLimitConfigBuilder rateLimiterName(String rateLimiterName);
+    }
+
+    public interface RateLimitConfigBuilder {
         InitialBuilder rateLimited();
     }
 
@@ -123,9 +135,9 @@ public class RateLimitFilter extends OncePerRequestFilter implements Ordered {
     }
 
     private static class Builder extends AbstractRequestMatcherRegistry<Builder>
-        implements InitialBuilder, AfterRequestMatchersBuilder {
+        implements InitialBuilder, AfterRequestMatchersBuilder, RateLimitConfigBuilder {
 
-        private final RateLimiter rateLimiter;
+        private final RateLimiterRegistry rateLimiterRegistry;
         private final RateLimitExceptionHandler rateLimitExceptionHandler;
         private final List<RequestMatcherConfig> requestMatcherConfigs = new ArrayList<>();
         private boolean anyRequestConfigured = false;
@@ -135,7 +147,7 @@ public class RateLimitFilter extends OncePerRequestFilter implements Ordered {
 
         private Builder(RateLimiterRegistry rateLimiterRegistry,
                         RateLimitExceptionHandler rateLimitExceptionHandler) {
-            this.rateLimiter = rateLimiterRegistry.rateLimiter("default");
+            this.rateLimiterRegistry = rateLimiterRegistry;
             this.rateLimitExceptionHandler = rateLimitExceptionHandler;
         }
 
@@ -144,7 +156,7 @@ public class RateLimitFilter extends OncePerRequestFilter implements Ordered {
             lastIndex = requestMatcherConfigs.size();
             for (String pattern : patterns) {
                 this.requestMatcherConfigs.add(new RequestMatcherConfig(
-                    new AntPathRequestMatcher(pattern, method.name()), true));
+                    new AntPathRequestMatcher(pattern, method.name()), DEFAULT_RATE_LIMITER_NAME, true));
             }
             return this;
         }
@@ -153,7 +165,8 @@ public class RateLimitFilter extends OncePerRequestFilter implements Ordered {
         public Builder requestMatchers(String... patterns) {
             lastIndex = requestMatcherConfigs.size();
             for (String pattern : patterns) {
-                this.requestMatcherConfigs.add(new RequestMatcherConfig(new AntPathRequestMatcher(pattern), true));
+                this.requestMatcherConfigs.add(new RequestMatcherConfig(
+                    new AntPathRequestMatcher(pattern), DEFAULT_RATE_LIMITER_NAME, true));
             }
             return this;
         }
@@ -162,7 +175,8 @@ public class RateLimitFilter extends OncePerRequestFilter implements Ordered {
         public Builder requestMatchers(RequestMatcher... requestMatchers) {
             lastIndex = requestMatcherConfigs.size();
             for (RequestMatcher requestMatcher : requestMatchers) {
-                this.requestMatcherConfigs.add(new RequestMatcherConfig(requestMatcher, true));
+                this.requestMatcherConfigs.add(new RequestMatcherConfig(
+                    requestMatcher, DEFAULT_RATE_LIMITER_NAME, true));
             }
             return this;
         }
@@ -174,6 +188,7 @@ public class RateLimitFilter extends OncePerRequestFilter implements Ordered {
             return this;
         }
 
+        @Override
         public Builder permitAll() {
             Assert.state(anyRequestConfigured || !requestMatcherConfigs.isEmpty(),
                 "permitAll() can only be called after requestMatchers() or anyRequest()");
@@ -187,6 +202,17 @@ public class RateLimitFilter extends OncePerRequestFilter implements Ordered {
             return this;
         }
 
+        @Override
+        public Builder rateLimiterName(String rateLimiterName) {
+            Assert.state(anyRequestConfigured || !requestMatcherConfigs.isEmpty(),
+                "rateLimiterName() can only be called after requestMatchers() or anyRequest()");
+            requestMatcherConfigs.stream()
+                .skip(lastIndex)
+                .forEach(config -> config.rateLimiterName = rateLimiterName);
+            return this;
+        }
+
+        @Override
         public Builder rateLimited() {
             Assert.state(anyRequestConfigured || !requestMatcherConfigs.isEmpty(),
                 "rateLimited() can only be called after requestMatchers() or anyRequest())");
@@ -200,13 +226,15 @@ public class RateLimitFilter extends OncePerRequestFilter implements Ordered {
             return this;
         }
 
+        @Override
         public Builder order(int order) {
             this.order = order;
             return this;
         }
 
-        public RateLimitFilter build() {
-            return new RateLimitFilter(rateLimiter,
+        @Override
+        public RateLimitingFilter build() {
+            return new RateLimitingFilter(rateLimiterRegistry,
                 rateLimitExceptionHandler,
                 requestMatcherConfigs, defaultRateLimited, order);
         }

@@ -123,3 +123,7 @@ resilience4j:
         limit-for-period: 1
         limit-refresh-period: 10s
         timeout-duration: 200ms
+      jwksRateLimiter:
+        limitForPeriod: 1
+        limitRefreshPeriod: 1s
+        timeoutDuration: 200ms
