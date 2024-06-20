@@ -102,7 +102,11 @@ public class YouTubeController {
                 schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(responseCode = "500", description = "Internal server error",
             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                schema = @Schema(implementation = ProblemDetail.class)))})
+                schema = @Schema(implementation = ProblemDetail.class))),
+        @ApiResponse(responseCode = "503", description = "Service Unavailable due to Circuit Breaker",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                schema = @Schema(implementation = ProblemDetail.class)))
+    })
     @GetMapping("/popular")
     public ResponseEntity<String> findPopularYouTubers(
         @Parameter(description = "The genre of YouTube content", example = "tech")

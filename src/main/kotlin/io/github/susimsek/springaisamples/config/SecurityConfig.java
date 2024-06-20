@@ -10,6 +10,7 @@ import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
+import io.github.susimsek.springaisamples.circuitbreaker.CircuitBreakerFilter;
 import io.github.susimsek.springaisamples.enums.FilterOrder;
 import io.github.susimsek.springaisamples.exception.security.SecurityProblemSupport;
 import io.github.susimsek.springaisamples.idempotency.IdempotencyFilter;
@@ -82,6 +83,7 @@ public class SecurityConfig {
         TraceFilter traceFilter,
         IdempotencyFilter idempotencyFilter,
         RateLimitingFilter rateLimitFilter,
+        CircuitBreakerFilter circuitBreakerFilter,
         LoggingFilter loggingFilter) throws Exception {
         http
             .csrf(AbstractHttpConfigurer::disable)
@@ -119,7 +121,8 @@ public class SecurityConfig {
             .addFilterAfter(idempotencyFilter, XssFilter.class)
             .addFilterAfter(traceFilter, IdempotencyFilter.class)
             .addFilterAfter(rateLimitFilter, IdempotencyFilter.class)
-            .addFilterAfter(loggingFilter, RateLimitingFilter.class);
+            .addFilterAfter(circuitBreakerFilter, RateLimitingFilter.class)
+            .addFilterAfter(loggingFilter, CircuitBreakerFilter.class);
         return http.build();
     }
 

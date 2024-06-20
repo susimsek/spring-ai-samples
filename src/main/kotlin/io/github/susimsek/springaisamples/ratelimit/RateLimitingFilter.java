@@ -91,7 +91,8 @@ public class RateLimitingFilter extends OncePerRequestFilter implements Ordered 
                                              int limitForPeriod,
                                              long availablePermissions,
                                              long resetTime) throws IOException, ServletException {
-        RateLimitExceededException exception = new RateLimitExceededException(TOO_MANY_REQUESTS_MESSAGE,
+        RateLimitExceededException exception = new RateLimitExceededException(
+            currentRateLimiterName, TOO_MANY_REQUESTS_MESSAGE,
             limitForPeriod, availablePermissions, resetTime);
         rateLimitExceptionHandler.handle(request, response, exception);
     }

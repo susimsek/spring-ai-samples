@@ -48,7 +48,11 @@ public class ChatController {
                 schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(responseCode = "500", description = "Internal server error",
             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                schema = @Schema(implementation = ProblemDetail.class)))})
+                schema = @Schema(implementation = ProblemDetail.class))),
+        @ApiResponse(responseCode = "503", description = "Service Unavailable due to Circuit Breaker",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                schema = @Schema(implementation = ProblemDetail.class)))
+    })
     @GetMapping("/api/ai/chat/generate")
     public ResponseEntity<String> generate(
         @Parameter(description = "Message", example = "Tell me a dad joke about dogs")
