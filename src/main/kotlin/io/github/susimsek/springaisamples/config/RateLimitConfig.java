@@ -6,9 +6,11 @@ import io.github.susimsek.springaisamples.exception.ratelimit.RateLimitProblemSu
 import io.github.susimsek.springaisamples.ratelimit.RateLimitingFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
 
 
 @Configuration(proxyBeanMethods = false)
+@EnableAspectJAutoProxy
 public class RateLimitConfig {
 
     @Bean

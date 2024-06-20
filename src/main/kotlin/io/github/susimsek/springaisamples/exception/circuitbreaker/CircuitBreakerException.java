@@ -4,11 +4,16 @@ import lombok.Getter;
 
 @Getter
 public class CircuitBreakerException extends RuntimeException {
-    
+
     private final String circuitBreakerName;
 
     public CircuitBreakerException(String circuitBreakerName, String message) {
         super(message);
+        this.circuitBreakerName = circuitBreakerName;
+    }
+
+    public CircuitBreakerException(String circuitBreakerName, String message, Throwable cause) {
+        super(message, cause);
         this.circuitBreakerName = circuitBreakerName;
     }
 

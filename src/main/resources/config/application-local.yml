@@ -136,11 +136,11 @@ resilience4j:
     instances:
       jwksCircuitBreaker:
         baseConfig: default
-        slidingWindowSize: 15
-        minimumNumberOfCalls: 10
-        failureRateThreshold: 60
-        waitDurationInOpenState: 20000ms
-        permittedNumberOfCallsInHalfOpenState: 5
+        slidingWindowSize: 5
+        minimumNumberOfCalls: 3
+        failureRateThreshold: 50
+        waitDurationInOpenState: 5s
+        permittedNumberOfCallsInHalfOpenState: 2
         slidingWindowType: COUNT_BASED
         recordExceptions:
           - java.net.ConnectException
@@ -156,6 +156,7 @@ resilience4j:
         timeout-duration: 200ms
     instances:
       jwksRateLimiter:
+        base-config: default
         limitForPeriod: 1
         limitRefreshPeriod: 1s
         timeoutDuration: 200ms

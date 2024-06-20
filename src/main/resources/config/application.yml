@@ -34,6 +34,10 @@ management:
       exposure:
         include: "*"
   health:
+    ratelimiters:
+      enabled: true
+    circuitbreakers:
+      enabled: true
     readiness-state:
       enabled: true
     liveness-state:
@@ -44,6 +48,7 @@ management:
     health:
       probes:
         enabled: true
+      show-details: always
   info:
     env:
       enabled: true
