@@ -53,9 +53,6 @@ public class ChatModalController {
                 schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(responseCode = "500", description = "Internal server error",
             content = @Content(mediaType = "application/json",
-                schema = @Schema(implementation = ProblemDetail.class))),
-        @ApiResponse(responseCode = "503", description = "Service Unavailable due to Circuit Breaker",
-            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                 schema = @Schema(implementation = ProblemDetail.class)))
     })
     @GetMapping("/dad-jokes")
