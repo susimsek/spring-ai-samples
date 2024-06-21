@@ -73,7 +73,7 @@ class RestClientConfigTest {
             .defaultUriVariables(Map.of("apiKey", "testApiKey"));
         RestClient restClient = restClientBuilder.build();
 
-        WeatherClient weatherClient = restClientConfig.weatherClient(restClientBuilder, properties);
+        WeatherClient weatherClient = restClientConfig.weatherClient(restClientBuilder, null, properties);
 
         assertNotNull(weatherClient);
 
