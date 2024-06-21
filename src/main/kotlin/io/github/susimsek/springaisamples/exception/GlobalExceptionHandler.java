@@ -5,8 +5,10 @@ import io.github.susimsek.springaisamples.exception.ratelimit.RateLimitExceededE
 import io.github.susimsek.springaisamples.exception.security.JwsException;
 import io.github.susimsek.springaisamples.i18n.ParameterMessageSource;
 import jakarta.validation.ConstraintViolationException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -146,6 +148,20 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             ErrorConstants.RATE_LIMITING_ERROR,  new HttpHeaders(), request);
     }
 
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<Object> handleResourceNotFoundException(@NonNull ResourceNotFoundException ex,
+                                                                  @NonNull WebRequest request) {
+        return handleResourceException(ex.getResourceName(), ex.getSearchCriteria(),
+           ex.getSearchValue(), HttpStatus.NOT_FOUND, ex, request);
+    }
+
+    @ExceptionHandler(ResourceAlreadyExistsException.class)
+    public ResponseEntity<Object> handleResourceAlreadyExistsException(@NonNull ResourceAlreadyExistsException ex,
+                                                                  @NonNull WebRequest request) {
+        return handleResourceException(ex.getResourceName(), ex.getSearchCriteria(),
+            ex.getSearchValue(), HttpStatus.CONFLICT, ex, request);
+    }
+
     @ExceptionHandler(LocalizedException.class)
     public ResponseEntity<Object> handleLocalizedException(@NonNull LocalizedException ex,
                                                            @NonNull WebRequest request) {
@@ -180,6 +196,25 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return super.handleExceptionInternal(ex, body, headers, status, request);
     }
 
+    protected ResponseEntity<Object> handleResourceException(
+        String resourceName,
+        String searchCriteria,
+        Object searchValue,
+        HttpStatusCode status,
+        LocalizedException ex,
+        @NonNull WebRequest request) {
+        Locale locale = request.getLocale();
+        String localizedResourceName = messageSource.getMessage(
+            "resource." + resourceName.toLowerCase(), null, locale);
+        String localizedSearchCriteria = messageSource.getMessage(
+            "search.criteria." + searchCriteria.toLowerCase(), null, locale);
+        String errorMessage = messageSource.getMessageWithNamedArgs(
+            ex.getMessage(), createNamedArgs(localizedResourceName,
+                localizedSearchCriteria, searchValue), locale);
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(status, errorMessage);
+        return handleExceptionInternal(ex, problem, new HttpHeaders(), status, request);
+    }
+
     private ResponseEntity<Object> createProblemDetailResponse(
         Exception ex,
         HttpStatusCode status,
@@ -197,5 +232,15 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         } else {
             return messageSource.getMessage(ex.getMessage(), ex.getArgs(), locale);
         }
+    }
+
+    private Map<String, String> createNamedArgs(String resourceName,
+                                                       String searchCriteria,
+                                                       Object searchValue) {
+        Map<String, String> namedArgs = new HashMap<>();
+        namedArgs.put("resource", resourceName);
+        namedArgs.put("criteria", searchCriteria);
+        namedArgs.put("value", searchValue.toString());
+        return namedArgs;
     }
 }
