@@ -145,6 +145,21 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             ErrorConstants.RATE_LIMITING_ERROR,  new HttpHeaders(), request);
     }
 
+    @ExceptionHandler(ClientErrorException.class)
+    public ResponseEntity<Object> handleClientErrorException(
+        @NonNull ClientErrorException ex,
+        @NonNull WebRequest request) {
+        return createProblemDetailResponse(ex, ex.getStatus(),
+            ex.getErrorKey(), new HttpHeaders(), request);
+    }
+
+    @ExceptionHandler(ServerErrorException.class)
+    public ResponseEntity<Object> handleServerErrorException(@NonNull ServerErrorException ex,
+                                                             @NonNull WebRequest request) {
+        return createProblemDetailResponse(ex, HttpStatus.INTERNAL_SERVER_ERROR,
+            ErrorConstants.INTERNAL_SERVER_ERROR, new HttpHeaders(), request);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Object> handleAllExceptions(
         @NonNull Exception ex,

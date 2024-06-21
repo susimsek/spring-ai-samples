@@ -1,6 +1,7 @@
 package io.github.susimsek.springaisamples.config;
 
 import io.github.susimsek.springaisamples.client.WeatherClient;
+import io.github.susimsek.springaisamples.exception.restclient.WeatherApiErrorHandler;
 import io.github.susimsek.springaisamples.logging.wrapper.HttpLoggingWrapper;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
@@ -44,10 +45,12 @@ public class RestClientConfig {
     @Bean
     public WeatherClient weatherClient(
         RestClient.Builder restClientBuilder,
+        WeatherApiErrorHandler weatherApiErrorHandler,
         WeatherClientProperties properties) {
         RestClient client = restClientBuilder
             .baseUrl(properties.getApiUrl())
             .defaultUriVariables(Map.of("apiKey", properties.getApiKey()))
+            .defaultStatusHandler(weatherApiErrorHandler)
             .build();
 
         HttpServiceProxyFactory factory = HttpServiceProxyFactory
