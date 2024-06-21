@@ -6,7 +6,7 @@ import org.springframework.http.HttpStatusCode;
 
 @Getter
 public class LocalizedException extends RuntimeException {
-    private final Object[] args;
+    private final transient Object[] args;
     private final Map<String, String> namedArgs;
     private final HttpStatusCode status;
 
