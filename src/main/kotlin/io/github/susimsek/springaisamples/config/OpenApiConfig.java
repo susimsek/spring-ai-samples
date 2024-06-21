@@ -8,7 +8,7 @@ import static io.github.susimsek.springaisamples.trace.TraceConstants.REQUEST_ID
 import io.github.susimsek.springaisamples.openapi.LocalizedOpenApiCustomizer;
 import io.github.susimsek.springaisamples.openapi.OpenApiProperties;
 import io.github.susimsek.springaisamples.openapi.annotation.Idempotent;
-import io.github.susimsek.springaisamples.openapi.annotation.JwsSignatureRequired;
+import io.github.susimsek.springaisamples.openapi.annotation.RequireJwsSignature;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
@@ -90,11 +90,11 @@ public class OpenApiConfig {
     }
 
     private boolean isJwsSignatureRequired(Class<?> clazz) {
-        return AnnotatedElementUtils.hasAnnotation(clazz, JwsSignatureRequired.class);
+        return AnnotatedElementUtils.hasAnnotation(clazz, RequireJwsSignature.class);
     }
 
     private boolean isJwsSignatureRequired(Method method) {
-        return AnnotatedElementUtils.hasAnnotation(method, JwsSignatureRequired.class);
+        return AnnotatedElementUtils.hasAnnotation(method, RequireJwsSignature.class);
     }
 
     private boolean isIdempotent(Class<?> clazz) {
