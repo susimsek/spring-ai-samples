@@ -1,6 +1,5 @@
 package io.github.susimsek.springaisamples.exception;
 
-import io.github.susimsek.springaisamples.exception.circuitbreaker.CircuitBreakerException;
 import io.github.susimsek.springaisamples.exception.idempotency.MissingIdempotencyKeyException;
 import io.github.susimsek.springaisamples.exception.ratelimit.RateLimitExceededException;
 import io.github.susimsek.springaisamples.exception.security.JwsException;
@@ -97,13 +96,6 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                                                         @NonNull WebRequest request) {
         return createProblemDetailResponse(ex, HttpStatus.BAD_REQUEST,
             ErrorConstants.IDEMPOTENCY_KEY_MISSING, new HttpHeaders(), request);
-    }
-
-    @ExceptionHandler(CircuitBreakerException.class)
-    protected ResponseEntity<Object> handleCircuitBreakerException(@NonNull CircuitBreakerException ex,
-                                                                   @NonNull WebRequest request) {
-        return createProblemDetailResponse(ex, HttpStatus.SERVICE_UNAVAILABLE,
-            ErrorConstants.CIRCUIT_BREAKER_ERROR, new HttpHeaders(), request);
     }
 
     @ExceptionHandler(AuthenticationException.class)
