@@ -148,19 +148,21 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             ErrorConstants.RATE_LIMITING_ERROR,  new HttpHeaders(), request);
     }
 
-    @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<Object> handleResourceNotFoundException(@NonNull ResourceNotFoundException ex,
-                                                                  @NonNull WebRequest request) {
-        return handleResourceException(ex.getResourceName(), ex.getSearchCriteria(),
-           ex.getSearchValue(), HttpStatus.NOT_FOUND, ex, request);
+    @ExceptionHandler(ResourceException.class)
+    public ResponseEntity<Object> handleResourceException(@NonNull ResourceException ex,
+                                                          @NonNull WebRequest request) {
+        Locale locale = request.getLocale();
+        String localizedResourceName = messageSource.getMessage(
+            "resource." + ex.getResourceName().toLowerCase(), null, locale);
+        String searchCriteria = messageSource.getMessage(
+            "search.criteria." + ex.getSearchCriteria().toLowerCase(), null, locale);
+        String errorMessage = messageSource.getMessageWithNamedArgs(
+            ex.getMessage(), createNamedArgs(localizedResourceName,
+                searchCriteria, ex.getSearchValue()), locale);
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(ex.getStatus(), errorMessage);
+        return handleExceptionInternal(ex, problem, new HttpHeaders(), ex.getStatus(), request);
     }
 
-    @ExceptionHandler(ResourceAlreadyExistsException.class)
-    public ResponseEntity<Object> handleResourceAlreadyExistsException(@NonNull ResourceAlreadyExistsException ex,
-                                                                  @NonNull WebRequest request) {
-        return handleResourceException(ex.getResourceName(), ex.getSearchCriteria(),
-            ex.getSearchValue(), HttpStatus.CONFLICT, ex, request);
-    }
 
     @ExceptionHandler(LocalizedException.class)
     public ResponseEntity<Object> handleLocalizedException(@NonNull LocalizedException ex,
@@ -194,25 +196,6 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         @NonNull WebRequest request) {
         log.error("An exception occurred, which will cause a {} response", status, ex);
         return super.handleExceptionInternal(ex, body, headers, status, request);
-    }
-
-    protected ResponseEntity<Object> handleResourceException(
-        String resourceName,
-        String searchCriteria,
-        Object searchValue,
-        HttpStatusCode status,
-        LocalizedException ex,
-        @NonNull WebRequest request) {
-        Locale locale = request.getLocale();
-        String localizedResourceName = messageSource.getMessage(
-            "resource." + resourceName.toLowerCase(), null, locale);
-        String localizedSearchCriteria = messageSource.getMessage(
-            "search.criteria." + searchCriteria.toLowerCase(), null, locale);
-        String errorMessage = messageSource.getMessageWithNamedArgs(
-            ex.getMessage(), createNamedArgs(localizedResourceName,
-                localizedSearchCriteria, searchValue), locale);
-        ProblemDetail problem = ProblemDetail.forStatusAndDetail(status, errorMessage);
-        return handleExceptionInternal(ex, problem, new HttpHeaders(), status, request);
     }
 
     private ResponseEntity<Object> createProblemDetailResponse(
