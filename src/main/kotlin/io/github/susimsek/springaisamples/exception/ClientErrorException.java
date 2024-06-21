@@ -1,20 +1,10 @@
 package io.github.susimsek.springaisamples.exception;
 
-import lombok.Getter;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 
-@Getter
-public class ClientErrorException extends RuntimeException {
-    private final String code;
-    private final HttpStatus status;
-    private final String errorKey;
+public class ClientErrorException extends LocalizedException {
 
-    public ClientErrorException(String code, String message, HttpStatus status,
-                                String errorKey) {
-        super(message);
-        this.code = code;
-        this.status = status;
-        this.errorKey = errorKey;
+    public ClientErrorException(String message, HttpStatusCode status) {
+        super(message, status);
     }
-
 }

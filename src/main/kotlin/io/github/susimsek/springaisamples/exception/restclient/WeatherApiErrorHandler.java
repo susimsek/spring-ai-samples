@@ -30,7 +30,7 @@ public class WeatherApiErrorHandler implements ResponseErrorHandler {
         HttpStatus status = HttpStatus.valueOf(response.getStatusCode().value());
         String errorKey = "weatherapi.error." + error.code();
         if (status.is4xxClientError()) {
-            throw new ClientErrorException(String.valueOf(error.code()), error.message(), status, errorKey);
+            throw new ClientErrorException(errorKey, status);
         } else if (status.is5xxServerError()) {
             throw new ServerErrorException(error.code(), error.message(), status);
         }

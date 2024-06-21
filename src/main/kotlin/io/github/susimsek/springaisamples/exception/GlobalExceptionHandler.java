@@ -6,6 +6,7 @@ import io.github.susimsek.springaisamples.exception.security.JwsException;
 import io.github.susimsek.springaisamples.i18n.ParameterMessageSource;
 import jakarta.validation.ConstraintViolationException;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -145,12 +146,12 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             ErrorConstants.RATE_LIMITING_ERROR,  new HttpHeaders(), request);
     }
 
-    @ExceptionHandler(ClientErrorException.class)
-    public ResponseEntity<Object> handleClientErrorException(
-        @NonNull ClientErrorException ex,
-        @NonNull WebRequest request) {
-        return createProblemDetailResponse(ex, ex.getStatus(),
-            ex.getErrorKey(), new HttpHeaders(), request);
+    @ExceptionHandler(LocalizedException.class)
+    public ResponseEntity<Object> handleLocalizedException(@NonNull LocalizedException ex,
+                                                           @NonNull WebRequest request) {
+        String errorMessage = resolveErrorMessage(ex, request.getLocale());
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(ex.getStatus(), errorMessage);
+        return handleExceptionInternal(ex, problem, new HttpHeaders(), ex.getStatus(), request);
     }
 
     @ExceptionHandler(ServerErrorException.class)
@@ -188,5 +189,13 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         String errorMessage = messageSource.getMessage(messageKey, null, request.getLocale());
         ProblemDetail problem = ProblemDetail.forStatusAndDetail(status, errorMessage);
         return handleExceptionInternal(ex, problem, headers, status, request);
+    }
+
+    private String resolveErrorMessage(LocalizedException ex, Locale locale) {
+        if (ex.getNamedArgs() != null) {
+            return messageSource.getMessageWithNamedArgs(ex.getMessage(), ex.getNamedArgs(), locale);
+        } else {
+            return messageSource.getMessage(ex.getMessage(), ex.getArgs(), locale);
+        }
     }
 }
