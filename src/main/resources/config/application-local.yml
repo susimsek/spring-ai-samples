@@ -10,6 +10,9 @@ spring:
     deserialization:
       fail-on-unknown-properties: false
     default-property-inclusion: non_null
+  restclient:
+    connect-timeout: 5s
+    read-timeout: 10s
   ai:
     openai:
       api-key: ${OPENAI_API_KEY}
