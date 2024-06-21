@@ -18,6 +18,8 @@ spring:
   messages:
     basename: i18n/messages
     fallback-to-system-locale: false
+    use-code-as-default-message: true
+    cache-duration: 1h
   mvc:
     problemdetails:
       enabled: true
