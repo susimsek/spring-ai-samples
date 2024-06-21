@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.Locale;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
@@ -26,6 +27,7 @@ public class LocalizationController {
 
     private final ParameterMessageSource messageSource;
 
+    @Cacheable("translationCache")
     @Operation(summary = "{api-docs.api.localization.summary}",
         description = "{api-docs.api.localization.description}")
     @ApiResponses(value = {
