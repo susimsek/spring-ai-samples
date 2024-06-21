@@ -27,7 +27,8 @@ public class LocalizationController {
 
     private final ParameterMessageSource messageSource;
 
-    @Cacheable("translationCache")
+    @Cacheable(value = "translationsCache", key = "#root.method.name + '_' "
+        + "+ T(org.springframework.context.i18n.LocaleContextHolder).getLocale().toString()")
     @Operation(summary = "{api-docs.api.localization.summary}",
         description = "{api-docs.api.localization.description}")
     @ApiResponses(value = {

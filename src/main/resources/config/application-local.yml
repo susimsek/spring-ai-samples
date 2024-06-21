@@ -25,6 +25,8 @@ spring:
         ttl: 1h
       jwksCache:
         ttl: 1h
+      translationsCache:
+        ttl: 1h
   devtools:
     restart:
       enabled: true
