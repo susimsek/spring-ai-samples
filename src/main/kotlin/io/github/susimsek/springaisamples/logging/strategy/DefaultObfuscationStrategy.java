@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.github.susimsek.springaisamples.logging.config.LoggingProperties;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -41,6 +42,7 @@ public class DefaultObfuscationStrategy implements ObfuscationStrategy {
             maskJsonPaths(rootNode, loggingProperties.getHttp().getObfuscate().getJsonBodyFields());
             return objectMapper.writeValueAsString(rootNode);
         } catch (Exception e) {
+            // Exception'ı loglamak için bir logger kullanabilirsiniz
             return body;
         }
     }
@@ -61,10 +63,35 @@ public class DefaultObfuscationStrategy implements ObfuscationStrategy {
     }
 
     private void maskJsonPaths(JsonNode rootNode, List<String> jsonPaths) {
-        jsonPaths.forEach(jsonPath -> {
-            String[] pathParts = jsonPath.replace("$.", "").split("\\.");
+        for (String jsonPath : jsonPaths) {
+            String[] pathParts = splitJsonPath(jsonPath.replace("$.", ""));
             maskJsonNodeRecursive(rootNode, pathParts, 0);
-        });
+        }
+    }
+
+    private String[] splitJsonPath(String jsonPath) {
+        List<String> pathParts = new ArrayList<>();
+        StringBuilder currentPart = new StringBuilder();
+        boolean escaped = false;
+
+        for (char c : jsonPath.toCharArray()) {
+            if (c == '\\' && !escaped) {
+                escaped = true;
+            } else if (c == '.' && !escaped) {
+                pathParts.add(currentPart.toString());
+                currentPart.setLength(0);
+            } else {
+                escaped = false;
+                currentPart.append(c);
+            }
+        }
+
+        pathParts.add(currentPart.toString());
+        return pathParts.toArray(new String[0]);
+    }
+
+    private String unescapePart(String part) {
+        return part.replace("\\.", ".");
     }
 
     private void maskJsonNodeRecursive(JsonNode currentNode, String[] pathParts, int index) {
@@ -72,7 +99,7 @@ public class DefaultObfuscationStrategy implements ObfuscationStrategy {
             return;
         }
 
-        String currentPart = pathParts[index];
+        String currentPart = unescapePart(pathParts[index]);
 
         if (isArraySegment(currentPart)) {
             processArraySegment(currentNode, pathParts, index, currentPart);
