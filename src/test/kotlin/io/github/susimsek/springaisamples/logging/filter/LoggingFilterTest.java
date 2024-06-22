@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.anyInt;
-import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -65,7 +64,6 @@ class LoggingFilterTest {
         when(request.getMethod()).thenReturn(HttpMethod.GET.name());
         when(request.getHeaderNames()).thenReturn(Collections.enumeration(Collections.emptyList()));
         when(response.getHeaderNames()).thenReturn(Collections.emptyList());
-        when(loggingHandler.shouldNotLog("/test", HttpMethod.GET)).thenReturn(false);
 
         ContentCachingRequestWrapper wrappedRequest = new ContentCachingRequestWrapper(request);
         ContentCachingResponseWrapper wrappedResponse = new ContentCachingResponseWrapper(response);
@@ -101,7 +99,6 @@ class LoggingFilterTest {
         // Arrange
         when(request.getRequestURI()).thenReturn("/test");
         when(request.getMethod()).thenReturn(HttpMethod.GET.name());
-        when(loggingHandler.shouldNotLog("/test", HttpMethod.GET)).thenReturn(true);
 
         // Act
         loggingFilter.doFilterInternal(request, response, filterChain);
@@ -120,7 +117,6 @@ class LoggingFilterTest {
         when(request.getRequestURI()).thenReturn("/test");
         when(request.getRequestURL()).thenReturn(new StringBuffer("http://localhost:8080/invalid uri"));
         when(request.getMethod()).thenReturn(HttpMethod.GET.name());
-        when(loggingHandler.shouldNotLog(anyString(), any(HttpMethod.class))).thenReturn(false);
 
         ContentCachingRequestWrapper wrappedRequest = new ContentCachingRequestWrapper(request);
         ContentCachingResponseWrapper wrappedResponse = new ContentCachingResponseWrapper(response);
@@ -138,7 +134,6 @@ class LoggingFilterTest {
         // Arrange
         when(request.getRequestURI()).thenReturn("/test");
         when(request.getMethod()).thenReturn(HttpMethod.GET.name());
-        when(loggingHandler.shouldNotLog("/test", HttpMethod.GET)).thenReturn(false);
 
         ContentCachingRequestWrapper wrappedRequest = new ContentCachingRequestWrapper(request);
         ContentCachingResponseWrapper wrappedResponse = new ContentCachingResponseWrapper(response);
@@ -170,7 +165,6 @@ class LoggingFilterTest {
         when(request.getMethod()).thenReturn(HttpMethod.GET.name());
         when(request.getHeaderNames()).thenReturn(Collections.enumeration(Collections.emptyList()));
         when(response.getHeaderNames()).thenReturn(Collections.emptyList());
-        when(loggingHandler.shouldNotLog("/test", HttpMethod.GET)).thenReturn(false);
 
         ContentCachingRequestWrapper wrappedRequest = new ContentCachingRequestWrapper(request);
         ContentCachingResponseWrapper wrappedResponse = new ContentCachingResponseWrapper(response);
@@ -212,7 +206,6 @@ class LoggingFilterTest {
         when(request.getRequestURL()).thenReturn(new StringBuffer("http://localhost/test"));
         when(request.getMethod()).thenReturn(HttpMethod.GET.name());
         when(response.getHeaderNames()).thenReturn(Collections.emptyList());
-        when(loggingHandler.shouldNotLog("/test", HttpMethod.GET)).thenReturn(false);
 
         ContentCachingRequestWrapper wrappedRequest = new ContentCachingRequestWrapper(request);
         ContentCachingResponseWrapper wrappedResponse = new ContentCachingResponseWrapper(response);
@@ -252,7 +245,6 @@ class LoggingFilterTest {
         when(request.getHeaderNames()).thenReturn(Collections.enumeration(Collections.emptyList()));
         when(response.getHeaderNames()).thenReturn(Collections.singletonList("Authorization"));
         when(response.getHeader("Authorization")).thenReturn("Header-Value");
-        when(loggingHandler.shouldNotLog("/test", HttpMethod.GET)).thenReturn(false);
 
         ContentCachingRequestWrapper wrappedRequest = new ContentCachingRequestWrapper(request);
         ContentCachingResponseWrapper wrappedResponse = new ContentCachingResponseWrapper(response);

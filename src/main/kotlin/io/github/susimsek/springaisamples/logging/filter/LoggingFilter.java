@@ -14,6 +14,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -23,24 +24,30 @@ import org.springframework.web.filter.OncePerRequestFilter;
 @Slf4j
 @RequiredArgsConstructor
 @Order()
-public class LoggingFilter extends OncePerRequestFilter {
+public class LoggingFilter extends OncePerRequestFilter  implements Ordered {
 
     private final LoggingHandler loggingHandler;
+
+    @Override
+    public int getOrder() {
+        return loggingHandler.getOrder();
+    }
+
+    @Override
+    protected boolean shouldNotFilter(@NonNull HttpServletRequest request) {
+        return loggingHandler.shouldNotLog(request);
+    }
 
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request,
                                     @NonNull HttpServletResponse response,
                                     @NonNull FilterChain filterChain) throws ServletException, IOException {
-        if (!loggingHandler.shouldNotLog(request.getRequestURI(), HttpMethod.valueOf(request.getMethod()))) {
-            CachedBodyHttpServletRequestWrapper wrappedRequest = new CachedBodyHttpServletRequestWrapper(request);
-            CachedBodyHttpServletResponseWrapper wrappedResponse = new CachedBodyHttpServletResponseWrapper(response);
+        CachedBodyHttpServletRequestWrapper wrappedRequest = new CachedBodyHttpServletRequestWrapper(request);
+        CachedBodyHttpServletResponseWrapper wrappedResponse = new CachedBodyHttpServletResponseWrapper(response);
 
-            filterChain.doFilter(wrappedRequest, wrappedResponse);
-            logRequestAndResponse(wrappedRequest, wrappedResponse);
-            wrappedResponse.copyBodyToResponse();
-        } else {
-            filterChain.doFilter(request, response);
-        }
+        filterChain.doFilter(wrappedRequest, wrappedResponse);
+        logRequestAndResponse(wrappedRequest, wrappedResponse);
+        wrappedResponse.copyBodyToResponse();
     }
 
     private void logRequestAndResponse(CachedBodyHttpServletRequestWrapper request,

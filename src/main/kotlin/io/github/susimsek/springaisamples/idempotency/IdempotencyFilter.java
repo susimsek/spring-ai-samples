@@ -2,9 +2,9 @@ package io.github.susimsek.springaisamples.idempotency;
 
 import static io.github.susimsek.springaisamples.idempotency.IdempotencyConstants.IDEMPOTENCY_HEADER_NAME;
 
+import io.github.susimsek.springaisamples.enums.FilterOrder;
 import io.github.susimsek.springaisamples.exception.idempotency.IdempotencyExceptionHandler;
 import io.github.susimsek.springaisamples.exception.idempotency.MissingIdempotencyKeyException;
-import io.github.susimsek.springaisamples.enums.FilterOrder;
 import io.github.susimsek.springaisamples.service.IdempotencyService;
 import io.github.susimsek.springaisamples.utils.CachedBodyHttpServletResponseWrapper;
 import io.github.susimsek.springaisamples.utils.HttpHeadersUtil;
@@ -35,7 +35,7 @@ public class IdempotencyFilter extends OncePerRequestFilter implements Ordered {
     private final IdempotencyService idempotencyService;
     private final IdempotencyExceptionHandler idempotencyExceptionHandler;
     private final List<IdempotencyFilter.RequestMatcherConfig> requestMatcherConfigs;
-    private final boolean defaultSigned;
+    private final boolean defaultIdempotent;
     private final int order;
 
     @Override
@@ -49,7 +49,7 @@ public class IdempotencyFilter extends OncePerRequestFilter implements Ordered {
             .filter(config -> config.requestMatcher.matches(request))
             .map(config -> !config.idempotent)
             .findFirst()
-            .orElse(!defaultSigned);
+            .orElse(!defaultIdempotent);
     }
 
     @Override

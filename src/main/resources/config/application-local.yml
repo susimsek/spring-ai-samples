@@ -77,24 +77,6 @@ logging:
         - $.secretKey
         - $.apiSecret
         - $.apiKey
-    exclude:
-      rules:
-        - path-pattern: "/actuator/**"
-        - pathPattern: "/error"
-        - pathPattern: "/static/**"
-        - pathPattern: "/public/**"
-        - pathPattern: "/resources/**"
-        - pathPattern: "/css/**"
-        - pathPattern: "/js/**"
-        - path-pattern: "/images/**"
-        - path-pattern: "/favicon.ico"
-        - pathPattern: "/webjars/**"
-        - pathPattern: "/v3/api-docs/**"
-        - pathPattern: "/swagger-ui/**"
-        - pathPattern: "/api-docs/**"
-    include:
-      rules:
-        - pathPattern: "/**"
 weather:
   client:
     api-key: ${WEATHER_API_KEY}

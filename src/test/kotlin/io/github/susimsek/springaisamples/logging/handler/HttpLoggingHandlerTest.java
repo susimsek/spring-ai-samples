@@ -13,7 +13,6 @@ import io.github.susimsek.springaisamples.logging.enums.Source;
 import io.github.susimsek.springaisamples.logging.formatter.LogFormatter;
 import io.github.susimsek.springaisamples.logging.model.HttpLog;
 import io.github.susimsek.springaisamples.logging.utils.Obfuscator;
-import io.github.susimsek.springaisamples.logging.utils.PathFilter;
 import java.net.URI;
 import java.net.URISyntaxException;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,9 +38,6 @@ class HttpLoggingHandlerTest {
     @Mock
     private Obfuscator obfuscator;
 
-    @Mock
-    private PathFilter pathFilter;
-
     @InjectMocks
     private HttpLoggingHandler httpLoggingHandler;
 
@@ -63,16 +59,12 @@ class HttpLoggingHandlerTest {
         when(obfuscator.maskBody(anyString())).thenAnswer(invocation -> invocation.getArgument(0));
         when(obfuscator.maskHeaders(any(HttpHeaders.class))).thenReturn(headers);
         when(logFormatter.format(any(HttpLog.class))).thenReturn("formatted log");
-        when(pathFilter.shouldInclude(anyString(), anyString())).thenReturn(true);
-        when(pathFilter.shouldExclude(anyString(), anyString())).thenReturn(false);
 
         // Act
         httpLoggingHandler.logRequest(HttpMethod.GET, uri, headers, body, Source.CLIENT);
 
         // Assert
         verify(logFormatter).format(any(HttpLog.class));
-        verify(pathFilter).shouldInclude(uri.getPath(), HttpMethod.GET.name());
-        verify(pathFilter).shouldExclude(uri.getPath(), HttpMethod.GET.name());
     }
 
     @Test
@@ -89,16 +81,12 @@ class HttpLoggingHandlerTest {
         when(obfuscator.maskBody(anyString())).thenAnswer(invocation -> invocation.getArgument(0));
         when(obfuscator.maskHeaders(any(HttpHeaders.class))).thenReturn(headers);
         when(logFormatter.format(any(HttpLog.class))).thenReturn("formatted log");
-        when(pathFilter.shouldInclude(anyString(), anyString())).thenReturn(true);
-        when(pathFilter.shouldExclude(anyString(), anyString())).thenReturn(false);
 
         // Act
         httpLoggingHandler.logResponse(HttpMethod.GET, uri, statusCode, headers, responseBody, Source.CLIENT);
 
         // Assert
         verify(logFormatter).format(any(HttpLog.class));
-        verify(pathFilter).shouldInclude(uri.getPath(), HttpMethod.GET.name());
-        verify(pathFilter).shouldExclude(uri.getPath(), HttpMethod.GET.name());
     }
 
     @Test
@@ -111,7 +99,6 @@ class HttpLoggingHandlerTest {
         httpProperties.setLevel(LogLevel.FULL);
 
         when(loggingProperties.getHttp()).thenReturn(httpProperties);
-        when(pathFilter.shouldInclude(anyString(), anyString())).thenReturn(false);
 
         // Act
         httpLoggingHandler.logRequest(HttpMethod.GET, uri, headers, body, Source.CLIENT);
@@ -131,7 +118,6 @@ class HttpLoggingHandlerTest {
         httpProperties.setLevel(LogLevel.FULL);
 
         when(loggingProperties.getHttp()).thenReturn(httpProperties);
-        when(pathFilter.shouldInclude(anyString(), anyString())).thenReturn(false);
 
         // Act
         httpLoggingHandler.logResponse(HttpMethod.GET, uri, statusCode, headers, responseBody, Source.CLIENT);
@@ -154,16 +140,12 @@ class HttpLoggingHandlerTest {
         lenient().when(obfuscator.maskBody(anyString())).thenAnswer(invocation -> invocation.getArgument(0));
         lenient().when(obfuscator.maskHeaders(any(HttpHeaders.class))).thenReturn(headers);
         when(logFormatter.format(any(HttpLog.class))).thenReturn("formatted log");
-        when(pathFilter.shouldInclude(anyString(), anyString())).thenReturn(true);
-        lenient().when(pathFilter.shouldExclude(anyString(), anyString())).thenReturn(false);
 
         // Act
         httpLoggingHandler.logResponse(HttpMethod.GET, uri, statusCode, headers, responseBody, Source.CLIENT);
 
         // Assert
         verify(logFormatter).format(any(HttpLog.class));
-        verify(pathFilter).shouldInclude(uri.getPath(), HttpMethod.GET.name());
-        verify(pathFilter).shouldExclude(uri.getPath(), HttpMethod.GET.name());
     }
 
     @Test
@@ -179,16 +161,12 @@ class HttpLoggingHandlerTest {
         when(loggingProperties.getHttp()).thenReturn(httpProperties);
         when(obfuscator.maskHeaders(any(HttpHeaders.class))).thenReturn(headers);
         when(logFormatter.format(any(HttpLog.class))).thenReturn("formatted log");
-        when(pathFilter.shouldInclude(anyString(), anyString())).thenReturn(true);
-        when(pathFilter.shouldExclude(anyString(), anyString())).thenReturn(false);
 
         // Act
         httpLoggingHandler.logResponse(HttpMethod.GET, uri, statusCode, headers, responseBody, Source.CLIENT);
 
         // Assert
         verify(logFormatter).format(any(HttpLog.class));
-        verify(pathFilter).shouldInclude(uri.getPath(), HttpMethod.GET.name());
-        verify(pathFilter).shouldExclude(uri.getPath(), HttpMethod.GET.name());
     }
 
     @Test
@@ -205,16 +183,12 @@ class HttpLoggingHandlerTest {
         when(obfuscator.maskBody(anyString())).thenAnswer(invocation -> invocation.getArgument(0));
         when(obfuscator.maskHeaders(any(HttpHeaders.class))).thenReturn(headers);
         when(logFormatter.format(any(HttpLog.class))).thenReturn("formatted log");
-        when(pathFilter.shouldInclude(anyString(), anyString())).thenReturn(true);
-        when(pathFilter.shouldExclude(anyString(), anyString())).thenReturn(false);
 
         // Act
         httpLoggingHandler.logResponse(HttpMethod.GET, uri, statusCode, headers, responseBody, Source.CLIENT);
 
         // Assert
         verify(logFormatter).format(any(HttpLog.class));
-        verify(pathFilter).shouldInclude(uri.getPath(), HttpMethod.GET.name());
-        verify(pathFilter).shouldExclude(uri.getPath(), HttpMethod.GET.name());
     }
 
     @Test
@@ -229,16 +203,12 @@ class HttpLoggingHandlerTest {
 
         when(loggingProperties.getHttp()).thenReturn(httpProperties);
         when(logFormatter.format(any(HttpLog.class))).thenReturn("formatted log");
-        when(pathFilter.shouldInclude(anyString(), anyString())).thenReturn(true);
-        when(pathFilter.shouldExclude(anyString(), anyString())).thenReturn(false);
 
         // Act
         httpLoggingHandler.logResponse(HttpMethod.GET, uri, statusCode, headers, responseBody, Source.CLIENT);
 
         // Assert
         verify(logFormatter).format(any(HttpLog.class));
-        verify(pathFilter).shouldInclude(uri.getPath(), HttpMethod.GET.name());
-        verify(pathFilter).shouldExclude(uri.getPath(), HttpMethod.GET.name());
     }
 
     @Test
@@ -254,16 +224,12 @@ class HttpLoggingHandlerTest {
         when(loggingProperties.getHttp()).thenReturn(httpProperties);
         when(obfuscator.maskHeaders(any(HttpHeaders.class))).thenReturn(headers);
         when(logFormatter.format(any(HttpLog.class))).thenReturn("formatted log");
-        when(pathFilter.shouldInclude(anyString(), anyString())).thenReturn(true);
-        when(pathFilter.shouldExclude(anyString(), anyString())).thenReturn(false);
 
         // Act
         httpLoggingHandler.logResponse(HttpMethod.GET, uri, statusCode, headers, responseBody, Source.CLIENT);
 
         // Assert
         verify(logFormatter).format(any(HttpLog.class));
-        verify(pathFilter).shouldInclude(uri.getPath(), HttpMethod.GET.name());
-        verify(pathFilter).shouldExclude(uri.getPath(), HttpMethod.GET.name());
     }
 
     @Test
@@ -294,8 +260,6 @@ class HttpLoggingHandlerTest {
         httpProperties.setLevel(LogLevel.FULL);
 
         when(loggingProperties.getHttp()).thenReturn(httpProperties);
-        when(pathFilter.shouldInclude(anyString(), anyString())).thenReturn(true);
-        when(pathFilter.shouldExclude(anyString(), anyString())).thenReturn(true);
 
         // Act
         httpLoggingHandler.logRequest(HttpMethod.GET, uri, headers, body, Source.CLIENT);
@@ -315,8 +279,6 @@ class HttpLoggingHandlerTest {
         httpProperties.setLevel(LogLevel.FULL);
 
         when(loggingProperties.getHttp()).thenReturn(httpProperties);
-        when(pathFilter.shouldInclude(anyString(), anyString())).thenReturn(true);
-        when(pathFilter.shouldExclude(anyString(), anyString())).thenReturn(true);
 
         // Act
         httpLoggingHandler.logResponse(HttpMethod.GET, uri, statusCode, headers, responseBody, Source.CLIENT);
@@ -335,8 +297,6 @@ class HttpLoggingHandlerTest {
         httpProperties.setLevel(LogLevel.BASIC); // Not HEADERS level
 
         when(loggingProperties.getHttp()).thenReturn(httpProperties);
-        when(pathFilter.shouldInclude(anyString(), anyString())).thenReturn(true);
-        when(pathFilter.shouldExclude(anyString(), anyString())).thenReturn(false);
 
         // Act
         httpLoggingHandler.logRequest(HttpMethod.GET, uri, headers, body, Source.CLIENT);

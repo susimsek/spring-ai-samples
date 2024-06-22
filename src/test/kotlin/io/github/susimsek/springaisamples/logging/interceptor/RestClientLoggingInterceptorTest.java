@@ -59,7 +59,6 @@ class RestClientLoggingInterceptorTest {
         when(request.getMethod()).thenReturn(HttpMethod.GET);
         when(request.getURI()).thenReturn(new URI("http://localhost/test"));
         when(request.getHeaders()).thenReturn(new HttpHeaders());
-        when(loggingHandler.shouldNotLog(any(String.class), any(HttpMethod.class))).thenReturn(false);
         when(execution.execute(any(HttpRequest.class), any(byte[].class))).thenReturn(response);
         when(response.getBody()).thenReturn(new ByteArrayInputStream("response body".getBytes()));
         when(response.getHeaders()).thenReturn(new HttpHeaders());
@@ -82,7 +81,6 @@ class RestClientLoggingInterceptorTest {
         // Arrange
         when(request.getMethod()).thenReturn(HttpMethod.GET);
         when(request.getURI()).thenReturn(new URI("http://localhost/test"));
-        when(loggingHandler.shouldNotLog(any(String.class), any(HttpMethod.class))).thenReturn(true);
         when(execution.execute(any(HttpRequest.class), any(byte[].class))).thenReturn(response);
 
         // Act
@@ -99,7 +97,6 @@ class RestClientLoggingInterceptorTest {
         when(request.getMethod()).thenReturn(HttpMethod.GET);
         when(request.getURI()).thenReturn(new URI("http://localhost/test"));
         when(request.getHeaders()).thenReturn(new HttpHeaders());
-        when(loggingHandler.shouldNotLog(any(String.class), any(HttpMethod.class))).thenReturn(false);
         when(execution.execute(any(HttpRequest.class), any(byte[].class))).thenThrow(new IOException("Test IOException"));
 
         // Act & Assert
@@ -119,7 +116,6 @@ class RestClientLoggingInterceptorTest {
         // Arrange
         when(request.getMethod()).thenReturn(HttpMethod.GET);
         when(request.getURI()).thenReturn(new URI("http://localhost/test"));
-        when(loggingHandler.shouldNotLog(any(String.class), any(HttpMethod.class))).thenReturn(false);
         when(execution.execute(any(HttpRequest.class), any(byte[].class))).thenReturn(response);
         when(response.getBody()).thenReturn(new ByteArrayInputStream("response body".getBytes()));
         when(response.getHeaders()).thenReturn(new HttpHeaders());

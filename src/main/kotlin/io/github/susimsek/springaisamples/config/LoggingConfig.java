@@ -1,6 +1,7 @@
 package io.github.susimsek.springaisamples.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.github.susimsek.springaisamples.enums.FilterOrder;
 import io.github.susimsek.springaisamples.logging.config.LoggingProperties;
 import io.github.susimsek.springaisamples.logging.filter.LoggingFilter;
 import io.github.susimsek.springaisamples.logging.formatter.JsonLogFormatter;
@@ -11,14 +12,12 @@ import io.github.susimsek.springaisamples.logging.strategy.DefaultObfuscationStr
 import io.github.susimsek.springaisamples.logging.strategy.NoOpObfuscationStrategy;
 import io.github.susimsek.springaisamples.logging.strategy.ObfuscationStrategy;
 import io.github.susimsek.springaisamples.logging.utils.Obfuscator;
-import io.github.susimsek.springaisamples.logging.utils.PathFilter;
 import io.github.susimsek.springaisamples.logging.wrapper.HttpLoggingWrapper;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.util.AntPathMatcher;
 
 @Configuration
 @EnableConfigurationProperties(LoggingProperties.class)
@@ -39,8 +38,14 @@ public class LoggingConfig {
     public LoggingHandler loggingHandler(LoggingProperties loggingProperties,
                                          LogFormatter logFormatter,
                                          Obfuscator obfuscator,
-                                         PathFilter pathFilter) {
-        return new HttpLoggingHandler(loggingProperties, logFormatter, obfuscator, pathFilter);
+                                         RequestMatchersConfig requestMatchersConfig) {
+        return HttpLoggingHandler.builder(loggingProperties, logFormatter, obfuscator)
+            .order(FilterOrder.LOGGING.order())
+            .requestMatchers(requestMatchersConfig.staticResourcePaths()).permitAll()
+            .requestMatchers(requestMatchersConfig.swaggerResourcePaths()).permitAll()
+            .requestMatchers(requestMatchersConfig.actuatorEndpoints()).permitAll()
+            .anyRequest().logged()
+            .build();
     }
 
     @Bean
@@ -62,10 +67,5 @@ public class LoggingConfig {
     @Bean
     public Obfuscator obfuscator(ObfuscationStrategy obfuscationStrategy) {
         return new Obfuscator(obfuscationStrategy);
-    }
-
-    @Bean
-    public PathFilter pathFilter(LoggingProperties loggingProperties) {
-        return new PathFilter(loggingProperties, new AntPathMatcher());
     }
 }

@@ -1,20 +1,29 @@
 package io.github.susimsek.springaisamples.logging.handler;
 
+import io.github.susimsek.springaisamples.enums.FilterOrder;
 import io.github.susimsek.springaisamples.logging.config.LoggingProperties;
 import io.github.susimsek.springaisamples.logging.enums.HttpLogType;
 import io.github.susimsek.springaisamples.logging.enums.LogLevel;
 import io.github.susimsek.springaisamples.logging.enums.Source;
 import io.github.susimsek.springaisamples.logging.formatter.LogFormatter;
 import io.github.susimsek.springaisamples.logging.model.HttpLog;
+import io.github.susimsek.springaisamples.logging.utils.HttpRequestMatcher;
 import io.github.susimsek.springaisamples.logging.utils.Obfuscator;
-import io.github.susimsek.springaisamples.logging.utils.PathFilter;
+import jakarta.servlet.http.HttpServletRequest;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
+import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.config.annotation.web.AbstractRequestMatcherRegistry;
+import org.springframework.security.web.util.matcher.RequestMatcher;
+import org.springframework.util.Assert;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -23,14 +32,18 @@ public class HttpLoggingHandler implements LoggingHandler {
     private final LoggingProperties loggingProperties;
     private final LogFormatter logFormatter;
     private final Obfuscator obfuscator;
-    private final PathFilter pathFilter;
+    private final List<RequestMatcherConfig> requestMatcherConfigs;
+    private final boolean defaultLogged;
+    private final int order;
+
+    @Override
+    public int getOrder() {
+        return order;
+    }
 
     @Override
     public void logRequest(HttpMethod method, URI uri, HttpHeaders headers, byte[] body, Source source) {
-        if (shouldNotLog(uri.getPath(), method)) {
-            return;
-        }
-
+        
         HttpLog.HttpLogBuilder logBuilder = initLogBuilder(
             HttpLogType.REQUEST, method, uri, headers, source
         );
@@ -44,10 +57,7 @@ public class HttpLoggingHandler implements LoggingHandler {
     @Override
     public void logResponse(HttpMethod method, URI uri, Integer statusCode, HttpHeaders headers,
                             byte[] responseBody, Source source) {
-        if (shouldNotLog(uri.getPath(), method)) {
-            return;
-        }
-
+        
         HttpLog.HttpLogBuilder logBuilder = initLogBuilder(
             HttpLogType.RESPONSE, method, uri, headers, source
         ).statusCode(statusCode);
@@ -63,6 +73,24 @@ public class HttpLoggingHandler implements LoggingHandler {
         }
 
         log("HTTP Response: {}", logFormatter.format(logBuilder.build()));
+    }
+
+    @Override
+    public boolean shouldNotLog(HttpServletRequest request) {
+        return requestMatcherConfigs.stream()
+            .filter(config -> config.requestMatcher.matches(request))
+            .map(config -> !config.logged)
+            .findFirst()
+            .orElse(!defaultLogged);
+    }
+
+    @Override
+    public boolean shouldNotLog(HttpRequest request) {
+        return requestMatcherConfigs.stream()
+            .filter(config -> config.requestMatcher.matches(request))
+            .map(config -> !config.logged)
+            .findFirst()
+            .orElse(!defaultLogged);
     }
 
     private HttpLog.HttpLogBuilder initLogBuilder(HttpLogType type, HttpMethod method, URI uri,
@@ -88,11 +116,123 @@ public class HttpLoggingHandler implements LoggingHandler {
         log.info(message, formattedLog);
     }
 
-    @Override
-    public boolean shouldNotLog(String path, HttpMethod method) {
-        LogLevel logLevel = loggingProperties.getHttp().getLevel();
-        return logLevel == LogLevel.NONE
-            || !pathFilter.shouldInclude(path, method.name())
-            || pathFilter.shouldExclude(path, method.name());
+    @AllArgsConstructor
+    private static class RequestMatcherConfig {
+        private final HttpRequestMatcher requestMatcher;
+        private boolean logged;
+    }
+
+    public interface InitialBuilder {
+        InitialBuilder order(int order);
+
+        AfterRequestMatchersBuilder anyRequest();
+
+        AfterRequestMatchersBuilder requestMatchers(HttpMethod method, String... patterns);
+
+        AfterRequestMatchersBuilder requestMatchers(String... patterns);
+
+        HttpLoggingHandler build();
+    }
+
+    public interface AfterRequestMatchersBuilder {
+        InitialBuilder permitAll();
+
+        InitialBuilder logged();
+    }
+
+    public static InitialBuilder builder(LoggingProperties loggingProperties,
+                                         LogFormatter logFormatter,
+                                         Obfuscator obfuscator) {
+        return new Builder(loggingProperties, logFormatter, obfuscator);
+    }
+
+    private static class Builder extends AbstractRequestMatcherRegistry<Builder>
+        implements InitialBuilder, AfterRequestMatchersBuilder {
+
+        private final LoggingProperties loggingProperties;
+        private final LogFormatter logFormatter;
+        private final Obfuscator obfuscator;
+        private final List<RequestMatcherConfig> requestMatcherConfigs = new ArrayList<>();
+        private boolean anyRequestConfigured = false;
+        private boolean defaultLogged = true;
+        private int order = FilterOrder.LOGGING.order();
+        private int lastIndex = 0;
+
+        private Builder(LoggingProperties loggingProperties,
+                        LogFormatter logFormatter,
+                        Obfuscator obfuscator) {
+            this.loggingProperties = loggingProperties;
+            this.logFormatter = logFormatter;
+            this.obfuscator = obfuscator;
+        }
+
+        @Override
+        public Builder requestMatchers(HttpMethod method, String... patterns) {
+            lastIndex = requestMatcherConfigs.size();
+            for (String pattern : patterns) {
+                this.requestMatcherConfigs.add(new RequestMatcherConfig(new HttpRequestMatcher.Builder()
+                    .pattern(method, pattern).build(), true));
+            }
+            return this;
+        }
+
+        @Override
+        public Builder requestMatchers(String... patterns) {
+            lastIndex = requestMatcherConfigs.size();
+            for (String pattern : patterns) {
+                this.requestMatcherConfigs.add(new RequestMatcherConfig(new HttpRequestMatcher.Builder()
+                    .pattern(pattern).build(), true));
+            }
+            return this;
+        }
+
+        @Override
+        public Builder anyRequest() {
+            Assert.state(!this.anyRequestConfigured, "anyRequest() can only be called once");
+            this.anyRequestConfigured = true;
+            return this;
+        }
+
+        public Builder permitAll() {
+            Assert.state(anyRequestConfigured || !requestMatcherConfigs.isEmpty(),
+                "permitAll() can only be called after requestMatchers() or anyRequest()");
+            if (anyRequestConfigured) {
+                this.defaultLogged = false;
+            } else {
+                requestMatcherConfigs.stream()
+                    .skip(lastIndex)
+                    .forEach(config -> config.logged = false);
+            }
+            return this;
+        }
+
+        public Builder logged() {
+            Assert.state(anyRequestConfigured || !requestMatcherConfigs.isEmpty(),
+                "logged() can only be called after requestMatchers() or anyRequest())");
+            if (anyRequestConfigured) {
+                this.defaultLogged = true;
+            } else {
+                requestMatcherConfigs.stream()
+                    .skip(lastIndex)
+                    .forEach(config -> config.logged = true);
+            }
+            return this;
+        }
+
+        public Builder order(int order) {
+            this.order = order;
+            return this;
+        }
+
+        public HttpLoggingHandler build() {
+            return new HttpLoggingHandler(loggingProperties, logFormatter, obfuscator,
+                requestMatcherConfigs, defaultLogged, order);
+        }
+
+        @Override
+        protected Builder chainRequestMatchers(List<RequestMatcher> requestMatchers) {
+            this.requestMatchers(requestMatchers.toArray(new RequestMatcher[0]));
+            return this;
+        }
     }
 }

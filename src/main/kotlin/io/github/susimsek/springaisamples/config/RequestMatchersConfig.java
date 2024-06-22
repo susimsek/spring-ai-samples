@@ -11,7 +11,7 @@ public class RequestMatchersConfig {
     private final MvcRequestMatcher.Builder mvc;
 
     public RequestMatcher[] staticResources() {
-        return new MvcRequestMatcher[]{
+        return new MvcRequestMatcher[] {
             mvc.pattern("/webjars/**"),
             mvc.pattern("/*.js"),
             mvc.pattern("/*.css"),
@@ -22,8 +22,20 @@ public class RequestMatchersConfig {
         };
     }
 
+    public String[] staticResourcePaths() {
+        return new String[] {
+            "/webjars/**",
+            "/*.js",
+            "/*.css",
+            "/*.ico",
+            "/*.png",
+            "/*.svg",
+            "/*.webapp"
+        };
+    }
+
     public RequestMatcher[] swaggerPaths() {
-        return new MvcRequestMatcher[]{
+        return new MvcRequestMatcher[] {
             mvc.pattern("/swagger-ui.html"),
             mvc.pattern("/swagger-ui/**"),
             mvc.pattern("/v3/api-docs/**"),
@@ -31,14 +43,29 @@ public class RequestMatchersConfig {
         };
     }
 
+    public String[] swaggerResourcePaths() {
+        return new String[] {
+            "/swagger-ui.html",
+            "/swagger-ui/**",
+            "/v3/api-docs/**",
+            "/api-docs/**"
+        };
+    }
+
+    public String[] actuatorEndpoints() {
+        return new String[] {
+            "/actuator/**"
+        };
+    }
+
     public RequestMatcher[] actuatorPaths() {
-        return new MvcRequestMatcher[]{
+        return new MvcRequestMatcher[] {
             mvc.pattern("/actuator/**")
         };
     }
 
     public RequestMatcher[] nonModifyingMethods() {
-        return new MvcRequestMatcher[]{
+        return new MvcRequestMatcher[] {
             mvc.pattern(HttpMethod.GET, "/**"),
             mvc.pattern(HttpMethod.HEAD, "/**"),
             mvc.pattern(HttpMethod.OPTIONS, "/**"),

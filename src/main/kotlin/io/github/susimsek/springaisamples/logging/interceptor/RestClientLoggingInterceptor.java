@@ -69,6 +69,6 @@ public class RestClientLoggingInterceptor implements ClientHttpRequestIntercepto
     }
 
     private boolean shouldNotLog(HttpRequest request) {
-        return loggingHandler.shouldNotLog(request.getURI().getPath(), request.getMethod());
+        return loggingHandler.shouldNotLog(request);
     }
 }

@@ -17,7 +17,6 @@ import io.github.susimsek.springaisamples.logging.strategy.DefaultObfuscationStr
 import io.github.susimsek.springaisamples.logging.strategy.NoOpObfuscationStrategy;
 import io.github.susimsek.springaisamples.logging.strategy.ObfuscationStrategy;
 import io.github.susimsek.springaisamples.logging.utils.Obfuscator;
-import io.github.susimsek.springaisamples.logging.utils.PathFilter;
 import io.github.susimsek.springaisamples.logging.wrapper.HttpLoggingWrapper;
 import jakarta.servlet.Filter;
 import org.junit.jupiter.api.BeforeEach;
@@ -47,8 +46,7 @@ class LoggingConfigTest {
         LoggingProperties loggingPropertiesMock = mock(LoggingProperties.class);
         LogFormatter logFormatterMock = mock(LogFormatter.class);
         Obfuscator obfuscatorMock = mock(Obfuscator.class);
-        PathFilter pathFilterMock = mock(PathFilter.class);
-        var loggingHandler = loggingConfig.loggingHandler(loggingPropertiesMock, logFormatterMock, obfuscatorMock, pathFilterMock);
+        var loggingHandler = loggingConfig.loggingHandler(loggingPropertiesMock, logFormatterMock, obfuscatorMock, null);
         assertNotNull(loggingHandler);
         assertEquals(HttpLoggingHandler.class, loggingHandler.getClass());
     }
@@ -122,14 +120,6 @@ class LoggingConfigTest {
         Obfuscator obfuscator = loggingConfig.obfuscator(obfuscationStrategyMock);
         assertNotNull(obfuscator);
         assertEquals(Obfuscator.class, obfuscator.getClass());
-    }
-
-    @Test
-    void testPathFilterBeanCreation() {
-        LoggingProperties loggingPropertiesMock = mock(LoggingProperties.class);
-        PathFilter pathFilter = loggingConfig.pathFilter(loggingPropertiesMock);
-        assertNotNull(pathFilter);
-        assertEquals(PathFilter.class, pathFilter.getClass());
     }
 
     @Test
