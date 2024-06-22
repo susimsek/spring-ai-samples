@@ -42,7 +42,6 @@ public class DefaultObfuscationStrategy implements ObfuscationStrategy {
             maskJsonPaths(rootNode, loggingProperties.getHttp().getObfuscate().getJsonBodyFields());
             return objectMapper.writeValueAsString(rootNode);
         } catch (Exception e) {
-            // Exception'ı loglamak için bir logger kullanabilirsiniz
             return body;
         }
     }
