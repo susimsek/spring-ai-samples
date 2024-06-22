@@ -37,10 +37,12 @@ import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.multipart.MultipartException;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
@@ -95,6 +97,34 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         @NonNull HttpStatusCode status,
         @NonNull WebRequest request) {
         return createProblemDetailResponse(ex, status, ErrorConstants.TYPE_MISMATCH, headers, request);
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleMissingServletRequestParameter(
+        @NonNull MissingServletRequestParameterException ex,
+        @NonNull HttpHeaders headers,
+        @NonNull HttpStatusCode status,
+        @NonNull WebRequest request) {
+        Locale locale = request.getLocale();
+        Map<String, String> namedArgs = Map.of("paramName", ex.getParameterName());
+        String errorMessage = messageSource.getMessageWithNamedArgs(
+            ErrorConstants.MISSING_PARAMETER, namedArgs, locale);
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(status, errorMessage);
+        return handleExceptionInternal(ex, problem, headers, status, request);
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleMissingServletRequestPart(
+        @NonNull MissingServletRequestPartException ex,
+        @NonNull HttpHeaders headers,
+        @NonNull HttpStatusCode status,
+        @NonNull WebRequest request) {
+        Locale locale = request.getLocale();
+        Map<String, String> namedArgs = Map.of("partName", ex.getRequestPartName());
+        String errorMessage = messageSource.getMessageWithNamedArgs(
+            ErrorConstants.MISSING_PART, namedArgs, locale);
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(status, errorMessage);
+        return handleExceptionInternal(ex, problem, headers, status, request);
     }
 
     @Override
@@ -222,6 +252,14 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                                                              @NonNull WebRequest request) {
         return createProblemDetailResponse(ex, HttpStatus.INTERNAL_SERVER_ERROR,
             ErrorConstants.INTERNAL_SERVER_ERROR, new HttpHeaders(), request);
+    }
+
+    @ExceptionHandler(UnsupportedOperationException.class)
+    public ResponseEntity<Object> handleUnsupportedOperationException(
+        @NonNull UnsupportedOperationException ex,
+        @NonNull WebRequest request) {
+        return createProblemDetailResponse(ex, HttpStatus.NOT_IMPLEMENTED,
+            ErrorConstants.UNSUPPORTED_OPERATION, new HttpHeaders(), request);
     }
 
     @ExceptionHandler(SocketTimeoutException.class)
