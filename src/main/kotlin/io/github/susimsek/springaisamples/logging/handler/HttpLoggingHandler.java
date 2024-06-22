@@ -1,7 +1,6 @@
 package io.github.susimsek.springaisamples.logging.handler;
 
 import io.github.susimsek.springaisamples.enums.FilterOrder;
-import io.github.susimsek.springaisamples.logging.config.LoggingProperties;
 import io.github.susimsek.springaisamples.logging.enums.HttpLogType;
 import io.github.susimsek.springaisamples.logging.enums.LogLevel;
 import io.github.susimsek.springaisamples.logging.enums.Source;
@@ -28,8 +27,7 @@ import org.springframework.util.Assert;
 @Slf4j
 @RequiredArgsConstructor
 public class HttpLoggingHandler implements LoggingHandler {
-
-    private final LoggingProperties loggingProperties;
+    private final LogLevel logLevel;
     private final LogFormatter logFormatter;
     private final Obfuscator obfuscator;
     private final List<RequestMatcherConfig> requestMatcherConfigs;
@@ -104,7 +102,7 @@ public class HttpLoggingHandler implements LoggingHandler {
     }
 
     private boolean isLogLevel(LogLevel level) {
-        return loggingProperties.getHttp().getLevel().ordinal() >= level.ordinal();
+        return logLevel.ordinal() >= level.ordinal();
     }
 
     private boolean shouldLogWithoutBody(HttpStatus status) {
@@ -123,6 +121,8 @@ public class HttpLoggingHandler implements LoggingHandler {
     }
 
     public interface InitialBuilder {
+        InitialBuilder logLevel(LogLevel logLevel);
+
         InitialBuilder order(int order);
 
         AfterRequestMatchersBuilder anyRequest();
@@ -140,28 +140,25 @@ public class HttpLoggingHandler implements LoggingHandler {
         InitialBuilder logged();
     }
 
-    public static InitialBuilder builder(LoggingProperties loggingProperties,
-                                         LogFormatter logFormatter,
+    public static InitialBuilder builder(LogFormatter logFormatter,
                                          Obfuscator obfuscator) {
-        return new Builder(loggingProperties, logFormatter, obfuscator);
+        return new Builder(logFormatter, obfuscator);
     }
 
     private static class Builder extends AbstractRequestMatcherRegistry<Builder>
         implements InitialBuilder, AfterRequestMatchersBuilder {
 
-        private final LoggingProperties loggingProperties;
         private final LogFormatter logFormatter;
         private final Obfuscator obfuscator;
         private final List<RequestMatcherConfig> requestMatcherConfigs = new ArrayList<>();
         private boolean anyRequestConfigured = false;
         private boolean defaultLogged = true;
+        private LogLevel logLevel = LogLevel.FULL;
         private int order = FilterOrder.LOGGING.order();
         private int lastIndex = 0;
 
-        private Builder(LoggingProperties loggingProperties,
-                        LogFormatter logFormatter,
+        private Builder(LogFormatter logFormatter,
                         Obfuscator obfuscator) {
-            this.loggingProperties = loggingProperties;
             this.logFormatter = logFormatter;
             this.obfuscator = obfuscator;
         }
@@ -224,8 +221,14 @@ public class HttpLoggingHandler implements LoggingHandler {
             return this;
         }
 
+        public Builder logLevel(LogLevel logLevel) {
+            this.logLevel = logLevel;
+            return this;
+        }
+
         public HttpLoggingHandler build() {
-            return new HttpLoggingHandler(loggingProperties, logFormatter, obfuscator,
+            return new HttpLoggingHandler(
+                logLevel, logFormatter, obfuscator,
                 requestMatcherConfigs, defaultLogged, order);
         }
 

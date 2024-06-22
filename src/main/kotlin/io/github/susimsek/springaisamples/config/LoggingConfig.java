@@ -39,7 +39,8 @@ public class LoggingConfig {
                                          LogFormatter logFormatter,
                                          Obfuscator obfuscator,
                                          RequestMatchersConfig requestMatchersConfig) {
-        return HttpLoggingHandler.builder(loggingProperties, logFormatter, obfuscator)
+        return HttpLoggingHandler.builder(logFormatter, obfuscator)
+            .logLevel(loggingProperties.getHttp().getLevel())
             .order(FilterOrder.LOGGING.order())
             .requestMatchers(requestMatchersConfig.staticResourcePaths()).permitAll()
             .requestMatchers(requestMatchersConfig.swaggerResourcePaths()).permitAll()
