@@ -2,6 +2,7 @@ package io.github.susimsek.springaisamples.logging.strategy;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.github.susimsek.springaisamples.logging.config.LoggingProperties;
@@ -72,19 +73,69 @@ public class DefaultObfuscationStrategy implements ObfuscationStrategy {
         }
 
         String currentPart = pathParts[index];
-        if (currentNode.has(currentPart)) {
-            if (index == pathParts.length - 1) {
-                ((ObjectNode) currentNode).set(
-                    currentPart,
-                    JsonNodeFactory.instance.textNode(loggingProperties.getHttp().getObfuscate().getMaskValue()));
-            } else {
-                maskJsonNodeRecursive(currentNode.get(currentPart), pathParts, index + 1);
+
+        if (isArraySegment(currentPart)) {
+            processArraySegment(currentNode, pathParts, index, currentPart);
+        } else if (currentNode.has(currentPart)) {
+            processObjectSegment(currentNode, pathParts, index, currentPart);
+        }
+    }
+
+    private boolean isArraySegment(String currentPart) {
+        return currentPart.contains("[*]");
+    }
+
+    private void processArraySegment(JsonNode currentNode, String[] pathParts, int index, String currentPart) {
+        String arrayPart = currentPart.split("\\[\\*]")[0];
+        if (currentNode.has(arrayPart) && currentNode.get(arrayPart).isArray()) {
+            for (JsonNode arrayItem : currentNode.get(arrayPart)) {
+                if (index + 1 == pathParts.length) {
+                    maskAllFields(arrayItem);
+                } else {
+                    maskJsonNodeRecursive(arrayItem, pathParts, index + 1);
+                }
+            }
+        }
+    }
+
+    private void processObjectSegment(JsonNode currentNode, String[] pathParts, int index, String currentPart) {
+        JsonNode nextNode = currentNode.get(currentPart);
+        if (index + 1 == pathParts.length) {
+            maskField((ObjectNode) currentNode, currentPart);
+        } else {
+            maskJsonNodeRecursive(nextNode, pathParts, index + 1);
+        }
+    }
+
+    private void maskField(ObjectNode currentNode, String fieldName) {
+        currentNode.set(
+            fieldName,
+            JsonNodeFactory.instance.textNode(
+                loggingProperties.getHttp().getObfuscate().getMaskValue()
+            )
+        );
+    }
+
+    private void maskAllFields(JsonNode node) {
+        if (node.isObject()) {
+            ObjectNode objectNode = (ObjectNode) node;
+            objectNode.fieldNames().forEachRemaining(fieldName -> maskField(objectNode, fieldName));
+        } else if (node.isArray()) {
+            ArrayNode arrayNode = (ArrayNode) node;
+            for (int i = 0; i < arrayNode.size(); i++) {
+                JsonNode arrayItem = arrayNode.get(i);
+                if (arrayItem.isObject()) {
+                    maskAllFields(arrayItem);
+                } else {
+                    arrayNode.set(i, JsonNodeFactory.instance.textNode(
+                        loggingProperties.getHttp().getObfuscate().getMaskValue()
+                    ));
+                }
             }
         }
     }
 
     private boolean shouldMask(List<String> list, String key) {
-        return list.stream()
-            .anyMatch(item -> item.equalsIgnoreCase(key));
+        return list.stream().anyMatch(item -> item.equalsIgnoreCase(key));
     }
 }
