@@ -9,6 +9,9 @@ public final class ErrorConstants {
     public static final String MEDIA_TYPE_NOT_ACCEPTABLE = "error.mediaType.notAcceptable";
     public static final String MEDIA_TYPE_NOT_SUPPORTED = "error.mediaType.notSupported";
     public static final String REQUEST_METHOD_NOT_SUPPORTED = "error.requestMethod.notSupported";
+    public static final String MESSAGE_NOT_READABLE = "error.messageNotReadable";
+    public static final String TYPE_MISMATCH = "error.typeMismatch";
+    public static final String MULTIPART_ERROR = "error.multipartError";
     public static final String VALIDATION_ERROR = "error.validation";
     public static final String AUTHENTICATION = "error.authentication";
     public static final String SIGNATURE = "error.signature";

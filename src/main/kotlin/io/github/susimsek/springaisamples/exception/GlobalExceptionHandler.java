@@ -22,11 +22,13 @@ import java.util.Map;
 import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.TypeMismatchException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.lang.NonNull;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
@@ -38,6 +40,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
@@ -77,6 +80,24 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @Override
+    protected ResponseEntity<Object> handleHttpMessageNotReadable(
+        @NonNull HttpMessageNotReadableException ex,
+        @NonNull HttpHeaders headers,
+        @NonNull HttpStatusCode status,
+        @NonNull WebRequest request) {
+        return createProblemDetailResponse(ex, status, ErrorConstants.MESSAGE_NOT_READABLE, headers, request);
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleTypeMismatch(
+        @NonNull TypeMismatchException ex,
+        @NonNull HttpHeaders headers,
+        @NonNull HttpStatusCode status,
+        @NonNull WebRequest request) {
+        return createProblemDetailResponse(ex, status, ErrorConstants.TYPE_MISMATCH, headers, request);
+    }
+
+    @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(
         @NonNull MethodArgumentNotValidException ex,
         @NonNull HttpHeaders headers,
@@ -103,6 +124,13 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, errorMessage);
         problem.setProperty(ErrorConstants.PROBLEM_VIOLATION_KEY, violations);
         return handleExceptionInternal(ex, problem, new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
+    }
+
+    @ExceptionHandler(MultipartException.class)
+    protected ResponseEntity<Object> handleMultipartException(@NonNull MultipartException ex,
+                                                              @NonNull WebRequest request) {
+        return createProblemDetailResponse(ex, HttpStatus.BAD_REQUEST,
+            ErrorConstants.MULTIPART_ERROR, new HttpHeaders(), request);
     }
 
     @ExceptionHandler(MissingIdempotencyKeyException.class)
