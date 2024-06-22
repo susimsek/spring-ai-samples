@@ -1,6 +1,7 @@
 package io.github.susimsek.springaisamples.config;
 
 import io.github.susimsek.springaisamples.exception.Violation;
+import java.util.concurrent.TimeoutException;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
 import org.springframework.aot.hint.TypeHint;
@@ -13,6 +14,7 @@ public class HintsRegistrar implements RuntimeHintsRegistrar {
     @Override
     public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
         hints.reflection().registerType(Violation.class, TypeHint.Builder::withMembers);
+        hints.reflection().registerType(TimeoutException.class, TypeHint.Builder::withMembers);
         hints.resources().registerPattern("data/*.json");
         hints.resources().registerPattern("images/*.png");
         hints.resources().registerPattern("prompts/*.st");
