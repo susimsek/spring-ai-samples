@@ -89,16 +89,16 @@ public class OpenApiConfig {
         return AnnotatedElementUtils.hasAnnotation(method, Idempotent.class);
     }
 
+    private boolean isIdempotent(Class<?> clazz) {
+        return AnnotatedElementUtils.hasAnnotation(clazz, Idempotent.class);
+    }
+
     private boolean isJwsSignatureRequired(Class<?> clazz) {
         return AnnotatedElementUtils.hasAnnotation(clazz, RequireJwsSignature.class);
     }
 
     private boolean isJwsSignatureRequired(Method method) {
         return AnnotatedElementUtils.hasAnnotation(method, RequireJwsSignature.class);
-    }
-
-    private boolean isIdempotent(Class<?> clazz) {
-        return AnnotatedElementUtils.hasAnnotation(clazz, Idempotent.class);
     }
 
     private void addIdempotentHeader(Operation operation) {
