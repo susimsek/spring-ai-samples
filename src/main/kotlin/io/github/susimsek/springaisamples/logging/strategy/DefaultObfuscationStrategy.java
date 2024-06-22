@@ -76,6 +76,12 @@ public class DefaultObfuscationStrategy implements ObfuscationStrategy {
 
         if (isArraySegment(currentPart)) {
             processArraySegment(currentNode, pathParts, index, currentPart);
+        } else if (currentPart.equals("*")) {
+            if (index + 1 == pathParts.length) {
+                maskAllFields(currentNode);
+            } else {
+                processWildcardSegment(currentNode, pathParts, index);
+            }
         } else if (currentNode.has(currentPart)) {
             processObjectSegment(currentNode, pathParts, index, currentPart);
         }
@@ -96,6 +102,12 @@ public class DefaultObfuscationStrategy implements ObfuscationStrategy {
                 }
             }
         }
+    }
+
+    private void processWildcardSegment(JsonNode currentNode, String[] pathParts, int index) {
+        currentNode.fieldNames().forEachRemaining(fieldName ->
+            maskJsonNodeRecursive(currentNode.get(fieldName), pathParts, index + 1)
+        );
     }
 
     private void processObjectSegment(JsonNode currentNode, String[] pathParts, int index, String currentPart) {
@@ -119,7 +131,9 @@ public class DefaultObfuscationStrategy implements ObfuscationStrategy {
     private void maskAllFields(JsonNode node) {
         if (node.isObject()) {
             ObjectNode objectNode = (ObjectNode) node;
-            objectNode.fieldNames().forEachRemaining(fieldName -> maskField(objectNode, fieldName));
+            objectNode.fieldNames().forEachRemaining(fieldName ->
+                maskField(objectNode, fieldName)
+            );
         } else if (node.isArray()) {
             ArrayNode arrayNode = (ArrayNode) node;
             for (int i = 0; i < arrayNode.size(); i++) {
