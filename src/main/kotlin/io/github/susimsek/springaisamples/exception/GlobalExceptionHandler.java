@@ -1,10 +1,20 @@
 package io.github.susimsek.springaisamples.exception;
 
+import static io.github.susimsek.springaisamples.ratelimit.RateLimitConstants.RATE_LIMIT_LIMIT_HEADER_NAME;
+import static io.github.susimsek.springaisamples.ratelimit.RateLimitConstants.RATE_LIMIT_REMAINING_HEADER_NAME;
+import static io.github.susimsek.springaisamples.ratelimit.RateLimitConstants.RATE_LIMIT_RESET_HEADER_NAME;
+
+import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
+import io.github.resilience4j.circuitbreaker.CircuitBreaker;
+import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
+import io.github.resilience4j.core.IntervalFunction;
 import io.github.susimsek.springaisamples.exception.idempotency.MissingIdempotencyKeyException;
 import io.github.susimsek.springaisamples.exception.ratelimit.RateLimitExceededException;
 import io.github.susimsek.springaisamples.exception.security.JwsException;
 import io.github.susimsek.springaisamples.i18n.ParameterMessageSource;
 import jakarta.validation.ConstraintViolationException;
+import java.net.SocketTimeoutException;
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -37,6 +47,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     private final ParameterMessageSource messageSource;
+    private final CircuitBreakerRegistry circuitBreakerRegistry;
 
     @Override
     protected ResponseEntity<Object> handleHttpMediaTypeNotAcceptable(
@@ -144,8 +155,14 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         @NonNull RateLimitExceededException ex,
         @NonNull WebRequest request) {
 
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.RETRY_AFTER, String.valueOf(ex.getWaitTime()));
+        headers.add(RATE_LIMIT_LIMIT_HEADER_NAME, String.valueOf(ex.getLimitForPeriod()));
+        headers.add(RATE_LIMIT_REMAINING_HEADER_NAME, String.valueOf(ex.getAvailablePermissions()));
+        headers.add(RATE_LIMIT_RESET_HEADER_NAME, String.valueOf(ex.getResetTime()));
+
         return createProblemDetailResponse(ex, HttpStatus.TOO_MANY_REQUESTS,
-            ErrorConstants.RATE_LIMITING_ERROR,  new HttpHeaders(), request);
+            ErrorConstants.RATE_LIMITING_ERROR,  headers, request);
     }
 
     @ExceptionHandler(ResourceException.class)
@@ -177,6 +194,29 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                                                              @NonNull WebRequest request) {
         return createProblemDetailResponse(ex, HttpStatus.INTERNAL_SERVER_ERROR,
             ErrorConstants.INTERNAL_SERVER_ERROR, new HttpHeaders(), request);
+    }
+
+    @ExceptionHandler(SocketTimeoutException.class)
+    public ResponseEntity<Object> handleSocketTimeoutException(@NonNull SocketTimeoutException ex,
+                                                                  @NonNull WebRequest request) {
+        return createProblemDetailResponse(ex, HttpStatus.GATEWAY_TIMEOUT,
+            ErrorConstants.GATEWAY_TIMEOUT, new HttpHeaders(), request);
+    }
+
+    @ExceptionHandler(CallNotPermittedException.class)
+    public ResponseEntity<Object> handleCallNotPermittedException(@NonNull CallNotPermittedException ex,
+                                                                  @NonNull WebRequest request) {
+        String circuitBreakerName = ex.getCausingCircuitBreakerName();
+        CircuitBreaker circuitBreaker = circuitBreakerRegistry
+            .circuitBreaker(circuitBreakerName);
+        IntervalFunction intervalFunction = circuitBreaker.getCircuitBreakerConfig()
+            .getWaitIntervalFunctionInOpenState();
+        long waitDurationMillis = intervalFunction.apply(1);
+        Duration waitDuration = Duration.ofMillis(waitDurationMillis);
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.RETRY_AFTER, String.valueOf(waitDuration.getSeconds()));
+        return createProblemDetailResponse(ex, HttpStatus.SERVICE_UNAVAILABLE,
+            ErrorConstants.CIRCUIT_BREAKER_ERROR, headers, request);
     }
 
     @ExceptionHandler(Exception.class)

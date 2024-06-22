@@ -21,7 +21,6 @@ import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.Ordered;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.lang.NonNull;
 import org.springframework.security.config.annotation.web.AbstractRequestMatcherRegistry;
@@ -73,16 +72,14 @@ public class RateLimitingFilter extends OncePerRequestFilter implements Ordered 
         int limitForPeriod = rateLimiter.getRateLimiterConfig().getLimitForPeriod();
         Instant nextReset = Instant.now().plus(timeUntilReset);
 
-        response.setHeader(HttpHeaders.RETRY_AFTER, String.valueOf(nextReset.getEpochSecond()));
-        response.setHeader(RATE_LIMIT_LIMIT_HEADER_NAME, String.valueOf(limitForPeriod));
-        response.setHeader(RATE_LIMIT_REMAINING_HEADER_NAME, String.valueOf(availablePermissions));
-        response.setHeader(RATE_LIMIT_RESET_HEADER_NAME, String.valueOf(nextReset.getEpochSecond()));
-
         if (rateLimiter.acquirePermission()) {
+            response.setHeader(RATE_LIMIT_LIMIT_HEADER_NAME, String.valueOf(limitForPeriod));
+            response.setHeader(RATE_LIMIT_REMAINING_HEADER_NAME, String.valueOf(availablePermissions));
+            response.setHeader(RATE_LIMIT_RESET_HEADER_NAME, String.valueOf(nextReset.getEpochSecond()));
             filterChain.doFilter(request, response);
         } else {
             handleRateLimitingException(request, response, limitForPeriod,
-                availablePermissions, nextReset.getEpochSecond());
+                availablePermissions, nextReset.getEpochSecond(), timeUntilReset.getSeconds());
         }
     }
 
@@ -90,10 +87,11 @@ public class RateLimitingFilter extends OncePerRequestFilter implements Ordered 
                                              HttpServletResponse response,
                                              int limitForPeriod,
                                              long availablePermissions,
-                                             long resetTime) throws IOException, ServletException {
+                                             long resetTime,
+                                             long waitTime) throws IOException, ServletException {
         RateLimitExceededException exception = new RateLimitExceededException(
             currentRateLimiterName, TOO_MANY_REQUESTS_MESSAGE,
-            limitForPeriod, availablePermissions, resetTime);
+            limitForPeriod, availablePermissions, resetTime, waitTime);
         rateLimitExceptionHandler.handle(request, response, exception);
     }
 

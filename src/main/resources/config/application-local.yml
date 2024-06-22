@@ -129,7 +129,7 @@ resilience4j:
         slidingWindowSize: 10
         minimumNumberOfCalls: 5
         failureRateThreshold: 50
-        waitDurationInOpenState: 10000ms
+        waitDurationInOpenState: 10s
         permittedNumberOfCallsInHalfOpenState: 3
         slidingWindowType: COUNT_BASED
         recordExceptions:
@@ -139,7 +139,7 @@ resilience4j:
         recordFailurePredicate:
           - org.springframework.web.client.HttpClientErrorException$TooManyRequests
     instances:
-      jwksCircuitBreaker:
+      cityCircuitBreaker:
         baseConfig: default
         slidingWindowSize: 5
         minimumNumberOfCalls: 3
@@ -157,7 +157,7 @@ resilience4j:
     configs:
       default:
         limit-for-period: 1
-        limit-refresh-period: 10s
+        limit-refresh-period: 1s
         timeout-duration: 200ms
     instances:
       jwksRateLimiter:

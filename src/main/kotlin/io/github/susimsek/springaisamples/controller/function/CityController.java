@@ -1,5 +1,6 @@
 package io.github.susimsek.springaisamples.controller.function;
 
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -10,6 +11,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import java.net.ConnectException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.chat.ChatClient;
@@ -37,6 +39,7 @@ public class CityController {
 
     private final ChatClient chatClient;
 
+    @CircuitBreaker(name = "cityCircuitBreaker")
     @Operation(summary = "Get city information", description = "Get information about cities based on user queries.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successfully retrieved city information",
@@ -56,6 +59,9 @@ public class CityController {
                 schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(responseCode = "500", description = "Internal server error",
             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                schema = @Schema(implementation = ProblemDetail.class))),
+        @ApiResponse(responseCode = "503", description = "Service unavailable due to circuit breaker",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                 schema = @Schema(implementation = ProblemDetail.class)))
     })
     @GetMapping
@@ -64,7 +70,10 @@ public class CityController {
         @RequestParam(value = "message")
         @NotBlank(message = "{validation.field.notBlank}")
         @Size(min = 2, max = 200, message = "{validation.field.size}")
-        String message) {
+        String message) throws ConnectException {
+        if (true) {
+            throw new ConnectException("asd");
+        }
         SystemMessage systemMessage =
             new SystemMessage("You are a helpful AI Assistant answering questions about cities around the world.");
         UserMessage userMessage = new UserMessage(message);

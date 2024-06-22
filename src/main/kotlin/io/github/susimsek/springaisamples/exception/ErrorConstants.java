@@ -18,4 +18,5 @@ public final class ErrorConstants {
     public static final String INTERNAL_SERVER_ERROR = "error.internalServerError";
     public static final String IDEMPOTENCY_KEY_MISSING = "error.idempotencyKey.missing";
     public static final String CIRCUIT_BREAKER_ERROR = "error.circuitBreaker";
+    public static final String GATEWAY_TIMEOUT = "error.gatewayTimeout";
 }
