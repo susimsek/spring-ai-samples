@@ -13,6 +13,7 @@ public final class ErrorConstants {
     public static final String TYPE_MISMATCH = "error.typeMismatch";
     public static final String MISSING_PARAMETER = "error.missingParameter";
     public static final String MISSING_PART = "error.missingPart";
+    public static final String REQUEST_BINDING_ERROR = "error.requestBindingError";
     public static final String MULTIPART_ERROR = "error.multipartError";
     public static final String VALIDATION_ERROR = "error.validation";
     public static final String AUTHENTICATION = "error.authentication";

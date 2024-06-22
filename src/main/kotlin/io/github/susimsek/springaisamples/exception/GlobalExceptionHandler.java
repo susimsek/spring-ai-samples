@@ -38,6 +38,7 @@ import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
+import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
@@ -125,6 +126,15 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             ErrorConstants.MISSING_PART, namedArgs, locale);
         ProblemDetail problem = ProblemDetail.forStatusAndDetail(status, errorMessage);
         return handleExceptionInternal(ex, problem, headers, status, request);
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleServletRequestBindingException(
+        @NonNull ServletRequestBindingException ex,
+        @NonNull HttpHeaders headers,
+        @NonNull HttpStatusCode status,
+        @NonNull WebRequest request) {
+        return createProblemDetailResponse(ex, status, ErrorConstants.REQUEST_BINDING_ERROR, headers, request);
     }
 
     @Override
