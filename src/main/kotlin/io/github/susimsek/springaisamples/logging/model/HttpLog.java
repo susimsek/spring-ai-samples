@@ -25,4 +25,5 @@ public class HttpLog {
     private String body;
     private Source source;
     private Trace trace;
+    private Long duration;
 }

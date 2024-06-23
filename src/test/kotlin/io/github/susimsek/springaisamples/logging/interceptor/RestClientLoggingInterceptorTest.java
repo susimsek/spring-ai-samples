@@ -72,7 +72,8 @@ class RestClientLoggingInterceptorTest {
             any(HttpMethod.class), any(URI.class), any(HttpHeaders.class), any(byte[].class), any(Source.class)
         );
         verify(loggingHandler, times(1)).logResponse(
-            any(HttpMethod.class), any(URI.class), anyInt(), any(HttpHeaders.class), any(byte[].class), any(Source.class)
+            any(HttpMethod.class), any(URI.class), anyInt(),
+            any(HttpHeaders.class), any(byte[].class), any(Source.class), any(Long.class)
         );
     }
 
@@ -88,7 +89,8 @@ class RestClientLoggingInterceptorTest {
 
         // Assert
         verify(loggingHandler, never()).logRequest(any(HttpMethod.class), any(URI.class), any(HttpHeaders.class), any(byte[].class), any(Source.class));
-        verify(loggingHandler, never()).logResponse(any(HttpMethod.class), any(URI.class), anyInt(), any(HttpHeaders.class), any(byte[].class), any(Source.class));
+        verify(loggingHandler, never()).logResponse(any(HttpMethod.class), any(URI.class),
+            anyInt(), any(HttpHeaders.class), any(byte[].class), any(Source.class), any(Long.class));
     }
 
     @Test
@@ -106,7 +108,8 @@ class RestClientLoggingInterceptorTest {
             any(HttpMethod.class), any(URI.class), any(HttpHeaders.class), any(byte[].class), any(Source.class)
         );
         verify(loggingHandler, times(1)).logResponse(
-            any(HttpMethod.class), any(URI.class), anyInt(), any(HttpHeaders.class), isNull(), any(Source.class)
+            any(HttpMethod.class), any(URI.class), anyInt(), any(HttpHeaders.class), isNull(),
+            any(Source.class), any(Long.class)
         );
         assert "Test IOException".equals(exception.getMessage());
     }

@@ -61,10 +61,11 @@ public class HttpLoggingHandler implements LoggingHandler {
 
     @Override
     public void logResponse(HttpMethod method, URI uri, Integer statusCode, HttpHeaders headers,
-                            byte[] responseBody, Source source) {
+                            byte[] responseBody, Source source, long duration) {
         
         HttpLog.HttpLogBuilder logBuilder = initLogBuilder(
-            HttpLogType.RESPONSE, method, uri, headers, source).statusCode(statusCode);
+            HttpLogType.RESPONSE, method, uri, headers, source).statusCode(statusCode)
+            .duration(duration);
 
         HttpStatus status = HttpStatus.valueOf(statusCode);
 

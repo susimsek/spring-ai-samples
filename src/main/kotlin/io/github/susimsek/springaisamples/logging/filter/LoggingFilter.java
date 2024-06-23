@@ -19,6 +19,7 @@ import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.lang.NonNull;
+import org.springframework.util.StopWatch;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 @Slf4j
@@ -45,13 +46,21 @@ public class LoggingFilter extends OncePerRequestFilter  implements Ordered {
         CachedBodyHttpServletRequestWrapper wrappedRequest = new CachedBodyHttpServletRequestWrapper(request);
         CachedBodyHttpServletResponseWrapper wrappedResponse = new CachedBodyHttpServletResponseWrapper(response);
 
+        StopWatch stopWatch = new StopWatch();
+        stopWatch.start();
+
         filterChain.doFilter(wrappedRequest, wrappedResponse);
-        logRequestAndResponse(wrappedRequest, wrappedResponse);
+
+        stopWatch.stop();
+        long duration = stopWatch.getTotalTimeMillis();
+
+        logRequestAndResponse(wrappedRequest, wrappedResponse, duration);
         wrappedResponse.copyBodyToResponse();
     }
 
     private void logRequestAndResponse(CachedBodyHttpServletRequestWrapper request,
-                                       CachedBodyHttpServletResponseWrapper response) {
+                                       CachedBodyHttpServletResponseWrapper response,
+                                       long duration) {
         try {
             URI uri = new URI(request.getRequestURL().toString());
             HttpHeaders requestHeaders = HttpHeadersUtil.convertToHttpHeaders(request);
@@ -70,7 +79,8 @@ public class LoggingFilter extends OncePerRequestFilter  implements Ordered {
                 response.getStatus(),
                 responseHeaders,
                 response.getBody(),
-                Source.SERVER
+                Source.SERVER,
+                duration
             );
         } catch (URISyntaxException e) {
             log.error("Invalid URI Syntax for request: {}", request.getRequestURL(), e);

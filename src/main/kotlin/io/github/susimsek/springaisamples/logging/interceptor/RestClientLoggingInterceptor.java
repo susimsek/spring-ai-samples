@@ -11,6 +11,7 @@ import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.lang.NonNull;
+import org.springframework.util.StopWatch;
 import org.springframework.util.StreamUtils;
 
 @Slf4j
@@ -24,6 +25,9 @@ public class RestClientLoggingInterceptor implements ClientHttpRequestIntercepto
     public ClientHttpResponse intercept(
         @NonNull HttpRequest request, @NonNull byte[] body, @NonNull ClientHttpRequestExecution execution)
         throws IOException {
+        StopWatch stopWatch = new StopWatch();
+        stopWatch.start();
+
         if (shouldNotLog(request)) {
             return execution.execute(request, body);
         }
@@ -34,10 +38,14 @@ public class RestClientLoggingInterceptor implements ClientHttpRequestIntercepto
         try {
             response = execution.execute(request, body);
             response = new BufferingClientHttpResponseWrapper(response);
-            logResponse(request, response);
+            stopWatch.stop();
+            long duration = stopWatch.getTotalTimeMillis();
+            logResponse(request, response, duration);
         } catch (IOException e) {
             log.error("IOException occurred during request execution or response logging", e);
-            logErrorResponse(request);
+            stopWatch.stop();
+            long duration = stopWatch.getTotalTimeMillis();
+            logErrorResponse(request, duration);
             throw e;
         }
 
@@ -50,7 +58,7 @@ public class RestClientLoggingInterceptor implements ClientHttpRequestIntercepto
         );
     }
 
-    private void logResponse(HttpRequest request, ClientHttpResponse response) throws IOException {
+    private void logResponse(HttpRequest request, ClientHttpResponse response, long duration) throws IOException {
         byte[] responseBody = StreamUtils.copyToByteArray(response.getBody());
         loggingHandler.logResponse(
             request.getMethod(),
@@ -58,13 +66,16 @@ public class RestClientLoggingInterceptor implements ClientHttpRequestIntercepto
             response.getStatusCode().value(),
             response.getHeaders(),
             responseBody,
-            Source.CLIENT
+            Source.CLIENT,
+            duration
         );
     }
 
-    private void logErrorResponse(HttpRequest request) {
+    private void logErrorResponse(HttpRequest request, long duration) {
         loggingHandler.logResponse(
-            request.getMethod(), request.getURI(), 0, request.getHeaders(), null, Source.CLIENT
+            request.getMethod(), request.getURI(),
+            0, request.getHeaders(), null, Source.CLIENT,
+            duration
         );
     }
 

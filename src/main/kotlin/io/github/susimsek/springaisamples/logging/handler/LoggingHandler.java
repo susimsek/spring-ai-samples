@@ -13,7 +13,7 @@ public interface LoggingHandler {
                     Source source);
 
     void logResponse(HttpMethod method, URI uri, Integer statusCode, HttpHeaders headers, byte[] responseBody,
-                     Source source);
+                     Source source, long duration);
 
     boolean shouldNotLog(HttpServletRequest request);
 

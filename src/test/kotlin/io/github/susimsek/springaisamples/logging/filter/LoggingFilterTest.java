@@ -87,7 +87,8 @@ class LoggingFilterTest {
             anyInt(), // default status code for wrappedResponse
             any(HttpHeaders.class),
             responseContentCaptor.capture(),
-            any(Source.class)
+            any(Source.class),
+            any(Long.class)
         );
 
         assertArrayEquals(wrappedRequest.getContentAsByteArray(), requestContentCaptor.getValue());
@@ -108,7 +109,7 @@ class LoggingFilterTest {
         verify(loggingHandler, never()).logRequest(any(HttpMethod.class), any(URI.class), any(HttpHeaders.class),
             any(byte[].class), any(Source.class));
         verify(loggingHandler, never()).logResponse(any(HttpMethod.class), any(URI.class), anyInt(), any(HttpHeaders.class),
-            any(byte[].class), any(Source.class));
+            any(byte[].class), any(Source.class), any(Long.class));
     }
 
     @Test
@@ -154,7 +155,7 @@ class LoggingFilterTest {
         verify(loggingHandler, never()).logRequest(any(HttpMethod.class), any(URI.class), any(HttpHeaders.class),
             any(byte[].class), any(Source.class));
         verify(loggingHandler, never()).logResponse(any(HttpMethod.class), any(URI.class), anyInt(), any(HttpHeaders.class),
-            any(byte[].class), any(Source.class));
+            any(byte[].class), any(Source.class), any(Long.class));
     }
 
     @Test
@@ -189,7 +190,8 @@ class LoggingFilterTest {
             anyInt(), // explicitly set status code
             any(HttpHeaders.class),
             responseContentCaptor.capture(),
-            any(Source.class)
+            any(Source.class),
+            any(Long.class)
         );
 
         assertArrayEquals(wrappedRequest.getContentAsByteArray(), requestContentCaptor.getValue());
@@ -229,7 +231,8 @@ class LoggingFilterTest {
             anyInt(), // explicitly set status code
             any(HttpHeaders.class),
             responseContentCaptor.capture(),
-            any(Source.class)
+            any(Source.class),
+            any(Long.class)
         );
 
         assertArrayEquals(wrappedRequest.getContentAsByteArray(), requestContentCaptor.getValue());
@@ -268,7 +271,8 @@ class LoggingFilterTest {
             anyInt(), // explicitly set status code
             any(HttpHeaders.class),
             responseContentCaptor.capture(),
-            any(Source.class)
+            any(Source.class),
+            any(Long.class)
         );
 
         assertArrayEquals(wrappedRequest.getContentAsByteArray(), requestContentCaptor.getValue());

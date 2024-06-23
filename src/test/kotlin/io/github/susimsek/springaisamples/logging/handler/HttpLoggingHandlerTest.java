@@ -83,7 +83,8 @@ class HttpLoggingHandlerTest {
         when(logFormatter.format(any(HttpLog.class))).thenReturn("formatted log");
 
         // Act
-        httpLoggingHandler.logResponse(HttpMethod.GET, uri, statusCode, headers, responseBody, Source.CLIENT);
+        httpLoggingHandler.logResponse(HttpMethod.GET, uri, statusCode, headers,
+            responseBody, Source.CLIENT, 0L);
 
         // Assert
         verify(logFormatter).format(any(HttpLog.class));
@@ -120,7 +121,8 @@ class HttpLoggingHandlerTest {
         when(loggingProperties.getHttp()).thenReturn(httpProperties);
 
         // Act
-        httpLoggingHandler.logResponse(HttpMethod.GET, uri, statusCode, headers, responseBody, Source.CLIENT);
+        httpLoggingHandler.logResponse(HttpMethod.GET, uri, statusCode, headers, responseBody,
+            Source.CLIENT, 0L);
 
         // Assert
         verify(logFormatter, never()).format(any(HttpLog.class));
@@ -142,7 +144,8 @@ class HttpLoggingHandlerTest {
         when(logFormatter.format(any(HttpLog.class))).thenReturn("formatted log");
 
         // Act
-        httpLoggingHandler.logResponse(HttpMethod.GET, uri, statusCode, headers, responseBody, Source.CLIENT);
+        httpLoggingHandler.logResponse(HttpMethod.GET, uri, statusCode,
+            headers, responseBody, Source.CLIENT, 0L);
 
         // Assert
         verify(logFormatter).format(any(HttpLog.class));
@@ -163,7 +166,8 @@ class HttpLoggingHandlerTest {
         when(logFormatter.format(any(HttpLog.class))).thenReturn("formatted log");
 
         // Act
-        httpLoggingHandler.logResponse(HttpMethod.GET, uri, statusCode, headers, responseBody, Source.CLIENT);
+        httpLoggingHandler.logResponse(HttpMethod.GET, uri,
+            statusCode, headers, responseBody, Source.CLIENT, 0L);
 
         // Assert
         verify(logFormatter).format(any(HttpLog.class));
@@ -185,7 +189,8 @@ class HttpLoggingHandlerTest {
         when(logFormatter.format(any(HttpLog.class))).thenReturn("formatted log");
 
         // Act
-        httpLoggingHandler.logResponse(HttpMethod.GET, uri, statusCode, headers, responseBody, Source.CLIENT);
+        httpLoggingHandler.logResponse(HttpMethod.GET, uri, statusCode,
+            headers, responseBody, Source.CLIENT, 0L);
 
         // Assert
         verify(logFormatter).format(any(HttpLog.class));
@@ -205,7 +210,8 @@ class HttpLoggingHandlerTest {
         when(logFormatter.format(any(HttpLog.class))).thenReturn("formatted log");
 
         // Act
-        httpLoggingHandler.logResponse(HttpMethod.GET, uri, statusCode, headers, responseBody, Source.CLIENT);
+        httpLoggingHandler.logResponse(HttpMethod.GET, uri,
+            statusCode, headers, responseBody, Source.CLIENT, 0L);
 
         // Assert
         verify(logFormatter).format(any(HttpLog.class));
@@ -226,7 +232,8 @@ class HttpLoggingHandlerTest {
         when(logFormatter.format(any(HttpLog.class))).thenReturn("formatted log");
 
         // Act
-        httpLoggingHandler.logResponse(HttpMethod.GET, uri, statusCode, headers, responseBody, Source.CLIENT);
+        httpLoggingHandler.logResponse(HttpMethod.GET, uri,
+            statusCode, headers, responseBody, Source.CLIENT, 0L);
 
         // Assert
         verify(logFormatter).format(any(HttpLog.class));
@@ -281,7 +288,8 @@ class HttpLoggingHandlerTest {
         when(loggingProperties.getHttp()).thenReturn(httpProperties);
 
         // Act
-        httpLoggingHandler.logResponse(HttpMethod.GET, uri, statusCode, headers, responseBody, Source.CLIENT);
+        httpLoggingHandler.logResponse(HttpMethod.GET, uri, statusCode,
+            headers, responseBody, Source.CLIENT, 0L);
 
         // Assert
         verify(logFormatter, never()).format(any(HttpLog.class));
