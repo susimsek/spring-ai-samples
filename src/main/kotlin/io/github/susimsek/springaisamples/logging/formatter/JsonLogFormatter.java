@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.github.susimsek.springaisamples.logging.model.HttpLog;
+import io.github.susimsek.springaisamples.logging.model.Trace;
 import java.io.IOException;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -36,6 +37,9 @@ public class JsonLogFormatter implements LogFormatter {
             logNode.set("body", parseBody(httpLog.getBody()));
         }
 
+        Optional.ofNullable(httpLog.getTrace())
+            .ifPresent(trace -> logNode.set("trace", parseTraceMetadata(trace)));
+
         return logNode.toPrettyString();
     }
 
@@ -51,5 +55,14 @@ public class JsonLogFormatter implements LogFormatter {
             node.set("body", JsonNodeFactory.instance.textNode(bodyString)); // Not a JSON body, log as plain text
             return node;
         }
+    }
+
+    private JsonNode parseTraceMetadata(Trace trace) {
+        ObjectNode traceNode = objectMapper.createObjectNode();
+        traceNode.set("traceId", JsonNodeFactory.instance.textNode(trace.getTraceId()));
+        traceNode.set("spanId", JsonNodeFactory.instance.textNode(trace.getSpanId()));
+        traceNode.set("requestId", JsonNodeFactory.instance.textNode(trace.getRequestId()));
+        traceNode.set("correlationId", JsonNodeFactory.instance.textNode(trace.getCorrelationId()));
+        return traceNode;
     }
 }

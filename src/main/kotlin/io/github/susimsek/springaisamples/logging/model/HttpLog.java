@@ -24,4 +24,5 @@ public class HttpLog {
     private HttpHeaders headers;
     private String body;
     private Source source;
+    private Trace trace;
 }

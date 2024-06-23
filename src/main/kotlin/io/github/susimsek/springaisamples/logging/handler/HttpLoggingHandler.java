@@ -1,11 +1,17 @@
 package io.github.susimsek.springaisamples.logging.handler;
 
+import static io.github.susimsek.springaisamples.trace.TraceConstants.CORRELATION_ID;
+import static io.github.susimsek.springaisamples.trace.TraceConstants.REQUEST_ID;
+import static io.github.susimsek.springaisamples.trace.TraceConstants.SPAN_ID;
+import static io.github.susimsek.springaisamples.trace.TraceConstants.TRACE_ID;
+
 import io.github.susimsek.springaisamples.enums.FilterOrder;
 import io.github.susimsek.springaisamples.logging.enums.HttpLogType;
 import io.github.susimsek.springaisamples.logging.enums.LogLevel;
 import io.github.susimsek.springaisamples.logging.enums.Source;
 import io.github.susimsek.springaisamples.logging.formatter.LogFormatter;
 import io.github.susimsek.springaisamples.logging.model.HttpLog;
+import io.github.susimsek.springaisamples.logging.model.Trace;
 import io.github.susimsek.springaisamples.logging.utils.HttpRequestMatcher;
 import io.github.susimsek.springaisamples.logging.utils.Obfuscator;
 import jakarta.servlet.http.HttpServletRequest;
@@ -16,6 +22,7 @@ import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRequest;
@@ -40,11 +47,11 @@ public class HttpLoggingHandler implements LoggingHandler {
     }
 
     @Override
-    public void logRequest(HttpMethod method, URI uri, HttpHeaders headers, byte[] body, Source source) {
+    public void logRequest(HttpMethod method, URI uri, HttpHeaders headers, byte[] body,
+                           Source source) {
         
         HttpLog.HttpLogBuilder logBuilder = initLogBuilder(
-            HttpLogType.REQUEST, method, uri, headers, source
-        );
+            HttpLogType.REQUEST, method, uri, headers, source);
         if (isLogLevel(LogLevel.FULL)) {
             logBuilder.body(obfuscator.maskBody(new String(body, StandardCharsets.UTF_8)));
         }
@@ -57,8 +64,7 @@ public class HttpLoggingHandler implements LoggingHandler {
                             byte[] responseBody, Source source) {
         
         HttpLog.HttpLogBuilder logBuilder = initLogBuilder(
-            HttpLogType.RESPONSE, method, uri, headers, source
-        ).statusCode(statusCode);
+            HttpLogType.RESPONSE, method, uri, headers, source).statusCode(statusCode);
 
         HttpStatus status = HttpStatus.valueOf(statusCode);
 
@@ -93,12 +99,21 @@ public class HttpLoggingHandler implements LoggingHandler {
 
     private HttpLog.HttpLogBuilder initLogBuilder(HttpLogType type, HttpMethod method, URI uri,
                                                   HttpHeaders headers, Source source) {
+
+        Trace trace = Trace.builder()
+            .traceId(MDC.get(TRACE_ID))
+            .spanId(MDC.get(SPAN_ID))
+            .requestId(MDC.get(REQUEST_ID))
+            .correlationId(MDC.get(CORRELATION_ID))
+            .build();
+
         return HttpLog.builder()
             .type(type)
             .method(method)
             .uri(uri)
             .headers(isLogLevel(LogLevel.HEADERS) ? obfuscator.maskHeaders(headers) : new HttpHeaders())
-            .source(source);
+            .source(source)
+            .trace(trace.isComplete() ? trace : null);
     }
 
     private boolean isLogLevel(LogLevel level) {
