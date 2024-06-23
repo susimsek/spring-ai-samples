@@ -65,7 +65,7 @@ public class HttpLoggingHandler implements LoggingHandler {
         
         HttpLog.HttpLogBuilder logBuilder = initLogBuilder(
             HttpLogType.RESPONSE, method, uri, headers, source).statusCode(statusCode)
-            .duration(duration);
+            .durationMs(duration);
 
         HttpStatus status = HttpStatus.valueOf(statusCode);
 

@@ -27,8 +27,9 @@ public class JsonLogFormatter implements LogFormatter {
         logNode.set("host", JsonNodeFactory.instance.textNode(httpLog.getUri().getHost()));
         logNode.set("path", JsonNodeFactory.instance.textNode(httpLog.getUri().getPath()));
 
-        Optional.ofNullable(httpLog.getDuration())
-            .ifPresent(duration -> logNode.set("duration", JsonNodeFactory.instance.numberNode(duration)));
+        Optional.ofNullable(httpLog.getDurationMs())
+            .ifPresent(duration -> logNode.set("duration", JsonNodeFactory.instance.textNode(
+                httpLog.getDurationMs() + "ms")));
 
         Optional.ofNullable(httpLog.getStatusCode())
             .ifPresent(statusCode -> logNode.set("statusCode", JsonNodeFactory.instance.numberNode(statusCode)));
