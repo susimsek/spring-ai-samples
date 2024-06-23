@@ -175,7 +175,6 @@ public class HttpLoggingHandler implements LoggingHandler {
             .type(type)
             .className(className)
             .methodName(methodName)
-
             .trace(trace.isComplete() ? trace : null);
     }
 

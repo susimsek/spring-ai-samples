@@ -17,11 +17,10 @@ public class LoggingAspect {
     private final LoggingHandler loggingHandler;
 
     @Pointcut(
-        "within(@org.springframework.stereotype.Repository *)"
-            + " || within(@org.springframework.stereotype.Service *)"
-            + " || within(@org.springframework.web.bind.annotation.RestController *)"
+        "@within(io.github.susimsek.springaisamples.logging.annotation.Loggable) || "
+            + "@annotation(io.github.susimsek.springaisamples.logging.annotation.Loggable)"
     )
-    public void springBeanPointcut() {
+    public void loggablePointcut() {
         // Method is empty as this is just a Pointcut, the implementations are in the advices.
     }
 
@@ -34,7 +33,7 @@ public class LoggingAspect {
         // Method is empty as this is just a Pointcut, the implementations are in the advices.
     }
 
-    @Around("applicationPackagePointcut() && springBeanPointcut()")
+    @Around("applicationPackagePointcut() && loggablePointcut()")
     public Object logAround(ProceedingJoinPoint joinPoint) throws Throwable {
         if (loggingHandler.shouldNotMethodLog(joinPoint)) {
             return joinPoint.proceed();
