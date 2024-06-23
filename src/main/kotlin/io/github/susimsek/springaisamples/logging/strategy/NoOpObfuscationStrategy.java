@@ -19,4 +19,14 @@ public class NoOpObfuscationStrategy implements ObfuscationStrategy {
     public URI maskUriParameters(URI uri) {
         return uri;
     }
+
+    @Override
+    public Object[] maskArguments(Object[] arguments) {
+        return arguments;
+    }
+
+    @Override
+    public Object maskResult(Object result) {
+        return result;
+    }
 }

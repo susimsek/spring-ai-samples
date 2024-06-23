@@ -21,4 +21,12 @@ public class Obfuscator {
     public URI maskUriParameters(URI uri) {
         return obfuscationStrategy.maskUriParameters(uri);
     }
+
+    public Object[] maskArguments(Object[] arguments) {
+        return obfuscationStrategy.maskArguments(arguments);
+    }
+
+    public Object maskResult(Object result) {
+        return obfuscationStrategy.maskResult(result);
+    }
 }

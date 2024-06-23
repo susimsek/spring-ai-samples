@@ -15,6 +15,13 @@ public interface LoggingHandler {
     void logResponse(HttpMethod method, URI uri, Integer statusCode, HttpHeaders headers, byte[] responseBody,
                      Source source, long duration);
 
+    void logMethodEntry(String className, String methodName, Object[] args);
+
+    void logMethodExit(String className, String methodName, Object result, long duration);
+
+    void logException(String className, String methodName, Object[] args,
+                      String exceptionMessage, long duration);
+
     boolean shouldNotLog(HttpServletRequest request);
 
     boolean shouldNotLog(HttpRequest request);

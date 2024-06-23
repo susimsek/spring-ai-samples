@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.github.susimsek.springaisamples.logging.model.HttpLog;
+import io.github.susimsek.springaisamples.logging.model.MethodLog;
 import io.github.susimsek.springaisamples.logging.model.Trace;
 import java.io.IOException;
 import java.util.Optional;
@@ -42,6 +43,30 @@ public class JsonLogFormatter implements LogFormatter {
         }
 
         Optional.ofNullable(httpLog.getTrace())
+            .ifPresent(trace -> logNode.set("trace", parseTraceMetadata(trace)));
+
+        return logNode.toPrettyString();
+    }
+
+    @Override
+    public String format(MethodLog methodLog) {
+        ObjectNode logNode = objectMapper.createObjectNode();
+        logNode.set("type", JsonNodeFactory.instance.textNode(methodLog.getType().toString().toLowerCase()));
+        logNode.set("className", JsonNodeFactory.instance.textNode(methodLog.getClassName()));
+        logNode.set("methodName", JsonNodeFactory.instance.textNode(methodLog.getMethodName()));
+        logNode.set("arguments", objectMapper.valueToTree(methodLog.getArguments()));
+        Optional.ofNullable(methodLog.getDurationMs())
+            .ifPresent(duration -> logNode.set("duration", JsonNodeFactory.instance.textNode(
+                methodLog.getDurationMs() + "ms")));
+
+        Optional.ofNullable(methodLog.getResult())
+            .ifPresent(result -> logNode.set("result", objectMapper.valueToTree(result)));
+
+        Optional.ofNullable(methodLog.getExceptionMessage())
+            .ifPresent(exceptionMessage -> logNode.set("exceptionMessage",
+                JsonNodeFactory.instance.textNode(exceptionMessage)));
+
+        Optional.ofNullable(methodLog.getTrace())
             .ifPresent(trace -> logNode.set("trace", parseTraceMetadata(trace)));
 
         return logNode.toPrettyString();

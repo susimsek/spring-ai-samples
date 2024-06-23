@@ -8,9 +8,11 @@ import static io.github.susimsek.springaisamples.trace.TraceConstants.TRACE_ID;
 import io.github.susimsek.springaisamples.enums.FilterOrder;
 import io.github.susimsek.springaisamples.logging.enums.HttpLogType;
 import io.github.susimsek.springaisamples.logging.enums.LogLevel;
+import io.github.susimsek.springaisamples.logging.enums.MethodLogType;
 import io.github.susimsek.springaisamples.logging.enums.Source;
 import io.github.susimsek.springaisamples.logging.formatter.LogFormatter;
 import io.github.susimsek.springaisamples.logging.model.HttpLog;
+import io.github.susimsek.springaisamples.logging.model.MethodLog;
 import io.github.susimsek.springaisamples.logging.model.Trace;
 import io.github.susimsek.springaisamples.logging.utils.HttpRequestMatcher;
 import io.github.susimsek.springaisamples.logging.utils.Obfuscator;
@@ -81,6 +83,32 @@ public class HttpLoggingHandler implements LoggingHandler {
     }
 
     @Override
+    public void logMethodEntry(String className, String methodName, Object[] args) {
+        MethodLog.MethodLogBuilder logBuilder = initMethodLogBuilder(
+            MethodLogType.METHOD_ENTRY, className, methodName, args);
+        log("Method Entry: {}", logFormatter.format(logBuilder.build()));
+    }
+
+    @Override
+    public void logMethodExit(String className, String methodName, Object result, long duration) {
+        MethodLog.MethodLogBuilder logBuilder = initMethodLogBuilder(
+            MethodLogType.METHOD_EXIT, className, methodName, null)
+            .result(result)
+            .durationMs(duration);
+        log("Method Exit: {}", logFormatter.format(logBuilder.build()));
+    }
+
+    @Override
+    public void logException(String className, String methodName,
+                             Object[] args, String exceptionMessage, long duration) {
+        MethodLog.MethodLogBuilder logBuilder = initMethodLogBuilder(
+            MethodLogType.EXCEPTION, className, methodName, args)
+            .exceptionMessage(exceptionMessage)
+            .durationMs(duration);
+        log("Exception: {}", logFormatter.format(logBuilder.build()));
+    }
+
+    @Override
     public boolean shouldNotLog(HttpServletRequest request) {
         return requestMatcherConfigs.stream()
             .filter(config -> config.requestMatcher.matches(request))
@@ -101,12 +129,7 @@ public class HttpLoggingHandler implements LoggingHandler {
     private HttpLog.HttpLogBuilder initLogBuilder(HttpLogType type, HttpMethod method, URI uri,
                                                   HttpHeaders headers, Source source) {
 
-        Trace trace = Trace.builder()
-            .traceId(MDC.get(TRACE_ID))
-            .spanId(MDC.get(SPAN_ID))
-            .requestId(MDC.get(REQUEST_ID))
-            .correlationId(MDC.get(CORRELATION_ID))
-            .build();
+        Trace trace = createTrace();
 
         return HttpLog.builder()
             .type(type)
@@ -114,6 +137,20 @@ public class HttpLoggingHandler implements LoggingHandler {
             .uri(uri)
             .headers(isLogLevel(LogLevel.HEADERS) ? obfuscator.maskHeaders(headers) : new HttpHeaders())
             .source(source)
+            .trace(trace.isComplete() ? trace : null);
+    }
+
+    private MethodLog.MethodLogBuilder initMethodLogBuilder(MethodLogType type,
+                                                            String className, String methodName,
+                                                            Object[] args) {
+        Trace trace = createTrace();
+
+        return MethodLog.builder()
+            .type(type)
+            .className(className)
+            .methodName(methodName)
+            .arguments(args)
+
             .trace(trace.isComplete() ? trace : null);
     }
 
@@ -128,6 +165,15 @@ public class HttpLoggingHandler implements LoggingHandler {
 
     private void log(String message, String formattedLog) {
         log.info(message, formattedLog);
+    }
+
+    private Trace createTrace() {
+        return Trace.builder()
+            .traceId(MDC.get(TRACE_ID))
+            .spanId(MDC.get(SPAN_ID))
+            .requestId(MDC.get(REQUEST_ID))
+            .correlationId(MDC.get(CORRELATION_ID))
+            .build();
     }
 
     @AllArgsConstructor

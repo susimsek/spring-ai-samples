@@ -61,6 +61,23 @@ public class DefaultObfuscationStrategy implements ObfuscationStrategy {
         return builder.build().toUri();
     }
 
+    @Override
+    public Object[] maskArguments(Object[] arguments) {
+        if (arguments == null) {
+            return null;
+        }
+        Object[] maskedArguments = new Object[arguments.length];
+        for (int i = 0; i < arguments.length; i++) {
+            maskedArguments[i] = maskObject(arguments[i]);
+        }
+        return maskedArguments;
+    }
+
+    @Override
+    public Object maskResult(Object result) {
+        return maskObject(result);
+    }
+
     private void maskJsonPaths(JsonNode rootNode, List<String> jsonPaths) {
         for (String jsonPath : jsonPaths) {
             String[] pathParts = splitJsonPath(jsonPath.replace("$.", ""));
@@ -177,5 +194,18 @@ public class DefaultObfuscationStrategy implements ObfuscationStrategy {
 
     private boolean shouldMask(List<String> list, String key) {
         return list.stream().anyMatch(item -> item.equalsIgnoreCase(key));
+    }
+
+    private Object maskObject(Object object) {
+        if (object == null) {
+            return null;
+        }
+        try {
+            JsonNode rootNode = objectMapper.valueToTree(object);
+            maskJsonPaths(rootNode, loggingProperties.getHttp().getObfuscate().getJsonBodyFields());
+            return objectMapper.treeToValue(rootNode, Object.class);
+        } catch (Exception e) {
+            return object;
+        }
     }
 }

@@ -9,4 +9,8 @@ public interface ObfuscationStrategy {
     String maskBody(String body);
 
     URI maskUriParameters(URI uri);
+
+    Object[] maskArguments(Object[] arguments);
+
+    Object maskResult(Object result);
 }

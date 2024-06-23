@@ -2,6 +2,7 @@ package io.github.susimsek.springaisamples.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.susimsek.springaisamples.enums.FilterOrder;
+import io.github.susimsek.springaisamples.logging.aspect.LoggingAspect;
 import io.github.susimsek.springaisamples.logging.config.LoggingProperties;
 import io.github.susimsek.springaisamples.logging.filter.LoggingFilter;
 import io.github.susimsek.springaisamples.logging.formatter.JsonLogFormatter;
@@ -32,6 +33,11 @@ public class LoggingConfig {
     @Bean
     public LoggingFilter loggingFilter(LoggingHandler loggingHandler) {
         return new LoggingFilter(loggingHandler);
+    }
+
+    @Bean
+    public LoggingAspect loggingAspect(LoggingHandler loggingHandler) {
+        return new LoggingAspect(loggingHandler);
     }
 
     @Bean
