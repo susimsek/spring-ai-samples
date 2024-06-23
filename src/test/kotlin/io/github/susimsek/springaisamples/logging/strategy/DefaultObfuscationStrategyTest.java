@@ -45,7 +45,7 @@ class DefaultObfuscationStrategyTest {
     @Test
     void testMaskHeaders() {
         when(loggingProperties.getHttp()).thenReturn(http);
-        when(loggingProperties.getHttp().getObfuscate()).thenReturn(obfuscate);
+        when(loggingProperties.getObfuscate()).thenReturn(obfuscate);
         when(obfuscate.getMaskValue()).thenReturn("*****");
         when(obfuscate.getHeaders()).thenReturn(List.of("Authorization"));
 
@@ -62,7 +62,7 @@ class DefaultObfuscationStrategyTest {
     @Test
     void testMaskBody() throws Exception {
         when(loggingProperties.getHttp()).thenReturn(http);
-        when(loggingProperties.getHttp().getObfuscate()).thenReturn(obfuscate);
+        when(loggingProperties.getObfuscate()).thenReturn(obfuscate);
         when(obfuscate.getMaskValue()).thenReturn("*****");
         when(obfuscate.getJsonBodyFields()).thenReturn(List.of("$.password", "$.nested.field"));
 
@@ -118,7 +118,7 @@ class DefaultObfuscationStrategyTest {
     @Test
     void testMaskUriParameters() {
         when(loggingProperties.getHttp()).thenReturn(http);
-        when(loggingProperties.getHttp().getObfuscate()).thenReturn(obfuscate);
+        when(loggingProperties.getObfuscate()).thenReturn(obfuscate);
         when(obfuscate.getMaskValue()).thenReturn("*****");
         when(obfuscate.getParameters()).thenReturn(List.of("token"));
 
@@ -137,7 +137,7 @@ class DefaultObfuscationStrategyTest {
     @Test
     void testMaskJsonPaths() throws Exception {
         when(loggingProperties.getHttp()).thenReturn(http);
-        when(loggingProperties.getHttp().getObfuscate()).thenReturn(obfuscate);
+        when(loggingProperties.getObfuscate()).thenReturn(obfuscate);
         when(obfuscate.getMaskValue()).thenReturn("*****");
 
         String json = "{\"username\":\"user\",\"password\":\"secret\",\"nested\":{\"field\":\"value\"}}";
@@ -186,7 +186,7 @@ class DefaultObfuscationStrategyTest {
     @Test
     void testMaskUriParametersWithEmptyParameters() {
         when(loggingProperties.getHttp()).thenReturn(http);
-        when(loggingProperties.getHttp().getObfuscate()).thenReturn(obfuscate);
+        when(loggingProperties.getObfuscate()).thenReturn(obfuscate);
         when(obfuscate.getParameters()).thenReturn(List.of());
 
         URI uri = URI.create("http://example.com?token=secret&name=user");

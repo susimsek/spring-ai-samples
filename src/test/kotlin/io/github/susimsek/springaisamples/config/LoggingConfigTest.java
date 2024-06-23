@@ -71,7 +71,6 @@ class LoggingConfigTest {
 
         // Mock Obfuscate
         LoggingProperties.Obfuscate obfuscateMock = mock(LoggingProperties.Obfuscate.class);
-        when(httpMock.getObfuscate()).thenReturn(obfuscateMock);
 
         // Mock isEnabled() method of Obfuscate
         when(obfuscateMock.isEnabled()).thenReturn(true);
@@ -98,7 +97,6 @@ class LoggingConfigTest {
 
         // Mock Obfuscate
         LoggingProperties.Obfuscate obfuscateMock = mock(LoggingProperties.Obfuscate.class);
-        when(httpMock.getObfuscate()).thenReturn(obfuscateMock);
 
         // Mock isEnabled() method of Obfuscate
         when(obfuscateMock.isEnabled()).thenReturn(false);
