@@ -3,6 +3,7 @@ package io.github.susimsek.springaisamples.logging.handler;
 import io.github.susimsek.springaisamples.logging.enums.Source;
 import jakarta.servlet.http.HttpServletRequest;
 import java.net.URI;
+import org.aspectj.lang.ProceedingJoinPoint;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRequest;
@@ -25,6 +26,8 @@ public interface LoggingHandler {
     boolean shouldNotLog(HttpServletRequest request);
 
     boolean shouldNotLog(HttpRequest request);
+
+    boolean shouldNotMethodLog(ProceedingJoinPoint joinPoint);
 
     int getOrder();
 }

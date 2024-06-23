@@ -36,6 +36,9 @@ public class LoggingAspect {
 
     @Around("applicationPackagePointcut() && springBeanPointcut()")
     public Object logAround(ProceedingJoinPoint joinPoint) throws Throwable {
+        if (loggingHandler.shouldNotMethodLog(joinPoint)) {
+            return joinPoint.proceed();
+        }
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
         

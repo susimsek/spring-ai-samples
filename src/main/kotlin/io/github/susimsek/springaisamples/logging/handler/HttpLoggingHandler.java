@@ -25,6 +25,7 @@ import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.aspectj.lang.ProceedingJoinPoint;
 import org.slf4j.MDC;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -145,6 +146,11 @@ public class HttpLoggingHandler implements LoggingHandler {
             .map(config -> !config.logged)
             .findFirst()
             .orElse(!defaultLogged);
+    }
+
+    @Override
+    public boolean shouldNotMethodLog(ProceedingJoinPoint joinPoint) {
+        return methodLogLevel == MethodLogLevel.NONE;
     }
 
     private HttpLog.HttpLogBuilder initLogBuilder(HttpLogType type, HttpMethod method, URI uri,
