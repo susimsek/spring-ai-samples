@@ -7,7 +7,7 @@ import static io.github.susimsek.springaisamples.trace.TraceConstants.TRACE_ID;
 
 import io.github.susimsek.springaisamples.enums.FilterOrder;
 import io.github.susimsek.springaisamples.logging.enums.HttpLogType;
-import io.github.susimsek.springaisamples.logging.enums.LogLevel;
+import io.github.susimsek.springaisamples.logging.enums.HttpLogLevel;
 import io.github.susimsek.springaisamples.logging.enums.MethodLogType;
 import io.github.susimsek.springaisamples.logging.enums.Source;
 import io.github.susimsek.springaisamples.logging.formatter.LogFormatter;
@@ -36,7 +36,7 @@ import org.springframework.util.Assert;
 @Slf4j
 @RequiredArgsConstructor
 public class HttpLoggingHandler implements LoggingHandler {
-    private final LogLevel logLevel;
+    private final HttpLogLevel logLevel;
     private final LogFormatter logFormatter;
     private final Obfuscator obfuscator;
     private final List<RequestMatcherConfig> requestMatcherConfigs;
@@ -54,7 +54,7 @@ public class HttpLoggingHandler implements LoggingHandler {
         
         HttpLog.HttpLogBuilder logBuilder = initLogBuilder(
             HttpLogType.REQUEST, method, uri, headers, source);
-        if (isLogLevel(LogLevel.FULL)) {
+        if (isLogLevel(HttpLogLevel.FULL)) {
             logBuilder.body(obfuscator.maskBody(new String(body, StandardCharsets.UTF_8)));
         }
 
@@ -71,7 +71,7 @@ public class HttpLoggingHandler implements LoggingHandler {
 
         HttpStatus status = HttpStatus.valueOf(statusCode);
 
-        if (isLogLevel(LogLevel.FULL) && status.is2xxSuccessful()) {
+        if (isLogLevel(HttpLogLevel.FULL) && status.is2xxSuccessful()) {
             logBuilder.body(obfuscator.maskBody(new String(responseBody, StandardCharsets.UTF_8)));
         } else if (shouldLogWithoutBody(status)) {
             logBuilder.body(null);
@@ -135,7 +135,7 @@ public class HttpLoggingHandler implements LoggingHandler {
             .type(type)
             .method(method)
             .uri(uri)
-            .headers(isLogLevel(LogLevel.HEADERS) ? obfuscator.maskHeaders(headers) : new HttpHeaders())
+            .headers(isLogLevel(HttpLogLevel.HEADERS) ? obfuscator.maskHeaders(headers) : new HttpHeaders())
             .source(source)
             .trace(trace.isComplete() ? trace : null);
     }
@@ -154,7 +154,7 @@ public class HttpLoggingHandler implements LoggingHandler {
             .trace(trace.isComplete() ? trace : null);
     }
 
-    private boolean isLogLevel(LogLevel level) {
+    private boolean isLogLevel(HttpLogLevel level) {
         return logLevel.ordinal() >= level.ordinal();
     }
 
@@ -183,7 +183,7 @@ public class HttpLoggingHandler implements LoggingHandler {
     }
 
     public interface InitialBuilder {
-        InitialBuilder logLevel(LogLevel logLevel);
+        InitialBuilder logLevel(HttpLogLevel logLevel);
 
         InitialBuilder order(int order);
 
@@ -215,7 +215,7 @@ public class HttpLoggingHandler implements LoggingHandler {
         private final List<RequestMatcherConfig> requestMatcherConfigs = new ArrayList<>();
         private boolean anyRequestConfigured = false;
         private boolean defaultLogged = true;
-        private LogLevel logLevel = LogLevel.FULL;
+        private HttpLogLevel logLevel = HttpLogLevel.FULL;
         private int order = FilterOrder.LOGGING.order();
         private int lastIndex = 0;
 
@@ -283,7 +283,7 @@ public class HttpLoggingHandler implements LoggingHandler {
             return this;
         }
 
-        public Builder logLevel(LogLevel logLevel) {
+        public Builder logLevel(HttpLogLevel logLevel) {
             this.logLevel = logLevel;
             return this;
         }

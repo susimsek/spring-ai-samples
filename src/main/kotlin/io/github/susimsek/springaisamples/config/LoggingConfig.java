@@ -36,6 +36,7 @@ public class LoggingConfig {
     }
 
     @Bean
+    @ConditionalOnProperty(name = "logging.aspect.enabled", havingValue = "true", matchIfMissing = true)
     public LoggingAspect loggingAspect(LoggingHandler loggingHandler) {
         return new LoggingAspect(loggingHandler);
     }
@@ -64,7 +65,7 @@ public class LoggingConfig {
     @Bean
     public ObfuscationStrategy obfuscationStrategy(LoggingProperties loggingProperties,
                                                    ObjectMapper objectMapper) {
-        if (loggingProperties.getHttp().getObfuscate().isEnabled()) {
+        if (loggingProperties.getObfuscate().isEnabled()) {
             return new DefaultObfuscationStrategy(loggingProperties, objectMapper);
         } else {
             return new NoOpObfuscationStrategy();

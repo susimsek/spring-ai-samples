@@ -26,8 +26,8 @@ public class DefaultObfuscationStrategy implements ObfuscationStrategy {
     public HttpHeaders maskHeaders(HttpHeaders headers) {
         HttpHeaders maskedHeaders = new HttpHeaders();
         headers.forEach((key, value) -> maskedHeaders.addAll(key,
-            shouldMask(loggingProperties.getHttp().getObfuscate().getHeaders(), key)
-                ? List.of(loggingProperties.getHttp().getObfuscate().getMaskValue())
+            shouldMask(loggingProperties.getObfuscate().getHeaders(), key)
+                ? List.of(loggingProperties.getObfuscate().getMaskValue())
                 : value));
         return maskedHeaders;
     }
@@ -39,7 +39,7 @@ public class DefaultObfuscationStrategy implements ObfuscationStrategy {
         }
         try {
             JsonNode rootNode = objectMapper.readTree(body);
-            maskJsonPaths(rootNode, loggingProperties.getHttp().getObfuscate().getJsonBodyFields());
+            maskJsonPaths(rootNode, loggingProperties.getObfuscate().getJsonBodyFields());
             return objectMapper.writeValueAsString(rootNode);
         } catch (Exception e) {
             return body;
@@ -53,8 +53,8 @@ public class DefaultObfuscationStrategy implements ObfuscationStrategy {
         MultiValueMap<String, String> maskedParams = new LinkedMultiValueMap<>();
 
         queryParams.forEach((key, value) -> maskedParams.addAll(key,
-            shouldMask(loggingProperties.getHttp().getObfuscate().getParameters(), key)
-                ? List.of(loggingProperties.getHttp().getObfuscate().getMaskValue())
+            shouldMask(loggingProperties.getObfuscate().getParameters(), key)
+                ? List.of(loggingProperties.getObfuscate().getMaskValue())
                 : value));
 
         builder.replaceQueryParams(maskedParams);
@@ -166,7 +166,7 @@ public class DefaultObfuscationStrategy implements ObfuscationStrategy {
         currentNode.set(
             fieldName,
             JsonNodeFactory.instance.textNode(
-                loggingProperties.getHttp().getObfuscate().getMaskValue()
+                loggingProperties.getObfuscate().getMaskValue()
             )
         );
     }
@@ -185,7 +185,7 @@ public class DefaultObfuscationStrategy implements ObfuscationStrategy {
                     maskAllFields(arrayItem);
                 } else {
                     arrayNode.set(i, JsonNodeFactory.instance.textNode(
-                        loggingProperties.getHttp().getObfuscate().getMaskValue()
+                        loggingProperties.getObfuscate().getMaskValue()
                     ));
                 }
             }
@@ -202,7 +202,7 @@ public class DefaultObfuscationStrategy implements ObfuscationStrategy {
         }
         try {
             JsonNode rootNode = objectMapper.valueToTree(object);
-            maskJsonPaths(rootNode, loggingProperties.getHttp().getObfuscate().getJsonBodyFields());
+            maskJsonPaths(rootNode, loggingProperties.getObfuscate().getMethodFields());
             return objectMapper.treeToValue(rootNode, Object.class);
         } catch (Exception e) {
             return object;

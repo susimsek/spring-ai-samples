@@ -54,7 +54,8 @@ public class JsonLogFormatter implements LogFormatter {
         logNode.set("type", JsonNodeFactory.instance.textNode(methodLog.getType().toString().toLowerCase()));
         logNode.set("className", JsonNodeFactory.instance.textNode(methodLog.getClassName()));
         logNode.set("methodName", JsonNodeFactory.instance.textNode(methodLog.getMethodName()));
-        logNode.set("arguments", objectMapper.valueToTree(methodLog.getArguments()));
+        Optional.ofNullable(methodLog.getResult())
+            .ifPresent(arguments -> logNode.set("arguments", objectMapper.valueToTree(arguments)));
         Optional.ofNullable(methodLog.getDurationMs())
             .ifPresent(duration -> logNode.set("duration", JsonNodeFactory.instance.textNode(
                 methodLog.getDurationMs() + "ms")));

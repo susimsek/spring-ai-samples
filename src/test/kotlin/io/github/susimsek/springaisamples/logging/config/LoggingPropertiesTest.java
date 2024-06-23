@@ -4,7 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import io.github.susimsek.springaisamples.logging.enums.LogLevel;
+import io.github.susimsek.springaisamples.logging.enums.HttpLogLevel;
 import java.util.Arrays;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,9 +35,9 @@ class LoggingPropertiesTest {
     @Test
     void testConfiguredValues() {
         assertFalse(loggingProperties.getHttp().isEnabled());
-        assertEquals(LogLevel.FULL, loggingProperties.getHttp().getLevel());
+        assertEquals(HttpLogLevel.FULL, loggingProperties.getHttp().getLevel());
 
-        LoggingProperties.Obfuscate obfuscate = loggingProperties.getHttp().getObfuscate();
+        LoggingProperties.Obfuscate obfuscate = loggingProperties.getObfuscate();
         assertNotNull(obfuscate);
         assertEquals("####", obfuscate.getMaskValue());
         assertEquals(Arrays.asList("Authorization", "Set-Cookie"), obfuscate.getHeaders());
