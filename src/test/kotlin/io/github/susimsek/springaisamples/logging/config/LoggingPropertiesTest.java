@@ -35,7 +35,7 @@ class LoggingPropertiesTest {
     @Test
     void testConfiguredValues() {
         assertFalse(loggingProperties.getHttp().isEnabled());
-        assertEquals(HttpLogLevel.FULL, loggingProperties.getHttp().getLevel());
+        assertEquals(HttpLogLevel.FULL, loggingProperties.getHttp().getLogLevel());
 
         LoggingProperties.Obfuscate obfuscate = loggingProperties.getObfuscate();
         assertNotNull(obfuscate);

@@ -53,7 +53,7 @@ class HttpLoggingHandlerTest {
         HttpHeaders headers = new HttpHeaders();
         byte[] body = "request body".getBytes();
         LoggingProperties.Http httpProperties = new LoggingProperties.Http();
-        httpProperties.setLevel(HttpLogLevel.FULL);
+        httpProperties.setLogLevel(HttpLogLevel.FULL);
 
         when(loggingProperties.getHttp()).thenReturn(httpProperties);
         when(obfuscator.maskBody(anyString())).thenAnswer(invocation -> invocation.getArgument(0));
@@ -75,7 +75,7 @@ class HttpLoggingHandlerTest {
         byte[] responseBody = "client error response".getBytes();
         int statusCode = 400;
         LoggingProperties.Http httpProperties = new LoggingProperties.Http();
-        httpProperties.setLevel(HttpLogLevel.FULL);
+        httpProperties.setLogLevel(HttpLogLevel.FULL);
 
         when(loggingProperties.getHttp()).thenReturn(httpProperties);
         when(obfuscator.maskBody(anyString())).thenAnswer(invocation -> invocation.getArgument(0));
@@ -97,7 +97,7 @@ class HttpLoggingHandlerTest {
         HttpHeaders headers = new HttpHeaders();
         byte[] body = "request body".getBytes();
         LoggingProperties.Http httpProperties = new LoggingProperties.Http();
-        httpProperties.setLevel(HttpLogLevel.FULL);
+        httpProperties.setLogLevel(HttpLogLevel.FULL);
 
         when(loggingProperties.getHttp()).thenReturn(httpProperties);
 
@@ -116,7 +116,7 @@ class HttpLoggingHandlerTest {
         byte[] responseBody = "response body".getBytes();
         int statusCode = 200;
         LoggingProperties.Http httpProperties = new LoggingProperties.Http();
-        httpProperties.setLevel(HttpLogLevel.FULL);
+        httpProperties.setLogLevel(HttpLogLevel.FULL);
 
         when(loggingProperties.getHttp()).thenReturn(httpProperties);
 
@@ -136,7 +136,7 @@ class HttpLoggingHandlerTest {
         HttpHeaders headers = new HttpHeaders();
         byte[] responseBody = "response body".getBytes();
         LoggingProperties.Http httpProperties = new LoggingProperties.Http();
-        httpProperties.setLevel(HttpLogLevel.FULL);
+        httpProperties.setLogLevel(HttpLogLevel.FULL);
 
         when(loggingProperties.getHttp()).thenReturn(httpProperties);
         lenient().when(obfuscator.maskBody(anyString())).thenAnswer(invocation -> invocation.getArgument(0));
@@ -159,7 +159,7 @@ class HttpLoggingHandlerTest {
         byte[] responseBody = "too many requests".getBytes();
         int statusCode = 429;
         LoggingProperties.Http httpProperties = new LoggingProperties.Http();
-        httpProperties.setLevel(HttpLogLevel.FULL);
+        httpProperties.setLogLevel(HttpLogLevel.FULL);
 
         when(loggingProperties.getHttp()).thenReturn(httpProperties);
         when(obfuscator.maskHeaders(any(HttpHeaders.class))).thenReturn(headers);
@@ -181,7 +181,7 @@ class HttpLoggingHandlerTest {
         byte[] responseBody = "internal server error".getBytes();
         int statusCode = 500;
         LoggingProperties.Http httpProperties = new LoggingProperties.Http();
-        httpProperties.setLevel(HttpLogLevel.FULL);
+        httpProperties.setLogLevel(HttpLogLevel.FULL);
 
         when(loggingProperties.getHttp()).thenReturn(httpProperties);
         when(obfuscator.maskBody(anyString())).thenAnswer(invocation -> invocation.getArgument(0));
@@ -204,7 +204,7 @@ class HttpLoggingHandlerTest {
         byte[] responseBody = "basic log level response".getBytes();
         int statusCode = 200;
         LoggingProperties.Http httpProperties = new LoggingProperties.Http();
-        httpProperties.setLevel(HttpLogLevel.BASIC);
+        httpProperties.setLogLevel(HttpLogLevel.BASIC);
 
         when(loggingProperties.getHttp()).thenReturn(httpProperties);
         when(logFormatter.format(any(HttpLog.class))).thenReturn("formatted log");
@@ -225,7 +225,7 @@ class HttpLoggingHandlerTest {
         byte[] responseBody = "headers log level response".getBytes();
         int statusCode = 200;
         LoggingProperties.Http httpProperties = new LoggingProperties.Http();
-        httpProperties.setLevel(HttpLogLevel.HEADERS);
+        httpProperties.setLogLevel(HttpLogLevel.HEADERS);
 
         when(loggingProperties.getHttp()).thenReturn(httpProperties);
         when(obfuscator.maskHeaders(any(HttpHeaders.class))).thenReturn(headers);
@@ -246,7 +246,7 @@ class HttpLoggingHandlerTest {
         HttpHeaders headers = new HttpHeaders();
         byte[] body = "request body".getBytes();
         LoggingProperties.Http httpProperties = new LoggingProperties.Http();
-        httpProperties.setLevel(HttpLogLevel.NONE);
+        httpProperties.setLogLevel(HttpLogLevel.NONE);
 
         when(loggingProperties.getHttp()).thenReturn(httpProperties);
 
@@ -264,7 +264,7 @@ class HttpLoggingHandlerTest {
         HttpHeaders headers = new HttpHeaders();
         byte[] body = "request body".getBytes();
         LoggingProperties.Http httpProperties = new LoggingProperties.Http();
-        httpProperties.setLevel(HttpLogLevel.FULL);
+        httpProperties.setLogLevel(HttpLogLevel.FULL);
 
         when(loggingProperties.getHttp()).thenReturn(httpProperties);
 
@@ -283,7 +283,7 @@ class HttpLoggingHandlerTest {
         byte[] responseBody = "response body".getBytes();
         int statusCode = 200;
         LoggingProperties.Http httpProperties = new LoggingProperties.Http();
-        httpProperties.setLevel(HttpLogLevel.FULL);
+        httpProperties.setLogLevel(HttpLogLevel.FULL);
 
         when(loggingProperties.getHttp()).thenReturn(httpProperties);
 
@@ -302,7 +302,7 @@ class HttpLoggingHandlerTest {
         HttpHeaders headers = new HttpHeaders();
         byte[] body = "request body".getBytes();
         LoggingProperties.Http httpProperties = new LoggingProperties.Http();
-        httpProperties.setLevel(HttpLogLevel.BASIC); // Not HEADERS level
+        httpProperties.setLogLevel(HttpLogLevel.BASIC); // Not HEADERS level
 
         when(loggingProperties.getHttp()).thenReturn(httpProperties);
 

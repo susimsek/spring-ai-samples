@@ -1,6 +1,7 @@
 package io.github.susimsek.springaisamples.logging.config;
 
 import io.github.susimsek.springaisamples.logging.enums.HttpLogLevel;
+import io.github.susimsek.springaisamples.logging.enums.MethodLogLevel;
 import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
@@ -20,13 +21,14 @@ public class LoggingProperties {
     @Setter
     public static class Http {
         private boolean enabled = true;
-        private HttpLogLevel level = HttpLogLevel.BASIC;
+        private HttpLogLevel logLevel = HttpLogLevel.BASIC;
     }
 
     @Getter
     @Setter
     public static class Aspect {
         private boolean enabled = true;
+        private MethodLogLevel logLevel = MethodLogLevel.BASIC;
     }
 
     @Getter

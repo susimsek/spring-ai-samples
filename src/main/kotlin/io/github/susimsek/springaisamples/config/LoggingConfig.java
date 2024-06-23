@@ -47,7 +47,8 @@ public class LoggingConfig {
                                          Obfuscator obfuscator,
                                          RequestMatchersConfig requestMatchersConfig) {
         return HttpLoggingHandler.builder(logFormatter, obfuscator)
-            .logLevel(loggingProperties.getHttp().getLevel())
+            .httpLogLevel(loggingProperties.getHttp().getLogLevel())
+            .methodLogLevel(loggingProperties.getAspect().getLogLevel())
             .order(FilterOrder.LOGGING.order())
             .requestMatchers(requestMatchersConfig.staticResourcePaths()).permitAll()
             .requestMatchers(requestMatchersConfig.swaggerResourcePaths()).permitAll()

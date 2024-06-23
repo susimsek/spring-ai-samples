@@ -6,8 +6,9 @@ import static io.github.susimsek.springaisamples.trace.TraceConstants.SPAN_ID;
 import static io.github.susimsek.springaisamples.trace.TraceConstants.TRACE_ID;
 
 import io.github.susimsek.springaisamples.enums.FilterOrder;
-import io.github.susimsek.springaisamples.logging.enums.HttpLogType;
 import io.github.susimsek.springaisamples.logging.enums.HttpLogLevel;
+import io.github.susimsek.springaisamples.logging.enums.HttpLogType;
+import io.github.susimsek.springaisamples.logging.enums.MethodLogLevel;
 import io.github.susimsek.springaisamples.logging.enums.MethodLogType;
 import io.github.susimsek.springaisamples.logging.enums.Source;
 import io.github.susimsek.springaisamples.logging.formatter.LogFormatter;
@@ -36,7 +37,8 @@ import org.springframework.util.Assert;
 @Slf4j
 @RequiredArgsConstructor
 public class HttpLoggingHandler implements LoggingHandler {
-    private final HttpLogLevel logLevel;
+    private final HttpLogLevel httpLogLevel;
+    private final MethodLogLevel methodLogLevel;
     private final LogFormatter logFormatter;
     private final Obfuscator obfuscator;
     private final List<RequestMatcherConfig> requestMatcherConfigs;
@@ -51,10 +53,12 @@ public class HttpLoggingHandler implements LoggingHandler {
     @Override
     public void logRequest(HttpMethod method, URI uri, HttpHeaders headers, byte[] body,
                            Source source) {
-        
+        if (httpLogLevel == HttpLogLevel.NONE) {
+            return;
+        }
         HttpLog.HttpLogBuilder logBuilder = initLogBuilder(
             HttpLogType.REQUEST, method, uri, headers, source);
-        if (isLogLevel(HttpLogLevel.FULL)) {
+        if (isHttpLogLevel(HttpLogLevel.FULL)) {
             logBuilder.body(obfuscator.maskBody(new String(body, StandardCharsets.UTF_8)));
         }
 
@@ -64,14 +68,16 @@ public class HttpLoggingHandler implements LoggingHandler {
     @Override
     public void logResponse(HttpMethod method, URI uri, Integer statusCode, HttpHeaders headers,
                             byte[] responseBody, Source source, long duration) {
-        
+        if (httpLogLevel == HttpLogLevel.NONE) {
+            return;
+        }
         HttpLog.HttpLogBuilder logBuilder = initLogBuilder(
             HttpLogType.RESPONSE, method, uri, headers, source).statusCode(statusCode)
             .durationMs(duration);
 
         HttpStatus status = HttpStatus.valueOf(statusCode);
 
-        if (isLogLevel(HttpLogLevel.FULL) && status.is2xxSuccessful()) {
+        if (isHttpLogLevel(HttpLogLevel.FULL) && status.is2xxSuccessful()) {
             logBuilder.body(obfuscator.maskBody(new String(responseBody, StandardCharsets.UTF_8)));
         } else if (shouldLogWithoutBody(status)) {
             logBuilder.body(null);
@@ -84,28 +90,42 @@ public class HttpLoggingHandler implements LoggingHandler {
 
     @Override
     public void logMethodEntry(String className, String methodName, Object[] args) {
+        if (!isMethodLogLevel(MethodLogLevel.BASIC)) {
+            return;
+        }
         MethodLog.MethodLogBuilder logBuilder = initMethodLogBuilder(
-            MethodLogType.METHOD_ENTRY, className, methodName, args);
+            MethodLogType.METHOD_ENTRY, className, methodName);
+        if (isMethodLogLevel(MethodLogLevel.FULL)) {
+            logBuilder.arguments(obfuscator.maskArguments(args));
+        }
         log("Method Entry: {}", logFormatter.format(logBuilder.build()));
     }
 
     @Override
     public void logMethodExit(String className, String methodName, Object result, long duration) {
+        if (!isMethodLogLevel(MethodLogLevel.BASIC)) {
+            return;
+        }
         MethodLog.MethodLogBuilder logBuilder = initMethodLogBuilder(
-            MethodLogType.METHOD_EXIT, className, methodName, null)
-            .result(result)
+            MethodLogType.METHOD_EXIT, className, methodName)
             .durationMs(duration);
+        if (isMethodLogLevel(MethodLogLevel.FULL)) {
+            logBuilder.result(obfuscator.maskResult(result));
+        }
         log("Method Exit: {}", logFormatter.format(logBuilder.build()));
     }
 
     @Override
     public void logException(String className, String methodName,
                              Object[] args, String exceptionMessage, long duration) {
+        if (!isMethodLogLevel(MethodLogLevel.EXCEPTION)) {
+            return;
+        }
         MethodLog.MethodLogBuilder logBuilder = initMethodLogBuilder(
-            MethodLogType.EXCEPTION, className, methodName, args)
+            MethodLogType.EXCEPTION, className, methodName)
             .exceptionMessage(exceptionMessage)
             .durationMs(duration);
-        log("Exception: {}", logFormatter.format(logBuilder.build()));
+        log("Exception in method: {}", logFormatter.format(logBuilder.build()));
     }
 
     @Override
@@ -119,7 +139,8 @@ public class HttpLoggingHandler implements LoggingHandler {
 
     @Override
     public boolean shouldNotLog(HttpRequest request) {
-        return requestMatcherConfigs.stream()
+        return httpLogLevel == HttpLogLevel.NONE
+            || requestMatcherConfigs.stream()
             .filter(config -> config.requestMatcher.matches(request))
             .map(config -> !config.logged)
             .findFirst()
@@ -135,27 +156,29 @@ public class HttpLoggingHandler implements LoggingHandler {
             .type(type)
             .method(method)
             .uri(uri)
-            .headers(isLogLevel(HttpLogLevel.HEADERS) ? obfuscator.maskHeaders(headers) : new HttpHeaders())
+            .headers(isHttpLogLevel(HttpLogLevel.HEADERS) ? obfuscator.maskHeaders(headers) : new HttpHeaders())
             .source(source)
             .trace(trace.isComplete() ? trace : null);
     }
 
     private MethodLog.MethodLogBuilder initMethodLogBuilder(MethodLogType type,
-                                                            String className, String methodName,
-                                                            Object[] args) {
+                                                            String className, String methodName) {
         Trace trace = createTrace();
 
         return MethodLog.builder()
             .type(type)
             .className(className)
             .methodName(methodName)
-            .arguments(args)
 
             .trace(trace.isComplete() ? trace : null);
     }
 
-    private boolean isLogLevel(HttpLogLevel level) {
-        return logLevel.ordinal() >= level.ordinal();
+    private boolean isHttpLogLevel(HttpLogLevel level) {
+        return httpLogLevel.ordinal() >= level.ordinal();
+    }
+
+    private boolean isMethodLogLevel(MethodLogLevel level) {
+        return methodLogLevel.ordinal() >= level.ordinal();
     }
 
     private boolean shouldLogWithoutBody(HttpStatus status) {
@@ -183,7 +206,9 @@ public class HttpLoggingHandler implements LoggingHandler {
     }
 
     public interface InitialBuilder {
-        InitialBuilder logLevel(HttpLogLevel logLevel);
+        InitialBuilder httpLogLevel(HttpLogLevel logLevel);
+
+        InitialBuilder methodLogLevel(MethodLogLevel logLevel);
 
         InitialBuilder order(int order);
 
@@ -215,7 +240,8 @@ public class HttpLoggingHandler implements LoggingHandler {
         private final List<RequestMatcherConfig> requestMatcherConfigs = new ArrayList<>();
         private boolean anyRequestConfigured = false;
         private boolean defaultLogged = true;
-        private HttpLogLevel logLevel = HttpLogLevel.FULL;
+        private HttpLogLevel httpLogLevel = HttpLogLevel.FULL;
+        private MethodLogLevel methodLogLevel = MethodLogLevel.FULL;
         private int order = FilterOrder.LOGGING.order();
         private int lastIndex = 0;
 
@@ -283,14 +309,19 @@ public class HttpLoggingHandler implements LoggingHandler {
             return this;
         }
 
-        public Builder logLevel(HttpLogLevel logLevel) {
-            this.logLevel = logLevel;
+        public Builder httpLogLevel(HttpLogLevel logLevel) {
+            this.httpLogLevel = logLevel;
+            return this;
+        }
+
+        public Builder methodLogLevel(MethodLogLevel logLevel) {
+            this.methodLogLevel = logLevel;
             return this;
         }
 
         public HttpLoggingHandler build() {
             return new HttpLoggingHandler(
-                logLevel, logFormatter, obfuscator,
+                httpLogLevel, methodLogLevel, logFormatter, obfuscator,
                 requestMatcherConfigs, defaultLogged, order);
         }
 
