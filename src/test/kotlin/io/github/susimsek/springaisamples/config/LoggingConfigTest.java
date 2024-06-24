@@ -30,7 +30,7 @@ class LoggingConfigTest {
 
     @BeforeEach
     void setUp() {
-        loggingConfig = new LoggingConfig();
+        loggingConfig = new LoggingConfig(null);
     }
 
     @Test
@@ -46,7 +46,7 @@ class LoggingConfigTest {
         LoggingProperties loggingPropertiesMock = mock(LoggingProperties.class);
         LogFormatter logFormatterMock = mock(LogFormatter.class);
         Obfuscator obfuscatorMock = mock(Obfuscator.class);
-        var loggingHandler = loggingConfig.loggingHandler(loggingPropertiesMock, logFormatterMock, obfuscatorMock, null);
+        var loggingHandler = loggingConfig.loggingHandler(logFormatterMock, obfuscatorMock, null);
         assertNotNull(loggingHandler);
         assertEquals(HttpLoggingHandler.class, loggingHandler.getClass());
     }
@@ -79,7 +79,7 @@ class LoggingConfigTest {
         ObjectMapper objectMapperMock = mock(ObjectMapper.class);
 
         // Invoke the method under test
-        ObfuscationStrategy obfuscationStrategy = loggingConfig.obfuscationStrategy(loggingPropertiesMock, objectMapperMock);
+        ObfuscationStrategy obfuscationStrategy = loggingConfig.obfuscationStrategy(objectMapperMock);
 
         // Verify that the correct strategy is returned
         assertNotNull(obfuscationStrategy);
@@ -105,7 +105,7 @@ class LoggingConfigTest {
         ObjectMapper objectMapperMock = mock(ObjectMapper.class);
 
         // Invoke the method under test
-        ObfuscationStrategy obfuscationStrategy = loggingConfig.obfuscationStrategy(loggingPropertiesMock, objectMapperMock);
+        ObfuscationStrategy obfuscationStrategy = loggingConfig.obfuscationStrategy(objectMapperMock);
 
         // Verify that the correct strategy is returned
         assertNotNull(obfuscationStrategy);

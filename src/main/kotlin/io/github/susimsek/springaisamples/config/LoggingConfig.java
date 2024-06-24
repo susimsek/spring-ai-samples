@@ -14,6 +14,7 @@ import io.github.susimsek.springaisamples.logging.strategy.NoOpObfuscationStrate
 import io.github.susimsek.springaisamples.logging.strategy.ObfuscationStrategy;
 import io.github.susimsek.springaisamples.logging.utils.Obfuscator;
 import io.github.susimsek.springaisamples.logging.wrapper.HttpLoggingWrapper;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -23,7 +24,10 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @EnableConfigurationProperties(LoggingProperties.class)
 @ConditionalOnProperty(name = "logging.http.enabled", havingValue = "true", matchIfMissing = true)
+@RequiredArgsConstructor
 public class LoggingConfig {
+
+    private final LoggingProperties loggingProperties;
 
     @Bean
     public HttpLoggingWrapper httpLoggingWrapper(LoggingHandler loggingHandler) {
@@ -42,8 +46,7 @@ public class LoggingConfig {
     }
 
     @Bean
-    public LoggingHandler loggingHandler(LoggingProperties loggingProperties,
-                                         LogFormatter logFormatter,
+    public LoggingHandler loggingHandler(LogFormatter logFormatter,
                                          Obfuscator obfuscator,
                                          RequestMatchersConfig requestMatchersConfig) {
         return HttpLoggingHandler.builder(logFormatter, obfuscator)
@@ -64,8 +67,7 @@ public class LoggingConfig {
     }
 
     @Bean
-    public ObfuscationStrategy obfuscationStrategy(LoggingProperties loggingProperties,
-                                                   ObjectMapper objectMapper) {
+    public ObfuscationStrategy obfuscationStrategy(ObjectMapper objectMapper) {
         if (loggingProperties.getObfuscate().isEnabled()) {
             return new DefaultObfuscationStrategy(loggingProperties, objectMapper);
         } else {
