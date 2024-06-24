@@ -74,6 +74,7 @@ mvn verify jib:dockerBuild
 - Micrometer tracing
 - Micrometer tracing bridge otel
 - Commons text
+- Internationalization(i18n)
 - Lombok
 - Mapstruct
 - Springdoc
