@@ -236,8 +236,9 @@ public class SecurityConfig {
             .requestMatchers(requestMatchersConfig.swaggerPaths()).permitAll()
             .requestMatchers(requestMatchersConfig.actuatorPaths()).permitAll()
             .anyRequest().sanitized()
-            .nonSanitizedHeaders(HttpHeaders.CONTENT_TYPE,
-                HttpHeaders.CONTENT_LENGTH, HttpHeaders.AUTHORIZATION,
+            .nonSanitizedHeaders(
+                HttpHeaders.CONTENT_ENCODING, HttpHeaders.CACHE_CONTROL,
+                HttpHeaders.CONTENT_TYPE, HttpHeaders.CONTENT_LENGTH, HttpHeaders.AUTHORIZATION,
                 HttpHeaders.COOKIE, HttpHeaders.HOST, HttpHeaders.USER_AGENT,
                 HttpHeaders.REFERER, HttpHeaders.ACCEPT,
                 JWS_SIGNATURE_HEADER_NAME,
