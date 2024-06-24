@@ -7,6 +7,13 @@ server:
     mime-types: text/html,text/xml,text/plain,text/css,application/javascript,application/json,image/svg+xml
 spring:
   mvc:
+    cors:
+      enabled: true
+      allowed-origins: "http://localhost:8100"
+      allowed-methods: "GET,POST,PUT,DELETE,OPTIONS,PATCH"
+      allowed-headers: "Authorization,Content-Type,Accept,Cache-Control,X-Requested-With,Origin,Referer,User-Agent,X-Request-ID,X-Correlation-ID,X-Idempotency-Key,X-JWS-Signature"
+      allow-credentials: true
+      max-age: 3600
     problemdetails:
       enabled: true
   jackson:

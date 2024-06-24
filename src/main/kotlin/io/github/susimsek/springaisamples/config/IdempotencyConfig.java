@@ -1,8 +1,8 @@
 package io.github.susimsek.springaisamples.config;
 
+import io.github.susimsek.springaisamples.enums.FilterOrder;
 import io.github.susimsek.springaisamples.exception.idempotency.IdempotencyProblemSupport;
 import io.github.susimsek.springaisamples.idempotency.IdempotencyFilter;
-import io.github.susimsek.springaisamples.enums.FilterOrder;
 import io.github.susimsek.springaisamples.service.IdempotencyService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
