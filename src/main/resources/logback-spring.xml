@@ -15,13 +15,16 @@
 
     <logger name="org.apache" level="WARN"/>
     <logger name="org.hibernate" level="WARN"/>
+    <logger name="org.hibernate.validator" level="WARN"/>
     <logger name="org.postgresql" level="WARN"/>
     <logger name="org.redisson" level="WARN"/>
     <logger name="org.springframework" level="WARN"/>
     <logger name="org.springframework.web" level="WARN"/>
+    <logger name="org.springframework.security" level="WARN"/>
     <logger name="org.springframework.cache" level="WARN"/>
     <logger name="org.springframework.ai" level="WARN"/>
     <logger name="liquibase" level="WARN"/>
+    <logger name="io.github.resilience4j" level="WARN"/>
     <logger name="io.netty" level="WARN"/>
     <logger name="com.netflix" level="WARN"/>
     <logger name="com.netflix.discovery" level="WARN"/>
