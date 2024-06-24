@@ -64,8 +64,16 @@ mvn verify jib:dockerBuild
 - Spring Boot 3.x
 - Spring AI
 - Spring Boot Web
+- Spring Boot Cache
 - Spring Boot Validation
 - Spring Boot Actuator
+- Spring Boot OAuth2 Resource Server
+- Spring Boot Security
+- Spring Cloud Circuit Breaker Resilience4j
+- Spring Boot Aop
+- Micrometer tracing
+- Micrometer tracing bridge otel
+- Commons text
 - Lombok
 - Mapstruct
 - Springdoc
