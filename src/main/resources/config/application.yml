@@ -1,6 +1,11 @@
 server:
   port: 8080
   forward-headers-strategy: framework
+  shutdown: graceful
+  compression:
+    enabled: true
+    min-response-size: 1024
+    mime-types: text/html,text/xml,text/plain,text/css,application/javascript,application/json,image/svg+xml
 spring:
   application:
     name: spring-ai-samples

@@ -1,5 +1,10 @@
 server:
   port: 8071
+  shutdown: graceful
+  compression:
+    enabled: true
+    min-response-size: 1024
+    mime-types: text/html,text/xml,text/plain,text/css,application/javascript,application/json,image/svg+xml
 spring:
   mvc:
     problemdetails:
