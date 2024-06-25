@@ -39,6 +39,12 @@ public class CachedBodyHttpServletResponseWrapper extends HttpServletResponseWra
         return cachedBody.toByteArray();
     }
 
+    public void setBody(byte[] body) throws IOException {
+        cachedBody.reset();
+        cachedBody.write(body);
+    }
+
+
     public void copyBodyToResponse() throws IOException {
         ServletOutputStream responseOutputStream = originalResponse.getOutputStream();
         responseOutputStream.write(getBody());

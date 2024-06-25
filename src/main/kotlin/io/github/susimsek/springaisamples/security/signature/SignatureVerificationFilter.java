@@ -58,23 +58,19 @@ public class SignatureVerificationFilter extends OncePerRequestFilter implements
                                     @NonNull HttpServletResponse response,
                                     @NonNull FilterChain filterChain)
         throws ServletException, IOException {
-        if (!shouldNotFilter(request)) {
-            Optional<String> optionalJwsToken = Optional.ofNullable(request.getHeader(JWS_SIGNATURE_HEADER_NAME));
-            if (optionalJwsToken.isEmpty()) {
-                handleMissingJws(request, response);
-                return;
-            }
-            String jwsToken = optionalJwsToken.get();
-            CachedBodyHttpServletRequestWrapper wrappedRequest = new CachedBodyHttpServletRequestWrapper(request);
-            String requestBody = new String(wrappedRequest.getBody(), StandardCharsets.UTF_8);
-            try {
-                signatureService.validateJws(jwsToken, requestBody);
-                filterChain.doFilter(wrappedRequest, response);
-            } catch (JwsException e) {
-                handleInvalidJws(wrappedRequest, response, e);
-            }
-        } else {
-            filterChain.doFilter(request, response);
+        Optional<String> optionalJwsToken = Optional.ofNullable(request.getHeader(JWS_SIGNATURE_HEADER_NAME));
+        if (optionalJwsToken.isEmpty()) {
+            handleMissingJws(request, response);
+            return;
+        }
+        String jwsToken = optionalJwsToken.get();
+        CachedBodyHttpServletRequestWrapper wrappedRequest = new CachedBodyHttpServletRequestWrapper(request);
+        String requestBody = new String(wrappedRequest.getBody(), StandardCharsets.UTF_8);
+        try {
+            signatureService.validateJws(jwsToken, requestBody);
+            filterChain.doFilter(wrappedRequest, response);
+        } catch (JwsException e) {
+            handleInvalidJws(wrappedRequest, response, e);
         }
     }
 

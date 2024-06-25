@@ -1,5 +1,6 @@
 package io.github.susimsek.springaisamples.utils;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
@@ -12,6 +13,10 @@ import org.springframework.util.StringUtils;
 public class JsonUtil {
 
     private final ObjectMapper objectMapper;
+
+    public <T> T convertToObject(String json, Class<T> valueType) throws JsonProcessingException {
+        return objectMapper.readValue(json, valueType);
+    }
 
     public String convertToJsonString(String value) {
         if (!StringUtils.hasText(value)) {

@@ -27,6 +27,7 @@ import io.github.susimsek.springaisamples.security.xss.XssFilter;
 import io.github.susimsek.springaisamples.service.EncryptionService;
 import io.github.susimsek.springaisamples.service.SignatureService;
 import io.github.susimsek.springaisamples.trace.TraceFilter;
+import io.github.susimsek.springaisamples.utils.JsonUtil;
 import io.github.susimsek.springaisamples.utils.SanitizationUtil;
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
@@ -255,14 +256,16 @@ public class SecurityConfig {
     public EncryptionFilter encryptionFilter(
         RequestMatchersConfig requestMatchersConfig,
         EncryptionService encryptionUtil,
+        JsonUtil jsonUtil,
         SecurityProblemSupport problemSupport) {
-        return EncryptionFilter.builder(encryptionUtil, problemSupport)
+        return EncryptionFilter.builder(encryptionUtil, problemSupport, jsonUtil)
             .order(FilterOrder.ENCRYPTION.order())
             .requestMatchers(requestMatchersConfig.staticResources()).permitAll()
             .requestMatchers(requestMatchersConfig.swaggerPaths()).permitAll()
             .requestMatchers(requestMatchersConfig.actuatorPaths()).permitAll()
             .requestMatchers(requestMatchersConfig.encryptionPaths()).permitAll()
             .requestMatchers(requestMatchersConfig.signPath()).permitAll()
+            .requestMatchers("/api/auth/token").encrypted()
             .anyRequest().permitAll()
             .build();
     }
