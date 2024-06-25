@@ -39,4 +39,15 @@ public class JsonUtil {
             return value.toString();
         }
     }
+
+    public Object convertToJsonObject(String value) {
+        if (!StringUtils.hasText(value)) {
+            return null;
+        }
+        try {
+            return objectMapper.readValue(value, Object.class);
+        } catch (IOException e) {
+            return value;
+        }
+    }
 }

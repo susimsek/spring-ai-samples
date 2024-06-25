@@ -16,6 +16,7 @@ public final class ErrorConstants {
     public static final String REQUEST_BINDING_ERROR = "error.requestBindingError";
     public static final String MULTIPART_ERROR = "error.multipartError";
     public static final String VALIDATION_ERROR = "error.validation";
+    public static final String ENCRYPTION = "error.encryption";
     public static final String AUTHENTICATION = "error.authentication";
     public static final String SIGNATURE = "error.signature";
     public static final String ACCESS_DENIED = "error.accessDenied";

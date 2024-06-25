@@ -20,8 +20,11 @@ import io.github.susimsek.springaisamples.security.InMemoryTokenStore;
 import io.github.susimsek.springaisamples.security.SecurityProperties;
 import io.github.susimsek.springaisamples.security.TokenProvider;
 import io.github.susimsek.springaisamples.security.TokenStore;
+import io.github.susimsek.springaisamples.security.encryption.EncryptionFilter;
+import io.github.susimsek.springaisamples.security.encryption.EncryptionUtil;
 import io.github.susimsek.springaisamples.security.signature.SignatureVerificationFilter;
 import io.github.susimsek.springaisamples.security.xss.XssFilter;
+import io.github.susimsek.springaisamples.service.EncryptionService;
 import io.github.susimsek.springaisamples.service.SignatureService;
 import io.github.susimsek.springaisamples.trace.TraceFilter;
 import io.github.susimsek.springaisamples.utils.SanitizationUtil;
@@ -77,6 +80,7 @@ public class SecurityConfig {
         MvcRequestMatcher.Builder mvc,
         RequestMatchersConfig requestMatchersConfig,
         SecurityProblemSupport problemSupport,
+        EncryptionFilter encryptionFilter,
         SignatureVerificationFilter signatureVerificationFilter,
         XssFilter xssFilter,
         TraceFilter traceFilter,
@@ -103,9 +107,10 @@ public class SecurityConfig {
                     .requestMatchers(requestMatchersConfig.staticResources()).permitAll()
                     .requestMatchers(requestMatchersConfig.swaggerPaths()).permitAll()
                     .requestMatchers(requestMatchersConfig.actuatorPaths()).permitAll()
+                    .requestMatchers(requestMatchersConfig.encryptionPaths()).permitAll()
+                    .requestMatchers(requestMatchersConfig.signPath()).permitAll()
                     .requestMatchers(mvc.pattern("/.well-known/jwks.json")).permitAll()
                     .requestMatchers(mvc.pattern("/api/auth/token")).permitAll()
-                    .requestMatchers(mvc.pattern("/api/security/sign")).permitAll()
                     .requestMatchers(mvc.pattern("/api/locales")).permitAll()
                     .requestMatchers(mvc.pattern("/api/ai/**")).hasAuthority(ADMIN)
                     .anyRequest().authenticated())
@@ -115,6 +120,7 @@ public class SecurityConfig {
                 .accessDeniedHandler(problemSupport)
                 .jwt(withDefaults()))
             .addFilterBefore(signatureVerificationFilter, BearerTokenAuthenticationFilter.class)
+            .addFilterBefore(encryptionFilter, SignatureVerificationFilter.class)
             .addFilterAfter(xssFilter, BearerTokenAuthenticationFilter.class)
             .addFilterAfter(idempotencyFilter, XssFilter.class)
             .addFilterAfter(traceFilter, IdempotencyFilter.class)
@@ -183,6 +189,17 @@ public class SecurityConfig {
     }
 
     @Bean
+    public KeyPair encryptionKeyPair() {
+        PublicKey publicKey = RsaKeyConverters.x509().convert(new ByteArrayInputStream(
+            securityProperties.getEncryption()
+            .getFormattedPublicKey().getBytes(StandardCharsets.UTF_8)));
+        PrivateKey privateKey = RsaKeyConverters.pkcs8().convert(new ByteArrayInputStream(
+            securityProperties.getEncryption()
+            .getFormattedPrivateKey().getBytes(StandardCharsets.UTF_8)));
+        return new KeyPair(publicKey, privateKey);
+    }
+
+    @Bean
     public JwtEncoder jwtEncoder(KeyPair jwtKeyPair) {
         RSAPublicKey publicKey = (RSAPublicKey) jwtKeyPair.getPublic();
         RSAPrivateKey privateKey = (RSAPrivateKey) jwtKeyPair.getPrivate();
@@ -210,6 +227,11 @@ public class SecurityConfig {
     }
 
     @Bean
+    public EncryptionUtil encryptionUtil(KeyPair encryptionKeyPair) {
+        return new EncryptionUtil(encryptionKeyPair);
+    }
+
+    @Bean
     public SignatureVerificationFilter signatureVerificationFilter(
         MvcRequestMatcher.Builder mvc,
         RequestMatchersConfig requestMatchersConfig,
@@ -221,8 +243,25 @@ public class SecurityConfig {
             .requestMatchers(requestMatchersConfig.swaggerPaths()).permitAll()
             .requestMatchers(requestMatchersConfig.actuatorPaths()).permitAll()
             .requestMatchers(requestMatchersConfig.nonModifyingMethods()).permitAll()
-            .requestMatchers(mvc.pattern("/api/security/sign")).permitAll()
+            .requestMatchers(requestMatchersConfig.encryptionPaths()).permitAll()
+            .requestMatchers(requestMatchersConfig.signPath()).permitAll()
             .anyRequest().signed()
+            .build();
+    }
+
+    @Bean
+    public EncryptionFilter encryptionFilter(
+        RequestMatchersConfig requestMatchersConfig,
+        EncryptionService encryptionUtil,
+        SecurityProblemSupport problemSupport) {
+        return EncryptionFilter.builder(encryptionUtil, problemSupport)
+            .order(FilterOrder.ENCRYPTION.order())
+            .requestMatchers(requestMatchersConfig.staticResources()).permitAll()
+            .requestMatchers(requestMatchersConfig.swaggerPaths()).permitAll()
+            .requestMatchers(requestMatchersConfig.actuatorPaths()).permitAll()
+            .requestMatchers(requestMatchersConfig.encryptionPaths()).permitAll()
+            .requestMatchers(requestMatchersConfig.signPath()).encrypted()
+            .anyRequest().permitAll()
             .build();
     }
 

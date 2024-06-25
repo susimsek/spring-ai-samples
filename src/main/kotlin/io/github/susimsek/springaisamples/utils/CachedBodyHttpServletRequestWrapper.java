@@ -35,7 +35,7 @@ public class CachedBodyHttpServletRequestWrapper extends HttpServletRequestWrapp
         return cachedBody;
     }
 
-    protected void setBody(byte[] body) {
+    public void setBody(byte[] body) {
         this.cachedBody = body;
     }
 

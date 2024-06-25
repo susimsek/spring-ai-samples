@@ -1,5 +1,10 @@
 package io.github.susimsek.springaisamples.security;
 
+import static io.github.susimsek.springaisamples.security.encryption.EncryptionConstants.PRIVATE_KEY_FOOTER;
+import static io.github.susimsek.springaisamples.security.encryption.EncryptionConstants.PRIVATE_KEY_HEADER;
+import static io.github.susimsek.springaisamples.security.encryption.EncryptionConstants.PUBLIC_KEY_FOOTER;
+import static io.github.susimsek.springaisamples.security.encryption.EncryptionConstants.PUBLIC_KEY_HEADER;
+
 import java.time.Duration;
 import lombok.Getter;
 import lombok.Setter;
@@ -11,6 +16,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class SecurityProperties {
     private JwtProperties jwt;
     private JwsProperties jws;
+    private EncryptionProperties encryption;
     private AdminProperties admin;
     private String contentSecurityPolicy;
 
@@ -26,11 +32,11 @@ public class SecurityProperties {
         private Duration refreshTokenExpiration;
 
         public String getFormattedPublicKey() {
-            return "-----BEGIN PUBLIC KEY-----\n" + publicKey + "\n-----END PUBLIC KEY-----";
+            return PUBLIC_KEY_HEADER + publicKey + PUBLIC_KEY_FOOTER;
         }
 
         public String getFormattedPrivateKey() {
-            return "-----BEGIN PRIVATE KEY-----\n" + privateKey + "\n-----END PRIVATE KEY-----";
+            return PRIVATE_KEY_HEADER + privateKey + PRIVATE_KEY_FOOTER;
         }
     }
 
@@ -42,11 +48,26 @@ public class SecurityProperties {
         private Duration jwsExpiration;
 
         public String getFormattedPublicKey() {
-            return "-----BEGIN PUBLIC KEY-----\n" + publicKey + "\n-----END PUBLIC KEY-----";
+            return PUBLIC_KEY_HEADER + publicKey + PUBLIC_KEY_FOOTER;
         }
 
         public String getFormattedPrivateKey() {
-            return "-----BEGIN PRIVATE KEY-----\n" + privateKey + "\n-----END PRIVATE KEY-----";
+            return PRIVATE_KEY_HEADER + privateKey + PRIVATE_KEY_FOOTER;
+        }
+    }
+
+    @Getter
+    @Setter
+    public static class EncryptionProperties {
+        private String publicKey;
+        private String privateKey;
+
+        public String getFormattedPublicKey() {
+            return PUBLIC_KEY_HEADER + publicKey + PUBLIC_KEY_FOOTER;
+        }
+
+        public String getFormattedPrivateKey() {
+            return PRIVATE_KEY_HEADER + privateKey + PRIVATE_KEY_FOOTER;
         }
     }
 

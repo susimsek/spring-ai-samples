@@ -8,6 +8,7 @@ import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import io.github.resilience4j.core.IntervalFunction;
+import io.github.susimsek.springaisamples.exception.encryption.BadEncryptionException;
 import io.github.susimsek.springaisamples.exception.idempotency.MissingIdempotencyKeyException;
 import io.github.susimsek.springaisamples.exception.ratelimit.RateLimitExceededException;
 import io.github.susimsek.springaisamples.exception.security.JwsException;
@@ -171,6 +172,13 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                                                               @NonNull WebRequest request) {
         return createProblemDetailResponse(ex, HttpStatus.BAD_REQUEST,
             ErrorConstants.MULTIPART_ERROR, new HttpHeaders(), request);
+    }
+
+    @ExceptionHandler(BadEncryptionException.class)
+    protected ResponseEntity<Object> handleEncryptionException(@NonNull BadEncryptionException ex,
+                                                                  @NonNull WebRequest request) {
+        return createProblemDetailResponse(ex, HttpStatus.BAD_REQUEST,
+            ErrorConstants.ENCRYPTION, new HttpHeaders(), request);
     }
 
     @ExceptionHandler(MissingIdempotencyKeyException.class)

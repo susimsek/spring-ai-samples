@@ -72,4 +72,15 @@ public class RequestMatchersConfig {
             mvc.pattern(HttpMethod.TRACE, "/**")
         };
     }
+
+    public RequestMatcher[] encryptionPaths() {
+        return new MvcRequestMatcher[] {
+            mvc.pattern("/api/security/encrypt"),
+            mvc.pattern("/api/security/decrypt")
+        };
+    }
+
+    public RequestMatcher signPath() {
+        return  mvc.pattern("/api/security/sign");
+    }
 }

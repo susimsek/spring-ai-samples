@@ -35,10 +35,10 @@ public class SignatureController {
     @Operation(summary = "Create JWS", description = "Create a JSON Web Signature")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successfully created JWS",
-            content = { @Content(mediaType = "application/json",
+            content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                     schema = @Schema(implementation = SignatureResponse.class)) }),
         @ApiResponse(responseCode = "400", description = "Invalid input",
-            content = @Content(mediaType = "application/json",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                 schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(responseCode = "401", description = "Invalid JWS encoding",
             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
@@ -47,7 +47,7 @@ public class SignatureController {
             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                 schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(responseCode = "500", description = "Internal server error",
-            content = @Content(mediaType = "application/json",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                 schema = @Schema(implementation = ProblemDetail.class)))
     })
     @PostMapping("/sign")
