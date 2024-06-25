@@ -16,7 +16,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class SecurityProperties {
     private JwtProperties jwt;
     private JwsProperties jws;
-    private EncryptionProperties encryption;
+    private JweProperties jwe;
     private AdminProperties admin;
     private String contentSecurityPolicy;
 
@@ -58,9 +58,10 @@ public class SecurityProperties {
 
     @Getter
     @Setter
-    public static class EncryptionProperties {
+    public static class JweProperties {
         private String publicKey;
         private String privateKey;
+        private Duration jweExpiration;
 
         public String getFormattedPublicKey() {
             return PUBLIC_KEY_HEADER + publicKey + PUBLIC_KEY_FOOTER;

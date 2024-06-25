@@ -46,7 +46,7 @@ public class EncryptionController {
     public ResponseEntity<EncryptResponse> encryptData(
         @Parameter(description = "Payload to be encrypted")
         @Valid @RequestBody EncryptRequest request) {
-        String encryptedData = encryptionService.encryptDataAsObject(request.payload());
+        String encryptedData = encryptionService.encryptDataAsObject(request.data());
         return ResponseEntity.ok(new EncryptResponse(encryptedData));
     }
 
@@ -66,7 +66,7 @@ public class EncryptionController {
     public ResponseEntity<DecryptResponse> decryptData(
         @Parameter(description = "Payload to be decrypted")
         @Valid @RequestBody DecryptRequest request) {
-        var decryptedData = encryptionService.decryptDataAsObject(request.payload());
+        var decryptedData = encryptionService.decryptDataAsObject(request.jweToken());
         return ResponseEntity.ok(new DecryptResponse(decryptedData));
     }
 }

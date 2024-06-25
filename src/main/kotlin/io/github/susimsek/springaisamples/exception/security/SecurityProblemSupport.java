@@ -1,7 +1,7 @@
 package io.github.susimsek.springaisamples.exception.security;
 
-import io.github.susimsek.springaisamples.exception.encryption.EncryptionException;
 import io.github.susimsek.springaisamples.exception.encryption.EncryptionExceptionHandler;
+import io.github.susimsek.springaisamples.exception.encryption.JweException;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -43,7 +43,7 @@ public class SecurityProblemSupport implements
 
     @Override
     public void handle(HttpServletRequest request, HttpServletResponse response,
-                       EncryptionException ex)
+                       JweException ex)
         throws IOException, ServletException {
         handlerExceptionResolver.resolveException(request, response, null, ex);
     }

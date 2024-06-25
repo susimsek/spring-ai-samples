@@ -12,4 +12,5 @@ public class EncryptionConstants {
     public static final String PRIVATE_KEY_HEADER = "-----BEGIN PRIVATE KEY-----\n";
     public static final String PRIVATE_KEY_FOOTER = "\n-----END PRIVATE KEY-----";
     public static final String CHARSET = "UTF-8";
+    public static final String CLAIM_NAME = "data";
 }

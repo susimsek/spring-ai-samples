@@ -1,10 +1,7 @@
 package io.github.susimsek.springaisamples.service;
 
-import io.github.susimsek.springaisamples.exception.encryption.BadEncryptionException;
-import io.github.susimsek.springaisamples.exception.encryption.EncryptionEncodingException;
-import io.github.susimsek.springaisamples.security.encryption.EncryptionUtil;
+import io.github.susimsek.springaisamples.security.TokenProvider;
 import io.github.susimsek.springaisamples.utils.JsonUtil;
-import java.security.GeneralSecurityException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -12,15 +9,11 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class EncryptionService {
 
-    private final EncryptionUtil encryptionUtil;
+    private final TokenProvider tokenProvider;
     private final JsonUtil jsonUtil;
 
     public String encryptData(String data) {
-        try {
-            return encryptionUtil.encryptData(data);
-        } catch (GeneralSecurityException e) {
-            throw new EncryptionEncodingException("Failed to encrypt response body", e);
-        }
+        return tokenProvider.createJwe(data);
     }
 
     public String encryptDataAsObject(Object data) {
@@ -29,11 +22,7 @@ public class EncryptionService {
     }
 
     public String decryptData(String encryptedData) {
-        try {
-            return encryptionUtil.decryptData(encryptedData);
-        } catch (GeneralSecurityException e) {
-            throw  new BadEncryptionException("Invalid encrypted data. Please check your input.");
-        }
+        return tokenProvider.extractDataFromJwe(encryptedData);
     }
 
     public Object decryptDataAsObject(String encryptedData) {

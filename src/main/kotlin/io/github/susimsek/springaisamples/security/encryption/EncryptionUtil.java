@@ -15,7 +15,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class EncryptionUtil {
 
-    private final KeyPair encryptionKeyPair;
+    private final KeyPair jweKeyPair;
 
     public String encryptData(String data) throws GeneralSecurityException {
         try {
@@ -42,9 +42,9 @@ public class EncryptionUtil {
         try {
             Cipher cipher = Cipher.getInstance(RSA_TRANSFORMATION);
             if (mode == Cipher.ENCRYPT_MODE) {
-                cipher.init(Cipher.ENCRYPT_MODE, encryptionKeyPair.getPublic());
+                cipher.init(Cipher.ENCRYPT_MODE, jweKeyPair.getPublic());
             } else if (mode == Cipher.DECRYPT_MODE) {
-                cipher.init(Cipher.DECRYPT_MODE, encryptionKeyPair.getPrivate());
+                cipher.init(Cipher.DECRYPT_MODE, jweKeyPair.getPrivate());
             }
             return cipher;
         } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException e) {

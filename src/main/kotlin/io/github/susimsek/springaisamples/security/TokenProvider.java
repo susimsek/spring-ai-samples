@@ -15,8 +15,11 @@ import com.nimbusds.jose.crypto.RSASSASigner;
 import com.nimbusds.jose.crypto.RSASSAVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
+import io.github.susimsek.springaisamples.exception.encryption.BadJweException;
+import io.github.susimsek.springaisamples.exception.encryption.JweEncodingException;
 import io.github.susimsek.springaisamples.exception.security.BadJwsException;
 import io.github.susimsek.springaisamples.exception.security.JwsEncodingException;
+import io.github.susimsek.springaisamples.security.encryption.EncryptionConstants;
 import io.github.susimsek.springaisamples.security.signature.SignatureConstants;
 import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
@@ -50,18 +53,21 @@ public class TokenProvider {
     private final SecurityProperties securityProperties;
     private final TokenStore tokenStore;
     private final KeyPair jwsKeyPair;
+    private final KeyPair jweKeyPair;
 
     public TokenProvider(JwtEncoder jwtEncoder,
                          KeyPair jwtKeyPair,
                          SecurityProperties securityProperties,
                          TokenStore tokenStore,
-                         KeyPair jwsKeyPair) {
+                         KeyPair jwsKeyPair,
+                         KeyPair jweKeyPair) {
         this.jwtEncoder = jwtEncoder;
         this.jwtKeyPair = jwtKeyPair;
         this.securityProperties = securityProperties;
         this.jwtDecoder = NimbusJwtDecoder.withPublicKey((RSAPublicKey) jwtKeyPair.getPublic()).build();
         this.tokenStore = tokenStore;
         this.jwsKeyPair = jwsKeyPair;
+        this.jweKeyPair = jweKeyPair;
     }
 
     public Token createToken(Authentication authentication) {
@@ -110,10 +116,10 @@ public class TokenProvider {
         return createToken(authentication);
     }
 
-    public String createJws(String payload) {
+    public String createJws(String data) {
         try {
-            String hashedPayload = HashUtil.hashWithSHA256(payload);
-            var jwsClaimsSet = buildJwsClaimsSet(hashedPayload,
+            String hashedData = HashUtil.hashWithSHA256(data);
+            var jwsClaimsSet = buildJwsClaimsSet(hashedData,
                 securityProperties.getJws().getJwsExpiration());
             SignedJWT signedJwt = new SignedJWT(
                 new JWSHeader(JWSAlgorithm.RS256),
@@ -123,6 +129,28 @@ public class TokenProvider {
             return signedJwt.serialize();
         } catch (JOSEException | NoSuchAlgorithmException e) {
             throw new JwsEncodingException("Failed to encrypt JWS", e);
+        }
+    }
+
+    public String createJwe(String data) {
+        try {
+            var jwsClaimsSet = buildJweClaimsSet(data,
+                securityProperties.getJwe().getJweExpiration());
+            SignedJWT signedJwt = new SignedJWT(
+                new JWSHeader(JWSAlgorithm.RS256),
+                jwsClaimsSet
+            );
+            signedJwt.sign(new RSASSASigner(jweKeyPair.getPrivate()));
+            JWEObject jweObject = new JWEObject(
+                new JWEHeader.Builder(JWEAlgorithm.RSA_OAEP_256, EncryptionMethod.A256GCM)
+                    .contentType("JWT")
+                    .build(),
+                new Payload(signedJwt));
+
+            jweObject.encrypt(new RSAEncrypter((RSAPublicKey) jweKeyPair.getPublic()));
+            return jweObject.serialize();
+        } catch (JOSEException e) {
+            throw new JweEncodingException("Failed to encrypt JWE", e);
         }
     }
 
@@ -166,13 +194,24 @@ public class TokenProvider {
             .build();
     }
 
-    private com.nimbusds.jwt.JWTClaimsSet buildJwsClaimsSet(String payload, Duration tokenExpiration) {
+    private com.nimbusds.jwt.JWTClaimsSet buildJwsClaimsSet(String data, Duration tokenExpiration) {
         Instant now = Instant.now();
         return new JWTClaimsSet.Builder()
             .issuer(securityProperties.getJwt().getIssuer())
             .issueTime(Date.from(now))
             .expirationTime(Date.from(now.plus(tokenExpiration)))
-            .claim(SignatureConstants.CLAIM_NAME, payload)
+            .claim(SignatureConstants.CLAIM_NAME, data)
+            .jwtID(UUID.randomUUID().toString())
+            .build();
+    }
+
+    private com.nimbusds.jwt.JWTClaimsSet buildJweClaimsSet(String data, Duration tokenExpiration) {
+        Instant now = Instant.now();
+        return new JWTClaimsSet.Builder()
+            .issuer(securityProperties.getJwt().getIssuer())
+            .issueTime(Date.from(now))
+            .expirationTime(Date.from(now.plus(tokenExpiration)))
+            .claim(EncryptionConstants.CLAIM_NAME, data)
             .jwtID(UUID.randomUUID().toString())
             .build();
     }
@@ -280,11 +319,42 @@ public class TokenProvider {
         }
     }
 
-    public void validateJws(String jwsSignature, String payload) {
+    public String extractDataFromJwe(String jweToken) {
         try {
-            String data = extractDataFromJws(jwsSignature);
-            String hashedPayload = HashUtil.hashWithSHA256(payload);
-            if (!Objects.equals(data, hashedPayload)) {
+            JWEObject jweObject = JWEObject.parse(jweToken);
+
+            // Decrypt JWE token
+            jweObject.decrypt(new RSADecrypter(jweKeyPair.getPrivate()));
+
+            // Extract the payload (JWE)
+            SignedJWT signedJwt = jweObject.getPayload().toSignedJWT();
+            if (signedJwt == null) {
+                throw new BadJweException("Invalid JWE token");
+            }
+            JWSVerifier verifier = new RSASSAVerifier((RSAPublicKey) jweKeyPair.getPublic());
+
+            if (!signedJwt.verify(verifier)) {
+                throw new BadJweException("JWE signature verification failed");
+            }
+
+            JWTClaimsSet claims = signedJwt.getJWTClaimsSet();
+            Instant now = Instant.now();
+
+            if (claims.getExpirationTime().before(Date.from(now))) {
+                throw new BadJweException("JWE token is expired");
+            }
+
+            return claims.getStringClaim(EncryptionConstants.CLAIM_NAME);
+        } catch (ParseException | JOSEException e) {
+            throw new BadJweException("Failed to extract data from JWE", e);
+        }
+    }
+
+    public void validateJws(String jwsSignature, String data) {
+        try {
+            String extractDataFromJws = extractDataFromJws(jwsSignature);
+            String hashedPayload = HashUtil.hashWithSHA256(data);
+            if (!Objects.equals(extractDataFromJws, hashedPayload)) {
                 throw new BadJwsException("Payload hash does not match");
             }
         } catch (NoSuchAlgorithmException e) {

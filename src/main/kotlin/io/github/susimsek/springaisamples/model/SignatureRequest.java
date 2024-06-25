@@ -12,6 +12,6 @@ public record SignatureRequest(
     )
     @NotNull(message = "{validation.field.notNull}")
     @NonEmptyString(message = "{validation.field.notBlank}")
-    Object payload
+    Object data
 ) {
 }

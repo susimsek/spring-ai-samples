@@ -8,5 +8,5 @@ import java.io.IOException;
 public interface EncryptionExceptionHandler {
 
     void handle(HttpServletRequest request, HttpServletResponse response,
-                EncryptionException exception) throws IOException, ServletException;
+                JweException exception) throws IOException, ServletException;
 }

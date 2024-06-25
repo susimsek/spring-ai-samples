@@ -189,12 +189,12 @@ public class SecurityConfig {
     }
 
     @Bean
-    public KeyPair encryptionKeyPair() {
+    public KeyPair jweKeyPair() {
         PublicKey publicKey = RsaKeyConverters.x509().convert(new ByteArrayInputStream(
-            securityProperties.getEncryption()
+            securityProperties.getJwe()
             .getFormattedPublicKey().getBytes(StandardCharsets.UTF_8)));
         PrivateKey privateKey = RsaKeyConverters.pkcs8().convert(new ByteArrayInputStream(
-            securityProperties.getEncryption()
+            securityProperties.getJwe()
             .getFormattedPrivateKey().getBytes(StandardCharsets.UTF_8)));
         return new KeyPair(publicKey, privateKey);
     }
@@ -217,8 +217,10 @@ public class SecurityConfig {
     public TokenProvider tokenProvider(JwtEncoder jwtEncoder,
                                        KeyPair jwtKeyPair,
                                        KeyPair jwsKeyPair,
+                                       KeyPair jweKeyPair,
                                        TokenStore tokenStore) {
-        return new TokenProvider(jwtEncoder, jwtKeyPair, securityProperties, tokenStore, jwsKeyPair);
+        return new TokenProvider(jwtEncoder, jwtKeyPair, securityProperties,
+            tokenStore, jwsKeyPair, jweKeyPair);
     }
 
     @Bean
@@ -227,8 +229,8 @@ public class SecurityConfig {
     }
 
     @Bean
-    public EncryptionUtil encryptionUtil(KeyPair encryptionKeyPair) {
-        return new EncryptionUtil(encryptionKeyPair);
+    public EncryptionUtil encryptionUtil(KeyPair jweKeyPair) {
+        return new EncryptionUtil(jweKeyPair);
     }
 
     @Bean
@@ -260,7 +262,7 @@ public class SecurityConfig {
             .requestMatchers(requestMatchersConfig.swaggerPaths()).permitAll()
             .requestMatchers(requestMatchersConfig.actuatorPaths()).permitAll()
             .requestMatchers(requestMatchersConfig.encryptionPaths()).permitAll()
-            .requestMatchers(requestMatchersConfig.signPath()).encrypted()
+            .requestMatchers(requestMatchersConfig.signPath()).permitAll()
             .anyRequest().permitAll()
             .build();
     }

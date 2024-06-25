@@ -1,8 +1,8 @@
 package io.github.susimsek.springaisamples.security.encryption;
 
 import io.github.susimsek.springaisamples.enums.FilterOrder;
-import io.github.susimsek.springaisamples.exception.encryption.EncryptionException;
 import io.github.susimsek.springaisamples.exception.encryption.EncryptionExceptionHandler;
+import io.github.susimsek.springaisamples.exception.encryption.JweException;
 import io.github.susimsek.springaisamples.service.EncryptionService;
 import io.github.susimsek.springaisamples.utils.CachedBodyHttpServletRequestWrapper;
 import io.github.susimsek.springaisamples.utils.CachedBodyHttpServletResponseWrapper;
@@ -60,8 +60,8 @@ public class EncryptionFilter extends OncePerRequestFilter implements Ordered {
         String decryptedBody;
         try {
             decryptedBody = encryptionService.decryptData(encryptedBody);
-        } catch (EncryptionException e) {
-            handleInvalidEncryptedData(request, response, e);
+        } catch (JweException e) {
+            handleJweException(request, response, e);
             return;
         }
         requestWrapper.setBody(decryptedBody.getBytes(StandardCharsets.UTF_8));
@@ -78,8 +78,8 @@ public class EncryptionFilter extends OncePerRequestFilter implements Ordered {
         responseWrapper.copyBodyToResponse();
     }
 
-    private void handleInvalidEncryptedData(HttpServletRequest request, HttpServletResponse response,
-                                            EncryptionException e)
+    private void handleJweException(HttpServletRequest request, HttpServletResponse response,
+                                            JweException e)
         throws IOException, ServletException {
         encryptionExceptionHandler.handle(request, response, e);
     }

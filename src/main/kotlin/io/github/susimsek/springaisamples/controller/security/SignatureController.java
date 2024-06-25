@@ -54,7 +54,7 @@ public class SignatureController {
     public ResponseEntity<SignatureResponse> createJws(
         @Parameter(description = "Payload for JWS token generation")
         @Valid @RequestBody SignatureRequest signatureRequest) {
-        String jws = signatureService.createJws(signatureRequest.payload());
+        String jws = signatureService.createJws(signatureRequest.data());
         return ResponseEntity.ok(new SignatureResponse(jws));
     }
 }

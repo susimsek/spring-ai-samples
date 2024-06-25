@@ -8,7 +8,7 @@ import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import io.github.resilience4j.core.IntervalFunction;
-import io.github.susimsek.springaisamples.exception.encryption.BadEncryptionException;
+import io.github.susimsek.springaisamples.exception.encryption.JweException;
 import io.github.susimsek.springaisamples.exception.idempotency.MissingIdempotencyKeyException;
 import io.github.susimsek.springaisamples.exception.ratelimit.RateLimitExceededException;
 import io.github.susimsek.springaisamples.exception.security.JwsException;
@@ -174,13 +174,6 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             ErrorConstants.MULTIPART_ERROR, new HttpHeaders(), request);
     }
 
-    @ExceptionHandler(BadEncryptionException.class)
-    protected ResponseEntity<Object> handleEncryptionException(@NonNull BadEncryptionException ex,
-                                                                  @NonNull WebRequest request) {
-        return createProblemDetailResponse(ex, HttpStatus.BAD_REQUEST,
-            ErrorConstants.ENCRYPTION, new HttpHeaders(), request);
-    }
-
     @ExceptionHandler(MissingIdempotencyKeyException.class)
     protected ResponseEntity<Object> handleMissingIdempotencyKeyException(@NonNull MissingIdempotencyKeyException ex,
                                                         @NonNull WebRequest request) {
@@ -205,8 +198,15 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(JwsException.class)
     protected ResponseEntity<Object> handleJwsException(@NonNull JwsException ex,
                                                         @NonNull WebRequest request) {
-        return createProblemDetailResponse(ex, HttpStatus.FORBIDDEN,
+        return createProblemDetailResponse(ex, HttpStatus.BAD_REQUEST,
             ErrorConstants.SIGNATURE, new HttpHeaders(), request);
+    }
+
+    @ExceptionHandler(JweException.class)
+    protected ResponseEntity<Object> handleEncryptionException(@NonNull JweException ex,
+                                                               @NonNull WebRequest request) {
+        return createProblemDetailResponse(ex, HttpStatus.BAD_REQUEST,
+            ErrorConstants.ENCRYPTION, new HttpHeaders(), request);
     }
 
     @ExceptionHandler(AccessDeniedException.class)

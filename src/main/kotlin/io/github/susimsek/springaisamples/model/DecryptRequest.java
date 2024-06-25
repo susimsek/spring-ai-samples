@@ -6,10 +6,10 @@ import jakarta.validation.constraints.NotBlank;
 @Schema(description = "Decrypt request model containing the payload to be decrypted")
 public record DecryptRequest(
     @Schema(
-        description = "The payload data to be decrypted",
-        example = "encryptedDataString"
+        description = "The JWE token to be decrypted",
+        example = "eyJhbGciOiJSU0EtT0FFUCIsImVuYyI6IkEyNTZHQ00ifQ..."
     )
     @NotBlank(message = "{validation.field.notBlank}")
-    String payload
+    String jweToken
 ) {
 }
