@@ -132,7 +132,7 @@ public class TokenProvider {
         }
     }
 
-    public String createJwe(String data) {
+    public String createJwe(Object data) {
         try {
             var jwsClaimsSet = buildJweClaimsSet(data,
                 securityProperties.getJwe().getJweExpiration());
@@ -205,7 +205,7 @@ public class TokenProvider {
             .build();
     }
 
-    private com.nimbusds.jwt.JWTClaimsSet buildJweClaimsSet(String data, Duration tokenExpiration) {
+    private com.nimbusds.jwt.JWTClaimsSet buildJweClaimsSet(Object data, Duration tokenExpiration) {
         Instant now = Instant.now();
         return new JWTClaimsSet.Builder()
             .issuer(securityProperties.getJwt().getIssuer())
@@ -319,7 +319,7 @@ public class TokenProvider {
         }
     }
 
-    public String extractDataFromJwe(String jweToken) {
+    public Object extractDataFromJwe(String jweToken) {
         try {
             JWEObject jweObject = JWEObject.parse(jweToken);
 
@@ -344,7 +344,7 @@ public class TokenProvider {
                 throw new BadJweException("JWE token is expired");
             }
 
-            return claims.getStringClaim(EncryptionConstants.CLAIM_NAME);
+            return claims.getClaim(EncryptionConstants.CLAIM_NAME);
         } catch (ParseException | JOSEException e) {
             throw new BadJweException("Failed to extract data from JWE", e);
         }

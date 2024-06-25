@@ -20,7 +20,8 @@ import io.github.susimsek.springaisamples.security.InMemoryTokenStore;
 import io.github.susimsek.springaisamples.security.SecurityProperties;
 import io.github.susimsek.springaisamples.security.TokenProvider;
 import io.github.susimsek.springaisamples.security.TokenStore;
-import io.github.susimsek.springaisamples.security.encryption.EncryptionFilter;
+import io.github.susimsek.springaisamples.security.encryption.RequestDecryptionFilter;
+import io.github.susimsek.springaisamples.security.encryption.ResponseEncryptionFilter;
 import io.github.susimsek.springaisamples.security.encryption.EncryptionUtil;
 import io.github.susimsek.springaisamples.security.signature.SignatureVerificationFilter;
 import io.github.susimsek.springaisamples.security.xss.XssFilter;
@@ -81,7 +82,8 @@ public class SecurityConfig {
         MvcRequestMatcher.Builder mvc,
         RequestMatchersConfig requestMatchersConfig,
         SecurityProblemSupport problemSupport,
-        EncryptionFilter encryptionFilter,
+        RequestDecryptionFilter requestDecryptionFilter,
+        ResponseEncryptionFilter responseEncryptionFilter,
         SignatureVerificationFilter signatureVerificationFilter,
         XssFilter xssFilter,
         TraceFilter traceFilter,
@@ -121,12 +123,13 @@ public class SecurityConfig {
                 .accessDeniedHandler(problemSupport)
                 .jwt(withDefaults()))
             .addFilterBefore(signatureVerificationFilter, BearerTokenAuthenticationFilter.class)
-            .addFilterBefore(encryptionFilter, SignatureVerificationFilter.class)
+            .addFilterBefore(requestDecryptionFilter, SignatureVerificationFilter.class)
             .addFilterAfter(xssFilter, BearerTokenAuthenticationFilter.class)
             .addFilterAfter(idempotencyFilter, XssFilter.class)
             .addFilterAfter(traceFilter, IdempotencyFilter.class)
             .addFilterAfter(rateLimitFilter, IdempotencyFilter.class)
-            .addFilterAfter(loggingFilter, RateLimitingFilter.class);
+            .addFilterAfter(responseEncryptionFilter, RateLimitingFilter.class)
+            .addFilterAfter(loggingFilter, ResponseEncryptionFilter.class);
         return http.build();
     }
 
@@ -236,7 +239,6 @@ public class SecurityConfig {
 
     @Bean
     public SignatureVerificationFilter signatureVerificationFilter(
-        MvcRequestMatcher.Builder mvc,
         RequestMatchersConfig requestMatchersConfig,
         SignatureService signatureService,
         SecurityProblemSupport problemSupport) {
@@ -253,13 +255,31 @@ public class SecurityConfig {
     }
 
     @Bean
-    public EncryptionFilter encryptionFilter(
+    public ResponseEncryptionFilter responseEncryptionFilter(
         RequestMatchersConfig requestMatchersConfig,
         EncryptionService encryptionUtil,
         JsonUtil jsonUtil,
         SecurityProblemSupport problemSupport) {
-        return EncryptionFilter.builder(encryptionUtil, problemSupport, jsonUtil)
-            .order(FilterOrder.ENCRYPTION.order())
+        return ResponseEncryptionFilter.builder(encryptionUtil, problemSupport, jsonUtil)
+            .order(FilterOrder.RESPONSE_ENCRYPTION.order())
+            .requestMatchers(requestMatchersConfig.staticResources()).permitAll()
+            .requestMatchers(requestMatchersConfig.swaggerPaths()).permitAll()
+            .requestMatchers(requestMatchersConfig.actuatorPaths()).permitAll()
+            .requestMatchers(requestMatchersConfig.encryptionPaths()).permitAll()
+            .requestMatchers(requestMatchersConfig.signPath()).permitAll()
+            .requestMatchers("/api/auth/token").encrypted()
+            .anyRequest().permitAll()
+            .build();
+    }
+
+    @Bean
+    public RequestDecryptionFilter requestDecryptionFilter(
+        RequestMatchersConfig requestMatchersConfig,
+        EncryptionService encryptionUtil,
+        JsonUtil jsonUtil,
+        SecurityProblemSupport problemSupport) {
+        return RequestDecryptionFilter.builder(encryptionUtil, problemSupport, jsonUtil)
+            .order(FilterOrder.REQUEST_DECRYPTION.order())
             .requestMatchers(requestMatchersConfig.staticResources()).permitAll()
             .requestMatchers(requestMatchersConfig.swaggerPaths()).permitAll()
             .requestMatchers(requestMatchersConfig.actuatorPaths()).permitAll()

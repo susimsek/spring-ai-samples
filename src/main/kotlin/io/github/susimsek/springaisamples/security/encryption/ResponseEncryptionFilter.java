@@ -3,11 +3,8 @@ package io.github.susimsek.springaisamples.security.encryption;
 import io.github.susimsek.springaisamples.enums.FilterOrder;
 import io.github.susimsek.springaisamples.exception.encryption.EncryptionExceptionHandler;
 import io.github.susimsek.springaisamples.exception.encryption.JweException;
-import io.github.susimsek.springaisamples.exception.encryption.MissingJweException;
-import io.github.susimsek.springaisamples.model.DecryptRequest;
 import io.github.susimsek.springaisamples.model.EncryptResponse;
 import io.github.susimsek.springaisamples.service.EncryptionService;
-import io.github.susimsek.springaisamples.utils.CachedBodyHttpServletRequestWrapper;
 import io.github.susimsek.springaisamples.utils.CachedBodyHttpServletResponseWrapper;
 import io.github.susimsek.springaisamples.utils.JsonUtil;
 import jakarta.servlet.FilterChain;
@@ -27,11 +24,10 @@ import org.springframework.security.config.annotation.web.AbstractRequestMatcher
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 @RequiredArgsConstructor
-public class EncryptionFilter extends OncePerRequestFilter implements Ordered {
+public class ResponseEncryptionFilter extends OncePerRequestFilter implements Ordered {
 
     private final EncryptionService encryptionService;
     private final EncryptionExceptionHandler encryptionExceptionHandler;
@@ -60,41 +56,18 @@ public class EncryptionFilter extends OncePerRequestFilter implements Ordered {
         @NonNull HttpServletResponse response,
         @NonNull FilterChain filterChain)
             throws ServletException, IOException {
-        // Request decryption
-        CachedBodyHttpServletRequestWrapper requestWrapper = new CachedBodyHttpServletRequestWrapper(request);
-        String requestBody = new String(requestWrapper.getBody(), StandardCharsets.UTF_8);
+        CachedBodyHttpServletResponseWrapper responseWrapper = new CachedBodyHttpServletResponseWrapper(response);
+        filterChain.doFilter(request, responseWrapper);
 
-        DecryptRequest decryptRequest;
+        String responseBody = new String(responseWrapper.getBody(), StandardCharsets.UTF_8);
+        String encryptedResponseBody;
         try {
-            decryptRequest = jsonUtil.convertToObject(requestBody, DecryptRequest.class);
-        } catch (IOException e) {
-            handleMissingJwe(request, response);
-            return;
-        }
-
-        String encryptedBody = decryptRequest.jweToken();
-        if (!StringUtils.hasText(encryptedBody)) {
-            handleMissingJwe(request, response);
-            return;
-        }
-
-        String decryptedBody;
-        try {
-            decryptedBody = encryptionService.decryptData(encryptedBody);
+            var jsonObject = jsonUtil.convertToJsonObject(responseBody);
+            encryptedResponseBody = encryptionService.encryptData(jsonObject);
         } catch (JweException e) {
             handleJweException(request, response, e);
             return;
         }
-
-        requestWrapper.setBody(decryptedBody.getBytes(StandardCharsets.UTF_8));
-
-        // Response encryption
-        CachedBodyHttpServletResponseWrapper responseWrapper = new CachedBodyHttpServletResponseWrapper(response);
-        filterChain.doFilter(requestWrapper, responseWrapper);
-
-        String responseBody = new String(responseWrapper.getBody(), StandardCharsets.UTF_8);
-        String encryptedResponseBody;
-        encryptedResponseBody = encryptionService.encryptData(responseBody);
 
         EncryptResponse encryptResponse = new EncryptResponse(encryptedResponseBody);
         String encryptedResponseJson = jsonUtil.convertObjectToString(encryptResponse);
@@ -107,11 +80,6 @@ public class EncryptionFilter extends OncePerRequestFilter implements Ordered {
                                             JweException e)
         throws IOException, ServletException {
         encryptionExceptionHandler.handle(request, response, e);
-    }
-
-    private void handleMissingJwe(HttpServletRequest request, HttpServletResponse response)
-        throws IOException, ServletException {
-        encryptionExceptionHandler.handle(request, response, new MissingJweException("JWE token is missing"));
     }
 
     @AllArgsConstructor
@@ -131,7 +99,7 @@ public class EncryptionFilter extends OncePerRequestFilter implements Ordered {
 
         AfterRequestMatchersBuilder requestMatchers(RequestMatcher... requestMatchers);
 
-        EncryptionFilter build();
+        ResponseEncryptionFilter build();
     }
 
     public interface AfterRequestMatchersBuilder {
@@ -155,7 +123,7 @@ public class EncryptionFilter extends OncePerRequestFilter implements Ordered {
         private final List<RequestMatcherConfig> requestMatcherConfigs = new ArrayList<>();
         private boolean anyRequestConfigured = false;
         private boolean defaultEncrypted = true;
-        private int order = FilterOrder.ENCRYPTION.order();
+        private int order = FilterOrder.RESPONSE_ENCRYPTION.order();
         private int lastIndex = 0;
 
         private Builder(EncryptionService encryptionService,
@@ -232,8 +200,8 @@ public class EncryptionFilter extends OncePerRequestFilter implements Ordered {
             return this;
         }
 
-        public EncryptionFilter build() {
-            return new EncryptionFilter(encryptionService, encryptionExceptionHandler,
+        public ResponseEncryptionFilter build() {
+            return new ResponseEncryptionFilter(encryptionService, encryptionExceptionHandler,
                 jsonUtil, requestMatcherConfigs, defaultEncrypted, order);
         }
 
