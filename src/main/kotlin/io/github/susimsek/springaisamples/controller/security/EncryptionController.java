@@ -1,5 +1,7 @@
 package io.github.susimsek.springaisamples.controller.security;
 
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+
 import io.github.susimsek.springaisamples.model.DecryptRequest;
 import io.github.susimsek.springaisamples.model.DecryptResponse;
 import io.github.susimsek.springaisamples.model.EncryptRequest;
@@ -14,6 +16,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
@@ -47,7 +50,14 @@ public class EncryptionController {
         @Parameter(description = "Payload to be encrypted")
         @Valid @RequestBody EncryptRequest request) {
         String encryptedData = encryptionService.encryptData(request.data());
-        return ResponseEntity.ok(new EncryptResponse(encryptedData));
+        EncryptResponse response = new EncryptResponse(encryptedData);
+        response.add(WebMvcLinkBuilder.linkTo(methodOn(EncryptionController.class)
+                .encryptData(request)).withSelfRel()
+            .withType("POST"));
+        response.add(WebMvcLinkBuilder.linkTo(methodOn(EncryptionController.class)
+                .decryptData(new DecryptRequest(encryptedData))).withRel("decrypt")
+            .withType("POST"));
+        return ResponseEntity.ok(response);
     }
 
     @Operation(summary = "Decrypt Data", description = "Decrypt the given data")
@@ -67,6 +77,14 @@ public class EncryptionController {
         @Parameter(description = "Payload to be decrypted")
         @Valid @RequestBody DecryptRequest request) {
         var decryptedData = encryptionService.decryptData(request.jweToken());
-        return ResponseEntity.ok(new DecryptResponse(decryptedData));
+        DecryptResponse response = new DecryptResponse(decryptedData);
+        response.add(WebMvcLinkBuilder.linkTo(methodOn(EncryptionController.class)
+                .decryptData(request)).withSelfRel()
+            .withType("POST"));
+        response.add(WebMvcLinkBuilder.linkTo(
+            methodOn(EncryptionController.class).encryptData(new EncryptRequest(
+                decryptedData))).withRel("encrypt")
+            .withType("POST"));
+        return ResponseEntity.ok(response);
     }
 }
