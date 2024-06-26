@@ -25,9 +25,8 @@ public class XssRequestWrapper extends CachedBodyHttpServletRequestWrapper {
     }
 
     private void sanitizeBody() {
-        byte[] body = getBody();
-        String bodyString = new String(body, StandardCharsets.UTF_8);
-        String sanitizedBodyString = sanitizationUtil.sanitizeJsonString(bodyString);
+        String body = getContentAsString();
+        String sanitizedBodyString = sanitizationUtil.sanitizeJsonString(body);
         byte[] sanitizedBody = sanitizedBodyString.getBytes(StandardCharsets.UTF_8);
         setBody(sanitizedBody);
     }

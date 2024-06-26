@@ -13,7 +13,6 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -64,13 +63,13 @@ public class SignatureVerificationFilter extends OncePerRequestFilter implements
             return;
         }
         String jwsToken = optionalJwsToken.get();
-        CachedBodyHttpServletRequestWrapper wrappedRequest = new CachedBodyHttpServletRequestWrapper(request);
-        String requestBody = new String(wrappedRequest.getBody(), StandardCharsets.UTF_8);
+        CachedBodyHttpServletRequestWrapper requestWrapper = new CachedBodyHttpServletRequestWrapper(request);
+        String requestBody = requestWrapper.getContentAsString();
         try {
             signatureService.validateJws(jwsToken, requestBody);
-            filterChain.doFilter(wrappedRequest, response);
+            filterChain.doFilter(requestWrapper, response);
         } catch (JwsException e) {
-            handleInvalidJws(wrappedRequest, response, e);
+            handleInvalidJws(requestWrapper, response, e);
         }
     }
 
@@ -123,7 +122,7 @@ public class SignatureVerificationFilter extends OncePerRequestFilter implements
         private final List<RequestMatcherConfig> requestMatcherConfigs = new ArrayList<>();
         private boolean anyRequestConfigured = false;
         private boolean defaultSigned = true;
-        private int order = FilterOrder.SIGNATURE.order();
+        private int order = FilterOrder.SIGNATURE_VERIFICATION.order();
         private int lastIndex = 0;
 
         private Builder(SignatureService signatureService, SignatureExceptionHandler signatureExceptionHandler) {

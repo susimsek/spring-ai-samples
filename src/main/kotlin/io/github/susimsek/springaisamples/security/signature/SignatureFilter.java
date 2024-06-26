@@ -1,24 +1,23 @@
-package io.github.susimsek.springaisamples.security.encryption;
+package io.github.susimsek.springaisamples.security.signature;
+
+import static io.github.susimsek.springaisamples.security.signature.SignatureConstants.JWS_SIGNATURE_HEADER_NAME;
 
 import io.github.susimsek.springaisamples.enums.FilterOrder;
-import io.github.susimsek.springaisamples.exception.encryption.EncryptionExceptionHandler;
-import io.github.susimsek.springaisamples.exception.encryption.JweException;
-import io.github.susimsek.springaisamples.model.EncryptResponse;
-import io.github.susimsek.springaisamples.service.EncryptionService;
-import io.github.susimsek.springaisamples.utils.JsonUtil;
+import io.github.susimsek.springaisamples.exception.security.JwsException;
+import io.github.susimsek.springaisamples.exception.security.SignatureExceptionHandler;
+import io.github.susimsek.springaisamples.service.SignatureService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.Ordered;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
 import org.springframework.lang.NonNull;
 import org.springframework.security.config.annotation.web.AbstractRequestMatcherRegistry;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
@@ -27,14 +26,14 @@ import org.springframework.util.Assert;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.util.ContentCachingResponseWrapper;
 
+@Slf4j
 @RequiredArgsConstructor
-public class EncryptionFilter extends OncePerRequestFilter implements Ordered {
+public class SignatureFilter extends OncePerRequestFilter implements Ordered {
 
-    private final EncryptionService encryptionService;
-    private final EncryptionExceptionHandler encryptionExceptionHandler;
-    private final JsonUtil jsonUtil;
+    private final SignatureService signatureService;
+    private final SignatureExceptionHandler signatureExceptionHandler;
     private final List<RequestMatcherConfig> requestMatcherConfigs;
-    private final boolean defaultEncrypted;
+    private final boolean defaultSigned;
     private final int order;
 
     @Override
@@ -46,51 +45,38 @@ public class EncryptionFilter extends OncePerRequestFilter implements Ordered {
     protected boolean shouldNotFilter(@NonNull HttpServletRequest request) {
         return requestMatcherConfigs.stream()
             .filter(config -> config.requestMatcher.matches(request))
-            .map(config -> !config.encrypted)
+            .map(config -> !config.signed)
             .findFirst()
-            .orElse(!defaultEncrypted);
+            .orElse(!defaultSigned);
     }
 
     @Override
-    protected void doFilterInternal(
-        @NonNull HttpServletRequest request,
-        @NonNull HttpServletResponse response,
-        @NonNull FilterChain filterChain)
-            throws ServletException, IOException {
+    protected void doFilterInternal(@NonNull HttpServletRequest request,
+                                    @NonNull HttpServletResponse response,
+                                    @NonNull FilterChain filterChain)
+        throws ServletException, IOException {
         ContentCachingResponseWrapper responseWrapper = new ContentCachingResponseWrapper(response);
         filterChain.doFilter(request, responseWrapper);
+        String responseBody = new String(responseWrapper.getContentAsByteArray(), responseWrapper.getCharacterEncoding());
 
-        String responseBody = new String(responseWrapper.getContentAsByteArray(), StandardCharsets.UTF_8);
-        String encryptedResponseBody;
         try {
-            var jsonObject = jsonUtil.convertToJsonObject(responseBody);
-            encryptedResponseBody = encryptionService.encryptData(jsonObject);
-        } catch (JweException e) {
-            handleJweException(request, response, e);
-            return;
+            String signature = signatureService.createJws(responseBody);
+            responseWrapper.setHeader(JWS_SIGNATURE_HEADER_NAME, signature);
+            responseWrapper.copyBodyToResponse();
+        } catch (JwsException e) {
+            handleJwsException(request, response, e);
         }
-
-        EncryptResponse encryptResponse = new EncryptResponse(encryptedResponseBody);
-        String encryptedResponseJson = jsonUtil.convertObjectToString(encryptResponse);
-
-        responseWrapper.resetBuffer();
-        response.setCharacterEncoding(StandardCharsets.UTF_8.name());
-        responseWrapper.setContentLength(encryptedResponseJson.length());
-        responseWrapper.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        responseWrapper.getWriter().write(encryptedResponseJson);
-        responseWrapper.copyBodyToResponse();
     }
 
-    private void handleJweException(HttpServletRequest request, HttpServletResponse response,
-                                            JweException e)
+    private void handleJwsException(HttpServletRequest request, HttpServletResponse response, JwsException e)
         throws IOException, ServletException {
-        encryptionExceptionHandler.handle(request, response, e);
+        signatureExceptionHandler.handle(request, response, e);
     }
 
     @AllArgsConstructor
     private static class RequestMatcherConfig {
         private final RequestMatcher requestMatcher;
-        private boolean encrypted;
+        private boolean signed;
     }
 
     public interface InitialBuilder {
@@ -104,39 +90,34 @@ public class EncryptionFilter extends OncePerRequestFilter implements Ordered {
 
         AfterRequestMatchersBuilder requestMatchers(RequestMatcher... requestMatchers);
 
-        EncryptionFilter build();
+        SignatureFilter build();
     }
 
     public interface AfterRequestMatchersBuilder {
         InitialBuilder permitAll();
 
-        InitialBuilder encrypted();
+        InitialBuilder signed();
     }
 
-    public static InitialBuilder builder(EncryptionService encryptionService,
-                                         EncryptionExceptionHandler encryptionExceptionHandler,
-                                         JsonUtil jsonUtil) {
-        return new Builder(encryptionService, encryptionExceptionHandler, jsonUtil);
+    public static InitialBuilder builder(SignatureService signatureService,
+                                         SignatureExceptionHandler signatureExceptionHandler) {
+        return new Builder(signatureService, signatureExceptionHandler);
     }
 
     private static class Builder extends AbstractRequestMatcherRegistry<Builder>
         implements InitialBuilder, AfterRequestMatchersBuilder {
 
-        private final EncryptionService encryptionService;
-        private final EncryptionExceptionHandler encryptionExceptionHandler;
-        private final JsonUtil jsonUtil;
+        private final SignatureService signatureService;
+        private final SignatureExceptionHandler signatureExceptionHandler;
         private final List<RequestMatcherConfig> requestMatcherConfigs = new ArrayList<>();
         private boolean anyRequestConfigured = false;
-        private boolean defaultEncrypted = true;
-        private int order = FilterOrder.ENCRYPTION.order();
+        private boolean defaultSigned = true;
+        private int order = FilterOrder.SIGNATURE.order();
         private int lastIndex = 0;
 
-        private Builder(EncryptionService encryptionService,
-                        EncryptionExceptionHandler encryptionExceptionHandler,
-                        JsonUtil jsonUtil) {
-            this.encryptionService = encryptionService;
-            this.encryptionExceptionHandler = encryptionExceptionHandler;
-            this.jsonUtil = jsonUtil;
+        private Builder(SignatureService signatureService, SignatureExceptionHandler signatureExceptionHandler) {
+            this.signatureService = signatureService;
+            this.signatureExceptionHandler = signatureExceptionHandler;
         }
 
         @Override
@@ -178,24 +159,24 @@ public class EncryptionFilter extends OncePerRequestFilter implements Ordered {
             Assert.state(anyRequestConfigured || !requestMatcherConfigs.isEmpty(),
                 "permitAll() can only be called after requestMatchers() or anyRequest()");
             if (anyRequestConfigured) {
-                this.defaultEncrypted = false;
+                this.defaultSigned = false;
             } else {
                 requestMatcherConfigs.stream()
                     .skip(lastIndex)
-                    .forEach(config -> config.encrypted = false);
+                    .forEach(config -> config.signed = false);
             }
             return this;
         }
 
-        public Builder encrypted() {
+        public Builder signed() {
             Assert.state(anyRequestConfigured || !requestMatcherConfigs.isEmpty(),
-                "encrypted() can only be called after requestMatchers() or anyRequest())");
+                "signed() can only be called after requestMatchers() or anyRequest())");
             if (anyRequestConfigured) {
-                this.defaultEncrypted = true;
+                this.defaultSigned = true;
             } else {
                 requestMatcherConfigs.stream()
                     .skip(lastIndex)
-                    .forEach(config -> config.encrypted = true);
+                    .forEach(config -> config.signed = true);
             }
             return this;
         }
@@ -205,9 +186,9 @@ public class EncryptionFilter extends OncePerRequestFilter implements Ordered {
             return this;
         }
 
-        public EncryptionFilter build() {
-            return new EncryptionFilter(encryptionService, encryptionExceptionHandler,
-                jsonUtil, requestMatcherConfigs, defaultEncrypted, order);
+        public SignatureFilter build() {
+            return new SignatureFilter(signatureService, signatureExceptionHandler,
+                requestMatcherConfigs, defaultSigned, order);
         }
 
         @Override

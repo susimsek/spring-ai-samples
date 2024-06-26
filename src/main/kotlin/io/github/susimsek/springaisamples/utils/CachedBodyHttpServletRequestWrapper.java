@@ -8,6 +8,7 @@ import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import org.springframework.util.StreamUtils;
 
@@ -22,7 +23,7 @@ public class CachedBodyHttpServletRequestWrapper extends HttpServletRequestWrapp
 
     @Override
     public ServletInputStream getInputStream() {
-        return new CachedBodyServletInputStream();
+        return new CachedBodyServletInputStream(this.cachedBody);
     }
 
     @Override
@@ -31,18 +32,29 @@ public class CachedBodyHttpServletRequestWrapper extends HttpServletRequestWrapp
         return new BufferedReader(new InputStreamReader(byteArrayInputStream, StandardCharsets.UTF_8));
     }
 
-    public byte[] getBody() {
-        return cachedBody;
+    @Override
+    public String getCharacterEncoding() {
+        String enc = super.getCharacterEncoding();
+        return enc != null ? enc : StandardCharsets.UTF_8.name();
+    }
+
+    public byte[] getContentAsByteArray() {
+        return this.cachedBody;
+    }
+
+    public String getContentAsString() {
+        return new String(this.cachedBody, Charset.forName(this.getCharacterEncoding()));
     }
 
     public void setBody(byte[] body) {
         this.cachedBody = body;
     }
 
-    private class CachedBodyServletInputStream extends ServletInputStream {
+    private static class CachedBodyServletInputStream extends ServletInputStream {
+
         private final ByteArrayInputStream byteArrayInputStream;
 
-        public CachedBodyServletInputStream() {
+        public CachedBodyServletInputStream(byte[] cachedBody) {
             this.byteArrayInputStream = new ByteArrayInputStream(cachedBody);
         }
 
@@ -57,7 +69,8 @@ public class CachedBodyHttpServletRequestWrapper extends HttpServletRequestWrapp
         }
 
         @Override
-        public void setReadListener(ReadListener listener) {
+        public void setReadListener(ReadListener readListener) {
+            throw new UnsupportedOperationException();
         }
 
         @Override

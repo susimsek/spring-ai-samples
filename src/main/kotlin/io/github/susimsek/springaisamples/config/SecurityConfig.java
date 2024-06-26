@@ -23,6 +23,7 @@ import io.github.susimsek.springaisamples.security.TokenStore;
 import io.github.susimsek.springaisamples.security.encryption.DecryptionFilter;
 import io.github.susimsek.springaisamples.security.encryption.EncryptionFilter;
 import io.github.susimsek.springaisamples.security.encryption.EncryptionUtil;
+import io.github.susimsek.springaisamples.security.signature.SignatureFilter;
 import io.github.susimsek.springaisamples.security.signature.SignatureVerificationFilter;
 import io.github.susimsek.springaisamples.security.xss.XssFilter;
 import io.github.susimsek.springaisamples.service.EncryptionService;
@@ -82,9 +83,10 @@ public class SecurityConfig {
         MvcRequestMatcher.Builder mvc,
         RequestMatchersConfig requestMatchersConfig,
         SecurityProblemSupport problemSupport,
-        DecryptionFilter requestDecryptionFilter,
-        EncryptionFilter responseEncryptionFilter,
+        DecryptionFilter decryptionFilter,
+        EncryptionFilter encryptionFilter,
         SignatureVerificationFilter signatureVerificationFilter,
+        SignatureFilter signatureFilter,
         XssFilter xssFilter,
         TraceFilter traceFilter,
         IdempotencyFilter idempotencyFilter,
@@ -123,12 +125,14 @@ public class SecurityConfig {
                 .accessDeniedHandler(problemSupport)
                 .jwt(withDefaults()))
             .addFilterBefore(signatureVerificationFilter, BearerTokenAuthenticationFilter.class)
-            .addFilterBefore(requestDecryptionFilter, SignatureVerificationFilter.class)
+            .addFilterBefore(decryptionFilter, SignatureVerificationFilter.class)
+            .addFilterBefore(loggingFilter, DecryptionFilter.class)
             .addFilterAfter(xssFilter, BearerTokenAuthenticationFilter.class)
             .addFilterAfter(idempotencyFilter, XssFilter.class)
             .addFilterAfter(traceFilter, IdempotencyFilter.class)
-            .addFilterAfter(rateLimitFilter, IdempotencyFilter.class)
-            .addFilterAfter(responseEncryptionFilter, RateLimitingFilter.class)
+            .addFilterAfter(rateLimitFilter, TraceFilter.class)
+            .addFilterAfter(signatureFilter, RateLimitingFilter.class)
+            .addFilterAfter(encryptionFilter, SignatureFilter.class)
             .addFilterAfter(loggingFilter, EncryptionFilter.class);
         return http.build();
     }
@@ -243,6 +247,23 @@ public class SecurityConfig {
         SignatureService signatureService,
         SecurityProblemSupport problemSupport) {
         return SignatureVerificationFilter.builder(signatureService, problemSupport)
+            .order(FilterOrder.SIGNATURE_VERIFICATION.order())
+            .requestMatchers(requestMatchersConfig.staticResources()).permitAll()
+            .requestMatchers(requestMatchersConfig.swaggerPaths()).permitAll()
+            .requestMatchers(requestMatchersConfig.actuatorPaths()).permitAll()
+            .requestMatchers(requestMatchersConfig.nonModifyingMethods()).permitAll()
+            .requestMatchers(requestMatchersConfig.encryptionPaths()).permitAll()
+            .requestMatchers(requestMatchersConfig.signPath()).permitAll()
+            .anyRequest().signed()
+            .build();
+    }
+
+    @Bean
+    public SignatureFilter signatureFilter(
+        RequestMatchersConfig requestMatchersConfig,
+        SignatureService signatureService,
+        SecurityProblemSupport problemSupport) {
+        return SignatureFilter.builder(signatureService, problemSupport)
             .order(FilterOrder.SIGNATURE.order())
             .requestMatchers(requestMatchersConfig.staticResources()).permitAll()
             .requestMatchers(requestMatchersConfig.swaggerPaths()).permitAll()

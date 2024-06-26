@@ -6,7 +6,6 @@ import io.github.susimsek.springaisamples.enums.FilterOrder;
 import io.github.susimsek.springaisamples.exception.idempotency.IdempotencyExceptionHandler;
 import io.github.susimsek.springaisamples.exception.idempotency.MissingIdempotencyKeyException;
 import io.github.susimsek.springaisamples.service.IdempotencyService;
-import io.github.susimsek.springaisamples.utils.CachedBodyHttpServletResponseWrapper;
 import io.github.susimsek.springaisamples.utils.HttpHeadersUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -22,12 +21,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.core.Ordered;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.lang.NonNull;
 import org.springframework.security.config.annotation.web.AbstractRequestMatcherRegistry;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.util.Assert;
 import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.web.util.ContentCachingResponseWrapper;
 
 @RequiredArgsConstructor
 public class IdempotencyFilter extends OncePerRequestFilter implements Ordered {
@@ -70,15 +71,16 @@ public class IdempotencyFilter extends OncePerRequestFilter implements Ordered {
             response.setStatus(cachedResponse.status());
             HttpHeadersUtil.setHttpHeadersToResponse(cachedResponse.headers(), response);
             response.setCharacterEncoding(StandardCharsets.UTF_8.name());
+            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
             response.getWriter().write(cachedResponse.body());
             response.flushBuffer();
             return;
         }
 
-        CachedBodyHttpServletResponseWrapper responseWrapper = new CachedBodyHttpServletResponseWrapper(response);
+        ContentCachingResponseWrapper responseWrapper = new ContentCachingResponseWrapper(response);
         filterChain.doFilter(request, responseWrapper);
 
-        String responseBody = new String(responseWrapper.getBody(), StandardCharsets.UTF_8);
+        String responseBody = new String(responseWrapper.getContentAsByteArray(), StandardCharsets.UTF_8);
 
         HttpHeaders headers = HttpHeadersUtil.convertToHttpHeaders(responseWrapper);
         CachedResponse cachedResponse = new CachedResponse(responseWrapper.getStatus(),

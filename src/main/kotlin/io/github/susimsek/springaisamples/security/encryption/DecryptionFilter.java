@@ -60,7 +60,7 @@ public class DecryptionFilter extends OncePerRequestFilter implements Ordered {
             throws ServletException, IOException {
         // Request decryption
         CachedBodyHttpServletRequestWrapper requestWrapper = new CachedBodyHttpServletRequestWrapper(request);
-        String requestBody = new String(requestWrapper.getBody(), StandardCharsets.UTF_8);
+        String requestBody = requestWrapper.getContentAsString();
 
         DecryptRequest decryptRequest;
         try {
@@ -80,6 +80,7 @@ public class DecryptionFilter extends OncePerRequestFilter implements Ordered {
         try {
             var data = encryptionService.decryptData(encryptedBody);
             decryptedBody = jsonUtil.convertObjectToString(data);
+
         } catch (JweException e) {
             handleJweException(request, response, e);
             return;
