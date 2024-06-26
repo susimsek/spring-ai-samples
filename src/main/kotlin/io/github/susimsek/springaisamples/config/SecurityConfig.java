@@ -20,8 +20,8 @@ import io.github.susimsek.springaisamples.security.InMemoryTokenStore;
 import io.github.susimsek.springaisamples.security.SecurityProperties;
 import io.github.susimsek.springaisamples.security.TokenProvider;
 import io.github.susimsek.springaisamples.security.TokenStore;
-import io.github.susimsek.springaisamples.security.encryption.RequestDecryptionFilter;
-import io.github.susimsek.springaisamples.security.encryption.ResponseEncryptionFilter;
+import io.github.susimsek.springaisamples.security.encryption.DecryptionFilter;
+import io.github.susimsek.springaisamples.security.encryption.EncryptionFilter;
 import io.github.susimsek.springaisamples.security.encryption.EncryptionUtil;
 import io.github.susimsek.springaisamples.security.signature.SignatureVerificationFilter;
 import io.github.susimsek.springaisamples.security.xss.XssFilter;
@@ -82,8 +82,8 @@ public class SecurityConfig {
         MvcRequestMatcher.Builder mvc,
         RequestMatchersConfig requestMatchersConfig,
         SecurityProblemSupport problemSupport,
-        RequestDecryptionFilter requestDecryptionFilter,
-        ResponseEncryptionFilter responseEncryptionFilter,
+        DecryptionFilter requestDecryptionFilter,
+        EncryptionFilter responseEncryptionFilter,
         SignatureVerificationFilter signatureVerificationFilter,
         XssFilter xssFilter,
         TraceFilter traceFilter,
@@ -129,7 +129,7 @@ public class SecurityConfig {
             .addFilterAfter(traceFilter, IdempotencyFilter.class)
             .addFilterAfter(rateLimitFilter, IdempotencyFilter.class)
             .addFilterAfter(responseEncryptionFilter, RateLimitingFilter.class)
-            .addFilterAfter(loggingFilter, ResponseEncryptionFilter.class);
+            .addFilterAfter(loggingFilter, EncryptionFilter.class);
         return http.build();
     }
 
@@ -255,31 +255,31 @@ public class SecurityConfig {
     }
 
     @Bean
-    public ResponseEncryptionFilter responseEncryptionFilter(
+    public DecryptionFilter decryptionFilter(
         RequestMatchersConfig requestMatchersConfig,
         EncryptionService encryptionUtil,
         JsonUtil jsonUtil,
         SecurityProblemSupport problemSupport) {
-        return ResponseEncryptionFilter.builder(encryptionUtil, problemSupport, jsonUtil)
-            .order(FilterOrder.RESPONSE_ENCRYPTION.order())
+        return DecryptionFilter.builder(encryptionUtil, problemSupport, jsonUtil)
+            .order(FilterOrder.DECRYPTION.order())
             .requestMatchers(requestMatchersConfig.staticResources()).permitAll()
             .requestMatchers(requestMatchersConfig.swaggerPaths()).permitAll()
             .requestMatchers(requestMatchersConfig.actuatorPaths()).permitAll()
             .requestMatchers(requestMatchersConfig.encryptionPaths()).permitAll()
             .requestMatchers(requestMatchersConfig.signPath()).permitAll()
-            .requestMatchers("/api/auth/token").encrypted()
+            .requestMatchers("/api/auth/token").decrypted()
             .anyRequest().permitAll()
             .build();
     }
 
     @Bean
-    public RequestDecryptionFilter requestDecryptionFilter(
+    public EncryptionFilter encryptionFilter(
         RequestMatchersConfig requestMatchersConfig,
         EncryptionService encryptionUtil,
         JsonUtil jsonUtil,
         SecurityProblemSupport problemSupport) {
-        return RequestDecryptionFilter.builder(encryptionUtil, problemSupport, jsonUtil)
-            .order(FilterOrder.REQUEST_DECRYPTION.order())
+        return EncryptionFilter.builder(encryptionUtil, problemSupport, jsonUtil)
+            .order(FilterOrder.ENCRYPTION.order())
             .requestMatchers(requestMatchersConfig.staticResources()).permitAll()
             .requestMatchers(requestMatchersConfig.swaggerPaths()).permitAll()
             .requestMatchers(requestMatchersConfig.actuatorPaths()).permitAll()

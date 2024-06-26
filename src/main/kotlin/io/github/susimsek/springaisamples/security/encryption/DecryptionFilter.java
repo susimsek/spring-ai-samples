@@ -29,13 +29,13 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 @RequiredArgsConstructor
-public class RequestDecryptionFilter extends OncePerRequestFilter implements Ordered {
+public class DecryptionFilter extends OncePerRequestFilter implements Ordered {
 
     private final EncryptionService encryptionService;
     private final EncryptionExceptionHandler encryptionExceptionHandler;
     private final JsonUtil jsonUtil;
     private final List<RequestMatcherConfig> requestMatcherConfigs;
-    private final boolean defaultEncrypted;
+    private final boolean defaultDecrypted;
     private final int order;
 
     @Override
@@ -47,9 +47,9 @@ public class RequestDecryptionFilter extends OncePerRequestFilter implements Ord
     protected boolean shouldNotFilter(@NonNull HttpServletRequest request) {
         return requestMatcherConfigs.stream()
             .filter(config -> config.requestMatcher.matches(request))
-            .map(config -> !config.encrypted)
+            .map(config -> !config.decrypted)
             .findFirst()
-            .orElse(!defaultEncrypted);
+            .orElse(!defaultDecrypted);
     }
 
     @Override
@@ -104,7 +104,7 @@ public class RequestDecryptionFilter extends OncePerRequestFilter implements Ord
     @AllArgsConstructor
     private static class RequestMatcherConfig {
         private final RequestMatcher requestMatcher;
-        private boolean encrypted;
+        private boolean decrypted;
     }
 
     public interface InitialBuilder {
@@ -118,13 +118,13 @@ public class RequestDecryptionFilter extends OncePerRequestFilter implements Ord
 
         AfterRequestMatchersBuilder requestMatchers(RequestMatcher... requestMatchers);
 
-        RequestDecryptionFilter build();
+        DecryptionFilter build();
     }
 
     public interface AfterRequestMatchersBuilder {
         InitialBuilder permitAll();
 
-        InitialBuilder encrypted();
+        InitialBuilder decrypted();
     }
 
     public static InitialBuilder builder(EncryptionService encryptionService,
@@ -141,8 +141,8 @@ public class RequestDecryptionFilter extends OncePerRequestFilter implements Ord
         private final JsonUtil jsonUtil;
         private final List<RequestMatcherConfig> requestMatcherConfigs = new ArrayList<>();
         private boolean anyRequestConfigured = false;
-        private boolean defaultEncrypted = true;
-        private int order = FilterOrder.REQUEST_DECRYPTION.order();
+        private boolean defaultDecrypted = true;
+        private int order = FilterOrder.DECRYPTION.order();
         private int lastIndex = 0;
 
         private Builder(EncryptionService encryptionService,
@@ -192,24 +192,24 @@ public class RequestDecryptionFilter extends OncePerRequestFilter implements Ord
             Assert.state(anyRequestConfigured || !requestMatcherConfigs.isEmpty(),
                 "permitAll() can only be called after requestMatchers() or anyRequest()");
             if (anyRequestConfigured) {
-                this.defaultEncrypted = false;
+                this.defaultDecrypted = false;
             } else {
                 requestMatcherConfigs.stream()
                     .skip(lastIndex)
-                    .forEach(config -> config.encrypted = false);
+                    .forEach(config -> config.decrypted = false);
             }
             return this;
         }
 
-        public Builder encrypted() {
+        public Builder decrypted() {
             Assert.state(anyRequestConfigured || !requestMatcherConfigs.isEmpty(),
-                "encrypted() can only be called after requestMatchers() or anyRequest())");
+                "decrypted() can only be called after requestMatchers() or anyRequest())");
             if (anyRequestConfigured) {
-                this.defaultEncrypted = true;
+                this.defaultDecrypted = true;
             } else {
                 requestMatcherConfigs.stream()
                     .skip(lastIndex)
-                    .forEach(config -> config.encrypted = true);
+                    .forEach(config -> config.decrypted = true);
             }
             return this;
         }
@@ -219,9 +219,9 @@ public class RequestDecryptionFilter extends OncePerRequestFilter implements Ord
             return this;
         }
 
-        public RequestDecryptionFilter build() {
-            return new RequestDecryptionFilter(encryptionService, encryptionExceptionHandler,
-                jsonUtil, requestMatcherConfigs, defaultEncrypted, order);
+        public DecryptionFilter build() {
+            return new DecryptionFilter(encryptionService, encryptionExceptionHandler,
+                jsonUtil, requestMatcherConfigs, defaultDecrypted, order);
         }
 
         @Override

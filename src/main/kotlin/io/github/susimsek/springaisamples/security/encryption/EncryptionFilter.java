@@ -27,7 +27,7 @@ import org.springframework.util.Assert;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 @RequiredArgsConstructor
-public class ResponseEncryptionFilter extends OncePerRequestFilter implements Ordered {
+public class EncryptionFilter extends OncePerRequestFilter implements Ordered {
 
     private final EncryptionService encryptionService;
     private final EncryptionExceptionHandler encryptionExceptionHandler;
@@ -99,7 +99,7 @@ public class ResponseEncryptionFilter extends OncePerRequestFilter implements Or
 
         AfterRequestMatchersBuilder requestMatchers(RequestMatcher... requestMatchers);
 
-        ResponseEncryptionFilter build();
+        EncryptionFilter build();
     }
 
     public interface AfterRequestMatchersBuilder {
@@ -123,7 +123,7 @@ public class ResponseEncryptionFilter extends OncePerRequestFilter implements Or
         private final List<RequestMatcherConfig> requestMatcherConfigs = new ArrayList<>();
         private boolean anyRequestConfigured = false;
         private boolean defaultEncrypted = true;
-        private int order = FilterOrder.RESPONSE_ENCRYPTION.order();
+        private int order = FilterOrder.ENCRYPTION.order();
         private int lastIndex = 0;
 
         private Builder(EncryptionService encryptionService,
@@ -200,8 +200,8 @@ public class ResponseEncryptionFilter extends OncePerRequestFilter implements Or
             return this;
         }
 
-        public ResponseEncryptionFilter build() {
-            return new ResponseEncryptionFilter(encryptionService, encryptionExceptionHandler,
+        public EncryptionFilter build() {
+            return new EncryptionFilter(encryptionService, encryptionExceptionHandler,
                 jsonUtil, requestMatcherConfigs, defaultEncrypted, order);
         }
 
