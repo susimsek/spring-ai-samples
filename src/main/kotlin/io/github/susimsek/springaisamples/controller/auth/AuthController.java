@@ -1,7 +1,8 @@
 package io.github.susimsek.springaisamples.controller.auth;
 
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+
 import io.github.susimsek.springaisamples.model.DecryptRequest;
-import io.github.susimsek.springaisamples.model.EncryptResponse;
 import io.github.susimsek.springaisamples.model.LoginRequest;
 import io.github.susimsek.springaisamples.model.RefreshTokenRequest;
 import io.github.susimsek.springaisamples.openapi.annotation.RequireJwsSignature;
@@ -17,6 +18,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
@@ -37,8 +39,8 @@ public class AuthController {
         description = "Authenticate user and return encrypted access, ID, and refresh tokens")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successfully authenticated",
-            content = { @Content(mediaType =  MediaType.APPLICATION_JSON_VALUE,
-                    schema = @Schema(implementation = EncryptResponse.class)) }),
+            content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = Token.class)) }),
         @ApiResponse(responseCode = "400",
             description = "Invalid input, invalid encrypted data, or invalid JWS signature",
             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
@@ -65,8 +67,17 @@ public class AuthController {
                 mediaType = MediaType.APPLICATION_JSON_VALUE,
                 schema = @Schema(implementation = DecryptRequest.class)))
         @Valid @RequestBody LoginRequest loginRequest) {
+
         Token tokenResponse = authenticationService.authenticateUser(
             loginRequest.username(), loginRequest.password());
+
+        tokenResponse.add(WebMvcLinkBuilder.linkTo(methodOn(AuthController.class)
+                .login(loginRequest)).withSelfRel()
+            .withType("POST"));
+        tokenResponse.add(WebMvcLinkBuilder.linkTo(methodOn(AuthController.class)
+                .refresh(new RefreshTokenRequest(tokenResponse.getRefreshToken()))).withRel("refresh_token")
+            .withType("POST"));
+
         return ResponseEntity.ok(tokenResponse);
     }
 
@@ -96,7 +107,14 @@ public class AuthController {
     public ResponseEntity<Token> refresh(
         @Parameter(description = "Refresh token request")
         @Valid @RequestBody RefreshTokenRequest refreshTokenRequest) {
+
         Token tokenResponse = authenticationService.refreshToken(refreshTokenRequest.refreshToken());
+
+        tokenResponse.add(WebMvcLinkBuilder.linkTo(methodOn(AuthController.class)
+            .refresh(refreshTokenRequest)).withSelfRel());
+        tokenResponse.add(WebMvcLinkBuilder.linkTo(methodOn(AuthController.class)
+            .login(new LoginRequest("username", "password"))).withRel("login"));
+
         return ResponseEntity.ok(tokenResponse);
     }
 }
