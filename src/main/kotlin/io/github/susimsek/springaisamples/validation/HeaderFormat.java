@@ -13,7 +13,7 @@ import java.lang.annotation.Target;
 @Constraint(validatedBy = HeaderValidator.class)
 @Target({ElementType.FIELD, ElementType.PARAMETER })
 @Retention(RetentionPolicy.RUNTIME)
-public @interface ValidHeader {
+public @interface HeaderFormat {
     String message() default "Invalid header";
     String headerName();
     boolean notBlank() default true;

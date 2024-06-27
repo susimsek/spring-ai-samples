@@ -1,7 +1,7 @@
 package io.github.susimsek.springaisamples.model;
 
 import io.github.susimsek.springaisamples.trace.TraceConstants;
-import io.github.susimsek.springaisamples.validation.ValidHeader;
+import io.github.susimsek.springaisamples.validation.HeaderFormat;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,11 +16,11 @@ import lombok.Setter;
 @Builder
 public class HeaderDTO {
 
-    @ValidHeader(headerName = TraceConstants.REQUEST_ID_HEADER_NAME,
+    @HeaderFormat(headerName = TraceConstants.REQUEST_ID_HEADER_NAME,
         min = 8, max = 36, regexp = "^[a-zA-Z0-9-]*$")
     private String requestId;
 
-    @ValidHeader(headerName = TraceConstants.CORRELATION_ID_HEADER_NAME,
+    @HeaderFormat(headerName = TraceConstants.CORRELATION_ID_HEADER_NAME,
         min = 8, max = 36, regexp = "^[a-zA-Z0-9-]*$")
     private String correlationId;
 

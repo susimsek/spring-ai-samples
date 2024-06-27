@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.util.StringUtils;
 
 @RequiredArgsConstructor
-public class HeaderValidator implements ConstraintValidator<ValidHeader, String> {
+public class HeaderValidator implements ConstraintValidator<HeaderFormat, String> {
 
     private String headerName;
     private boolean notBlank;
@@ -18,7 +18,7 @@ public class HeaderValidator implements ConstraintValidator<ValidHeader, String>
     private String patternMessage;
 
     @Override
-    public void initialize(ValidHeader constraintAnnotation) {
+    public void initialize(HeaderFormat constraintAnnotation) {
         this.headerName = constraintAnnotation.headerName();
         this.notBlank = constraintAnnotation.notBlank();
         this.min = constraintAnnotation.min();
