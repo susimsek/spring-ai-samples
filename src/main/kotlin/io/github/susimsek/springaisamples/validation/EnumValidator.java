@@ -6,13 +6,13 @@ import java.util.Arrays;
 import java.util.stream.Collectors;
 import org.hibernate.validator.constraintvalidation.HibernateConstraintValidatorContext;
 
-public class EnumValidator implements ConstraintValidator<ValidEnum, String> {
+public class EnumValidator implements ConstraintValidator<EnumFormat, String> {
 
     private Class<? extends Enum<?>> enumClass;
     private String message;
 
     @Override
-    public void initialize(ValidEnum annotation) {
+    public void initialize(EnumFormat annotation) {
         this.enumClass = annotation.enumClass();
         this.message = annotation.message();
     }
