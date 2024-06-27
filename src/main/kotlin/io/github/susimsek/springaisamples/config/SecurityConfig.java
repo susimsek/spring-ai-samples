@@ -31,6 +31,7 @@ import io.github.susimsek.springaisamples.service.SignatureService;
 import io.github.susimsek.springaisamples.trace.TraceFilter;
 import io.github.susimsek.springaisamples.utils.JsonUtil;
 import io.github.susimsek.springaisamples.utils.SanitizationUtil;
+import io.github.susimsek.springaisamples.validation.HeaderValidationFilter;
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyPair;
@@ -89,6 +90,7 @@ public class SecurityConfig {
         SignatureFilter signatureFilter,
         XssFilter xssFilter,
         TraceFilter traceFilter,
+        HeaderValidationFilter headerValidationFilter,
         IdempotencyFilter idempotencyFilter,
         RateLimitingFilter rateLimitFilter,
         LoggingFilter loggingFilter) throws Exception {
@@ -127,7 +129,8 @@ public class SecurityConfig {
             .addFilterBefore(signatureVerificationFilter, BearerTokenAuthenticationFilter.class)
             .addFilterBefore(decryptionFilter, SignatureVerificationFilter.class)
             .addFilterAfter(traceFilter, DecryptionFilter.class)
-            .addFilterBefore(loggingFilter, TraceFilter.class)
+            .addFilterBefore(headerValidationFilter, TraceFilter.class)
+            .addFilterBefore(loggingFilter, HeaderValidationFilter.class)
             .addFilterAfter(xssFilter, BearerTokenAuthenticationFilter.class)
             .addFilterAfter(idempotencyFilter, XssFilter.class)
             .addFilterAfter(rateLimitFilter, IdempotencyFilter.class)
