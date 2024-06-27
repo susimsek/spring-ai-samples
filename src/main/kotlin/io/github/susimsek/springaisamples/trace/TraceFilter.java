@@ -56,7 +56,7 @@ public class TraceFilter extends OncePerRequestFilter implements Ordered {
         @NonNull HttpServletRequest request,
         @NonNull HttpServletResponse response,
         @NonNull FilterChain filterChain)
-            throws ServletException, IOException {
+        throws ServletException, IOException {
         String requestId = request.getHeader(REQUEST_ID_HEADER_NAME);
         if (!StringUtils.hasText(requestId)) {
             handleMissingHeaderException(request, response, REQUEST_ID_HEADER_NAME);
@@ -69,7 +69,7 @@ public class TraceFilter extends OncePerRequestFilter implements Ordered {
             return;
         }
 
-       Span currentSpan = tracer.currentSpan();
+        Span currentSpan = tracer.currentSpan();
         if (currentSpan != null) {
             currentSpan.tag("request.id", requestId);
             currentSpan.tag("correlation.id", correlationId);
@@ -89,8 +89,8 @@ public class TraceFilter extends OncePerRequestFilter implements Ordered {
 
 
     private void handleMissingHeaderException(HttpServletRequest request,
-                                       HttpServletResponse response,
-                                       String headerName) throws IOException, ServletException {
+                                              HttpServletResponse response,
+                                              String headerName) throws IOException, ServletException {
         headerValidationExceptionHandler.handle(request, response,
             new MissingHeaderException(headerName));
     }
