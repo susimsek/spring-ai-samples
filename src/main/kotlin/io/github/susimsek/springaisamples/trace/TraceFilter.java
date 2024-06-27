@@ -4,6 +4,9 @@ import static io.github.susimsek.springaisamples.trace.TraceConstants.CORRELATIO
 import static io.github.susimsek.springaisamples.trace.TraceConstants.REQUEST_ID_HEADER_NAME;
 
 import io.github.susimsek.springaisamples.enums.FilterOrder;
+import io.github.susimsek.springaisamples.exception.header.HeaderValidationExceptionHandler;
+import io.github.susimsek.springaisamples.exception.header.MissingHeaderException;
+import io.micrometer.tracing.Span;
 import io.micrometer.tracing.Tracer;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -12,7 +15,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.MDC;
@@ -30,6 +32,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 public class TraceFilter extends OncePerRequestFilter implements Ordered {
 
     private final Tracer tracer;
+    private final HeaderValidationExceptionHandler headerValidationExceptionHandler;
     private final List<RequestMatcherConfig> requestMatcherConfigs;
     private final boolean defaultTraced;
     private final int order;
@@ -56,15 +59,17 @@ public class TraceFilter extends OncePerRequestFilter implements Ordered {
             throws ServletException, IOException {
         String requestId = request.getHeader(REQUEST_ID_HEADER_NAME);
         if (!StringUtils.hasText(requestId)) {
-            requestId = UUID.randomUUID().toString();
+            handleMissingHeaderException(request, response, REQUEST_ID_HEADER_NAME);
+            return;
         }
 
         String correlationId = request.getHeader(CORRELATION_ID_HEADER_NAME);
         if (!StringUtils.hasText(correlationId)) {
-            correlationId = UUID.randomUUID().toString();
+            handleMissingHeaderException(request, response, CORRELATION_ID_HEADER_NAME);
+            return;
         }
 
-        io.micrometer.tracing.Span currentSpan = tracer.currentSpan();
+       Span currentSpan = tracer.currentSpan();
         if (currentSpan != null) {
             currentSpan.tag("request.id", requestId);
             currentSpan.tag("correlation.id", correlationId);
@@ -80,6 +85,14 @@ public class TraceFilter extends OncePerRequestFilter implements Ordered {
         } finally {
             MDC.clear();
         }
+    }
+
+
+    private void handleMissingHeaderException(HttpServletRequest request,
+                                       HttpServletResponse response,
+                                       String headerName) throws IOException, ServletException {
+        headerValidationExceptionHandler.handle(request, response,
+            new MissingHeaderException(headerName));
     }
 
     @AllArgsConstructor
@@ -108,22 +121,26 @@ public class TraceFilter extends OncePerRequestFilter implements Ordered {
         InitialBuilder traced();
     }
 
-    public static InitialBuilder builder(Tracer tracer) {
-        return new Builder(tracer);
+    public static InitialBuilder builder(Tracer tracer,
+                                         HeaderValidationExceptionHandler headerValidationExceptionHandler) {
+        return new Builder(tracer, headerValidationExceptionHandler);
     }
 
     private static class Builder extends AbstractRequestMatcherRegistry<Builder>
         implements InitialBuilder, AfterRequestMatchersBuilder {
 
         private final Tracer tracer;
+        private final HeaderValidationExceptionHandler headerValidationExceptionHandler;
         private final List<RequestMatcherConfig> requestMatcherConfigs = new ArrayList<>();
         private boolean anyRequestConfigured = false;
         private boolean defaultTraced = true;
         private int order = FilterOrder.TRACE.order();
         private int lastIndex = 0;
 
-        private Builder(Tracer tracer) {
+        private Builder(Tracer tracer,
+                        HeaderValidationExceptionHandler headerValidationExceptionHandler) {
             this.tracer = tracer;
+            this.headerValidationExceptionHandler = headerValidationExceptionHandler;
         }
 
         @Override
@@ -194,6 +211,7 @@ public class TraceFilter extends OncePerRequestFilter implements Ordered {
 
         public TraceFilter build() {
             return new TraceFilter(tracer,
+                headerValidationExceptionHandler,
                 requestMatcherConfigs, defaultTraced, order);
         }
 

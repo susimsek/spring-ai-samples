@@ -9,6 +9,7 @@ import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import io.github.resilience4j.core.IntervalFunction;
 import io.github.susimsek.springaisamples.exception.encryption.JweException;
+import io.github.susimsek.springaisamples.exception.header.MissingHeaderException;
 import io.github.susimsek.springaisamples.exception.idempotency.MissingIdempotencyKeyException;
 import io.github.susimsek.springaisamples.exception.ratelimit.RateLimitExceededException;
 import io.github.susimsek.springaisamples.exception.security.JwsException;
@@ -179,6 +180,18 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                                                         @NonNull WebRequest request) {
         return createProblemDetailResponse(ex, HttpStatus.BAD_REQUEST,
             ErrorConstants.IDEMPOTENCY_KEY_MISSING, new HttpHeaders(), request);
+    }
+
+    @ExceptionHandler(MissingHeaderException.class)
+    protected ResponseEntity<Object> handleMissingHeaderException(@NonNull MissingHeaderException ex,
+                                                                          @NonNull WebRequest request) {
+        Locale locale = request.getLocale();
+        HttpStatusCode status = HttpStatus.BAD_REQUEST;
+        Map<String, String> namedArgs = Map.of("headerName", ex.getHeaderName());
+        String errorMessage = messageSource.getMessageWithNamedArgs(
+            ErrorConstants.HEADER_MISSING, namedArgs, locale);
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(status, errorMessage);
+        return handleExceptionInternal(ex, problem, new HttpHeaders(), status, request);
     }
 
     @ExceptionHandler(AuthenticationException.class)
