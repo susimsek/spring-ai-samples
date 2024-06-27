@@ -19,6 +19,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
@@ -73,10 +74,10 @@ public class AuthController {
 
         tokenResponse.add(WebMvcLinkBuilder.linkTo(methodOn(AuthController.class)
                 .login(loginRequest)).withSelfRel()
-            .withType("POST"));
+            .withType(HttpMethod.POST.name()));
         tokenResponse.add(WebMvcLinkBuilder.linkTo(methodOn(AuthController.class)
                 .refresh(new RefreshTokenRequest(tokenResponse.getRefreshToken()))).withRel("refresh_token")
-            .withType("POST"));
+            .withType(HttpMethod.POST.name()));
 
         return ResponseEntity.ok(tokenResponse);
     }

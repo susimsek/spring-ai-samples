@@ -11,12 +11,17 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.Ordered;
+import org.springframework.hateoas.Link;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.lang.NonNull;
@@ -28,6 +33,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.util.ContentCachingResponseWrapper;
 
 @RequiredArgsConstructor
+@Slf4j
 public class EncryptionFilter extends OncePerRequestFilter implements Ordered {
 
     private final EncryptionService encryptionService;
@@ -71,6 +77,17 @@ public class EncryptionFilter extends OncePerRequestFilter implements Ordered {
         }
 
         EncryptResponse encryptResponse = new EncryptResponse(encryptedResponseBody);
+        Optional<URI> optionalUri = getUri(request);
+        if (optionalUri.isPresent()) {
+            URI uri = optionalUri.get();
+            Link selfLink = Link.of(uri.toString()).withSelfRel().withType(request.getMethod());
+            encryptResponse.add(selfLink);
+            String baseUrl = uri.getScheme() + "://" + uri.getAuthority() + request.getContextPath();
+            Link decryptLink = Link.of(baseUrl + "/api/security/decrypt")
+                .withRel("decrypt").withType(HttpMethod.POST.name());
+            encryptResponse.add(decryptLink);
+        }
+
         String encryptedResponseJson = jsonUtil.convertObjectToString(encryptResponse);
 
         responseWrapper.resetBuffer();
@@ -79,6 +96,15 @@ public class EncryptionFilter extends OncePerRequestFilter implements Ordered {
         responseWrapper.setContentType(MediaType.APPLICATION_JSON_VALUE);
         responseWrapper.getWriter().write(encryptedResponseJson);
         responseWrapper.copyBodyToResponse();
+    }
+
+    private Optional<URI> getUri(HttpServletRequest request) {
+        try {
+            return Optional.of(new URI(request.getRequestURL().toString()));
+        } catch (URISyntaxException e) {
+            log.error("Invalid URI Syntax for request: {}", request.getRequestURL(), e);
+            return Optional.empty();
+        }
     }
 
     private void handleJweException(HttpServletRequest request, HttpServletResponse response,

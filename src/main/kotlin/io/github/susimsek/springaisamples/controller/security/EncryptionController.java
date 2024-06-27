@@ -17,6 +17,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
@@ -53,10 +54,10 @@ public class EncryptionController {
         EncryptResponse response = new EncryptResponse(encryptedData);
         response.add(WebMvcLinkBuilder.linkTo(methodOn(EncryptionController.class)
                 .encryptData(request)).withSelfRel()
-            .withType("POST"));
+            .withType(HttpMethod.POST.name()));
         response.add(WebMvcLinkBuilder.linkTo(methodOn(EncryptionController.class)
                 .decryptData(new DecryptRequest(encryptedData))).withRel("decrypt")
-            .withType("POST"));
+            .withType(HttpMethod.POST.name()));
         return ResponseEntity.ok(response);
     }
 
@@ -80,11 +81,11 @@ public class EncryptionController {
         DecryptResponse response = new DecryptResponse(decryptedData);
         response.add(WebMvcLinkBuilder.linkTo(methodOn(EncryptionController.class)
                 .decryptData(request)).withSelfRel()
-            .withType("POST"));
+            .withType(HttpMethod.POST.name()));
         response.add(WebMvcLinkBuilder.linkTo(
             methodOn(EncryptionController.class).encryptData(new EncryptRequest(
                 decryptedData))).withRel("encrypt")
-            .withType("POST"));
+            .withType(HttpMethod.POST.name()));
         return ResponseEntity.ok(response);
     }
 }
