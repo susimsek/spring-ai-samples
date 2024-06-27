@@ -148,7 +148,7 @@ public class JwksController {
         // Add HATEOAS links
         EntityModel<Map<String, Object>> entityModel = EntityModel.of(jwks);
         entityModel.add(WebMvcLinkBuilder.linkTo(methodOn(JwksController.class)
-            .getJwks()).withSelfRel().withType("GET"));
+            .getJwks()).withSelfRel().withType(HttpMethod.GET.name()));
         entityModel.add(WebMvcLinkBuilder.linkTo(methodOn(AuthController.class).login(
             new LoginRequest("username", "password")))
             .withRel("token").withType(HttpMethod.POST.name()));
