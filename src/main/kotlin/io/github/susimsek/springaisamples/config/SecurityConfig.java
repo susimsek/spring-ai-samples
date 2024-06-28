@@ -117,7 +117,7 @@ public class SecurityConfig {
                     .requestMatchers(requestMatchersConfig.encryptionPaths()).permitAll()
                     .requestMatchers(requestMatchersConfig.signPath()).permitAll()
                     .requestMatchers(mvc.pattern("/.well-known/jwks.json")).permitAll()
-                    .requestMatchers(mvc.pattern("/api/auth/token")).permitAll()
+                    .requestMatchers(requestMatchersConfig.tokenPath()).permitAll()
                     .requestMatchers(mvc.pattern("/api/locales")).permitAll()
                     .requestMatchers(mvc.pattern("/api/ai/**")).hasAuthority(ADMIN)
                     .anyRequest().authenticated())
@@ -291,7 +291,7 @@ public class SecurityConfig {
             .requestMatchers(requestMatchersConfig.actuatorPaths()).permitAll()
             .requestMatchers(requestMatchersConfig.encryptionPaths()).permitAll()
             .requestMatchers(requestMatchersConfig.signPath()).permitAll()
-            .requestMatchers("/api/auth/token").decrypted()
+            .requestMatchers(requestMatchersConfig.tokenPath()).decrypted()
             .anyRequest().permitAll()
             .build();
     }
@@ -309,7 +309,7 @@ public class SecurityConfig {
             .requestMatchers(requestMatchersConfig.actuatorPaths()).permitAll()
             .requestMatchers(requestMatchersConfig.encryptionPaths()).permitAll()
             .requestMatchers(requestMatchersConfig.signPath()).permitAll()
-            .requestMatchers("/api/auth/token").encrypted()
+            .requestMatchers(requestMatchersConfig.tokenPath()).encrypted()
             .anyRequest().permitAll()
             .build();
     }

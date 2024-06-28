@@ -83,4 +83,8 @@ public class RequestMatchersConfig {
     public RequestMatcher signPath() {
         return  mvc.pattern("/api/security/sign");
     }
+
+    public RequestMatcher tokenPath() {
+        return  mvc.pattern("/api/auth/token");
+    }
 }
