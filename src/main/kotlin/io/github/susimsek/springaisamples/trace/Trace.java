@@ -22,6 +22,6 @@ public class Trace {
     private String correlationId;
 
     public boolean isComplete() {
-        return Stream.of(traceId, spanId, requestId, correlationId).allMatch(Objects::nonNull);
+        return Stream.of(requestId, correlationId).allMatch(Objects::nonNull);
     }
 }
