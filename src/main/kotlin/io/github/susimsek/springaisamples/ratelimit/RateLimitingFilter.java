@@ -37,11 +37,12 @@ public class RateLimitingFilter extends OncePerRequestFilter implements Ordered 
     private final List<RequestMatcherConfig> requestMatcherConfigs;
     private final boolean defaultRateLimited;
     private final int order;
+    private final String defaultRateLimiterName;
 
     private static final String DEFAULT_RATE_LIMITER_NAME = "default";
     private static final String TOO_MANY_REQUESTS_MESSAGE = "Too many requests";
 
-    private String currentRateLimiterName = DEFAULT_RATE_LIMITER_NAME;
+    private String currentRateLimiterName;
 
     @Override
     public int getOrder() {
@@ -50,14 +51,19 @@ public class RateLimitingFilter extends OncePerRequestFilter implements Ordered 
 
     @Override
     protected boolean shouldNotFilter(@NonNull HttpServletRequest request) {
-        return requestMatcherConfigs.stream()
+        var optionalConfig = requestMatcherConfigs.stream()
             .filter(config -> config.requestMatcher.matches(request))
             .findFirst()
             .map(config -> {
                 currentRateLimiterName = config.rateLimiterName;
                 return !config.rateLimited;
-            })
-            .orElse(!defaultRateLimited);
+            });
+        if (optionalConfig.isEmpty()) {
+            currentRateLimiterName = defaultRateLimiterName;
+            return !defaultRateLimited;
+        } else {
+            return optionalConfig.get();
+        }
     }
 
     @Override
@@ -143,6 +149,7 @@ public class RateLimitingFilter extends OncePerRequestFilter implements Ordered 
         private boolean defaultRateLimited = true;
         private int order = FilterOrder.RATE_LIMIT.order();
         private int lastIndex = 0;
+        private String defaultRateLimiterName = DEFAULT_RATE_LIMITER_NAME;
 
         private Builder(RateLimiterRegistry rateLimiterRegistry,
                         RateLimitExceptionHandler rateLimitExceptionHandler) {
@@ -205,9 +212,13 @@ public class RateLimitingFilter extends OncePerRequestFilter implements Ordered 
         public Builder rateLimiterName(String rateLimiterName) {
             Assert.state(anyRequestConfigured || !requestMatcherConfigs.isEmpty(),
                 "rateLimiterName() can only be called after requestMatchers() or anyRequest()");
-            requestMatcherConfigs.stream()
-                .skip(lastIndex)
-                .forEach(config -> config.rateLimiterName = rateLimiterName);
+            if (anyRequestConfigured) {
+                this.defaultRateLimiterName = rateLimiterName;
+            } else {
+                requestMatcherConfigs.stream()
+                    .skip(lastIndex)
+                    .forEach(config -> config.rateLimiterName = rateLimiterName);
+            }
             return this;
         }
 
@@ -235,7 +246,7 @@ public class RateLimitingFilter extends OncePerRequestFilter implements Ordered 
         public RateLimitingFilter build() {
             return new RateLimitingFilter(rateLimiterRegistry,
                 rateLimitExceptionHandler,
-                requestMatcherConfigs, defaultRateLimited, order);
+                requestMatcherConfigs, defaultRateLimited, order, defaultRateLimiterName);
         }
 
         @Override
