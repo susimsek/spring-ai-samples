@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Path;
+import java.io.Serializable;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 
@@ -25,7 +26,7 @@ public record Violation(
     @Schema(description = "Error Message", example = "size must be between 4 and 50")
     @JsonProperty
     String message
-) {
+) implements Serializable {
     public Violation(String objectName, String message) {
         this(objectName, null, null, message);
     }

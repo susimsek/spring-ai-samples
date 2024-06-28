@@ -3,7 +3,6 @@ package io.github.susimsek.springaisamples.exception.header;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.validation.ConstraintViolationException;
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -23,8 +22,8 @@ public class HeaderValidationProblemSupport implements HeaderValidationException
     }
 
     @Override
-    public void handleConstraintViolationException(HttpServletRequest request, HttpServletResponse response,
-                                                   ConstraintViolationException ex) {
+    public void handleHeaderValidationException(HttpServletRequest request, HttpServletResponse response,
+                                                   HeaderConstraintViolationException ex) {
         handlerExceptionResolver.resolveException(request, response, null, ex);
     }
 }

@@ -9,6 +9,7 @@ import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import io.github.resilience4j.core.IntervalFunction;
 import io.github.susimsek.springaisamples.exception.encryption.JweException;
+import io.github.susimsek.springaisamples.exception.header.HeaderConstraintViolationException;
 import io.github.susimsek.springaisamples.exception.header.MissingHeaderException;
 import io.github.susimsek.springaisamples.exception.idempotency.MissingIdempotencyKeyException;
 import io.github.susimsek.springaisamples.exception.ratelimit.RateLimitExceededException;
@@ -162,6 +163,17 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         @NonNull WebRequest request) {
         List<Violation> violations = ex.getConstraintViolations().stream().map(Violation::new).toList();
 
+        String errorMessage = messageSource.getMessage(ErrorConstants.VALIDATION_ERROR);
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, errorMessage);
+        problem.setProperty(ErrorConstants.PROBLEM_VIOLATION_KEY, violations);
+        return handleExceptionInternal(ex, problem, new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
+    }
+
+    @ExceptionHandler(HeaderConstraintViolationException.class)
+    protected ResponseEntity<Object> handleHeaderConstraintViolationException(
+        @NonNull HeaderConstraintViolationException ex,
+        @NonNull WebRequest request) {
+        List<Violation> violations = ex.getViolations();
         String errorMessage = messageSource.getMessage(ErrorConstants.VALIDATION_ERROR);
         ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, errorMessage);
         problem.setProperty(ErrorConstants.PROBLEM_VIOLATION_KEY, violations);
