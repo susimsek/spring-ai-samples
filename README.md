@@ -64,6 +64,7 @@ mvn verify jib:dockerBuild
 - Spring Boot 3.x
 - Spring AI
 - Spring Boot Web
+- Spring Boot HATEOAS
 - Spring Boot Cache
 - Spring Boot Validation
 - Spring Boot Actuator
