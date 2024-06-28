@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.github.susimsek.springaisamples.logging.model.HttpLog;
 import io.github.susimsek.springaisamples.logging.model.MethodLog;
-import io.github.susimsek.springaisamples.logging.model.Trace;
+import io.github.susimsek.springaisamples.trace.Trace;
 import java.io.IOException;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;

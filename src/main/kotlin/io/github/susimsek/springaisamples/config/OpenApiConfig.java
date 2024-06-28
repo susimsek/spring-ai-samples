@@ -9,6 +9,7 @@ import io.github.susimsek.springaisamples.openapi.LocalizedOpenApiCustomizer;
 import io.github.susimsek.springaisamples.openapi.OpenApiProperties;
 import io.github.susimsek.springaisamples.openapi.annotation.Idempotent;
 import io.github.susimsek.springaisamples.openapi.annotation.RequireJwsSignature;
+import io.github.susimsek.springaisamples.trace.TraceContext;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
@@ -81,6 +82,8 @@ public class OpenApiConfig {
                 addJwsSignatureHeader(operation);
             }
 
+            removeTraceContextParameters(operation, handlerMethod.getMethod());
+
             return operation;
         };
     }
@@ -118,5 +121,12 @@ public class OpenApiConfig {
             .description("JWS Signature")
             .required(true);
         operation.addParametersItem(jwsSignatureHeader);
+    }
+
+    private void removeTraceContextParameters(Operation operation, Method method) {
+        Arrays.stream(method.getParameters())
+            .filter(parameter -> AnnotatedElementUtils.hasAnnotation(parameter, TraceContext.class))
+            .map(java.lang.reflect.Parameter::getName)
+            .forEach(paramName -> operation.getParameters().removeIf(param -> param.getName().equals(paramName)));
     }
 }

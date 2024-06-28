@@ -2,6 +2,7 @@ package io.github.susimsek.springaisamples.config;
 
 import io.github.susimsek.springaisamples.enums.FilterOrder;
 import io.github.susimsek.springaisamples.exception.trace.TraceProblemSupport;
+import io.github.susimsek.springaisamples.trace.TraceArgumentResolver;
 import io.github.susimsek.springaisamples.trace.TraceFilter;
 import io.micrometer.tracing.Tracer;
 import org.springframework.context.annotation.Bean;
@@ -22,5 +23,10 @@ public class TraceConfig {
             .requestMatchers(requestMatchersConfig.actuatorPaths()).permitAll()
             .anyRequest().traced()
             .build();
+    }
+
+    @Bean
+    public TraceArgumentResolver traceArgumentResolver() {
+        return new TraceArgumentResolver();
     }
 }

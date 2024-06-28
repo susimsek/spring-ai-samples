@@ -14,7 +14,7 @@ import io.github.susimsek.springaisamples.logging.enums.Source;
 import io.github.susimsek.springaisamples.logging.formatter.LogFormatter;
 import io.github.susimsek.springaisamples.logging.model.HttpLog;
 import io.github.susimsek.springaisamples.logging.model.MethodLog;
-import io.github.susimsek.springaisamples.logging.model.Trace;
+import io.github.susimsek.springaisamples.trace.Trace;
 import io.github.susimsek.springaisamples.logging.utils.HttpRequestMatcher;
 import io.github.susimsek.springaisamples.logging.utils.Obfuscator;
 import jakarta.servlet.http.HttpServletRequest;

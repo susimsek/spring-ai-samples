@@ -1,4 +1,4 @@
-package io.github.susimsek.springaisamples.logging.model;
+package io.github.susimsek.springaisamples.trace;
 
 import java.util.Objects;
 import java.util.stream.Stream;
@@ -7,12 +7,14 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString
 public class Trace {
     private String traceId;
     private String spanId;

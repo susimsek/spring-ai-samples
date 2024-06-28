@@ -12,6 +12,8 @@ import io.github.susimsek.springaisamples.model.EncryptRequest;
 import io.github.susimsek.springaisamples.model.LoginRequest;
 import io.github.susimsek.springaisamples.model.RefreshTokenRequest;
 import io.github.susimsek.springaisamples.model.SignatureRequest;
+import io.github.susimsek.springaisamples.trace.Trace;
+import io.github.susimsek.springaisamples.trace.TraceContext;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -23,6 +25,7 @@ import java.security.interfaces.RSAPublicKey;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
@@ -40,6 +43,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "security", description = "Security APIs")
 @RequestMapping("/.well-known")
 @Validated
+@Slf4j
 public class JwksController {
 
     private final KeyPair jwtKeyPair;
@@ -118,7 +122,9 @@ public class JwksController {
     })
     @GetMapping("/jwks.json")
     @Cacheable("jwksCache")
-    public ResponseEntity<EntityModel<Map<String, Object>>> getJwks() {
+    public ResponseEntity<EntityModel<Map<String, Object>>> getJwks(
+        @TraceContext Trace trace) {
+        log.info("Trace: {}", trace);
         // JWS Key
         RSAPublicKey jwsPublicKey = (RSAPublicKey) jwsKeyPair.getPublic();
         RSAKey jwsJwk = new RSAKey.Builder(jwsPublicKey)
@@ -150,7 +156,7 @@ public class JwksController {
         // Add HATEOAS links
         EntityModel<Map<String, Object>> entityModel = EntityModel.of(jwks);
         entityModel.add(WebMvcLinkBuilder.linkTo(methodOn(JwksController.class)
-            .getJwks()).withSelfRel().withType(HttpMethod.GET.name()));
+            .getJwks(null)).withSelfRel().withType(HttpMethod.GET.name()));
         entityModel.add(WebMvcLinkBuilder.linkTo(methodOn(AuthController.class).login(
             new LoginRequest("username", "password")))
             .withRel("token").withType(HttpMethod.POST.name()));

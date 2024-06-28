@@ -2,6 +2,7 @@ package io.github.susimsek.springaisamples.logging.model;
 
 import io.github.susimsek.springaisamples.logging.enums.HttpLogType;
 import io.github.susimsek.springaisamples.logging.enums.Source;
+import io.github.susimsek.springaisamples.trace.Trace;
 import java.net.URI;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

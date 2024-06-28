@@ -39,7 +39,7 @@ class WebConfigTest {
     void addViewControllers_ShouldAddRedirectViewController() {
         // Arrange
         ViewControllerRegistry registry = mock(ViewControllerRegistry.class);
-        WebConfig webConfig = new WebConfig();
+        WebConfig webConfig = new WebConfig(null);
 
         // Act
         webConfig.addViewControllers(registry);

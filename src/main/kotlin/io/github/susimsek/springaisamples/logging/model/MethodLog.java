@@ -1,6 +1,7 @@
 package io.github.susimsek.springaisamples.logging.model;
 
 import io.github.susimsek.springaisamples.logging.enums.MethodLogType;
+import io.github.susimsek.springaisamples.trace.Trace;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
