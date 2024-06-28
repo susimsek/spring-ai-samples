@@ -3,9 +3,12 @@ package io.github.susimsek.springaisamples.exception.header;
 import lombok.Getter;
 
 @Getter
-public class MissingHeaderException extends HeaderException {
+public class MissingHeaderException extends RuntimeException {
+
+    private final String headerName;
 
     public MissingHeaderException(String headerName) {
-        super(headerName, "Missing required header: " + headerName);
+        super("Missing required header: " + headerName);
+        this.headerName = headerName;
     }
 }

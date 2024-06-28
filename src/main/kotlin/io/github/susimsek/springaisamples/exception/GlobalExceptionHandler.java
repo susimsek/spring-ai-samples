@@ -10,10 +10,11 @@ import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import io.github.resilience4j.core.IntervalFunction;
 import io.github.susimsek.springaisamples.exception.encryption.JweException;
 import io.github.susimsek.springaisamples.exception.header.HeaderConstraintViolationException;
-import io.github.susimsek.springaisamples.exception.header.MissingHeaderException;
 import io.github.susimsek.springaisamples.exception.idempotency.MissingIdempotencyKeyException;
 import io.github.susimsek.springaisamples.exception.ratelimit.RateLimitExceededException;
 import io.github.susimsek.springaisamples.exception.security.JwsException;
+import io.github.susimsek.springaisamples.exception.trace.MissingCorrelationIdException;
+import io.github.susimsek.springaisamples.exception.trace.MissingRequestIdException;
 import io.github.susimsek.springaisamples.i18n.ParameterMessageSource;
 import jakarta.validation.ConstraintViolationException;
 import java.net.SocketTimeoutException;
@@ -194,16 +195,19 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             ErrorConstants.IDEMPOTENCY_KEY_MISSING, new HttpHeaders(), request);
     }
 
-    @ExceptionHandler(MissingHeaderException.class)
-    protected ResponseEntity<Object> handleMissingHeaderException(@NonNull MissingHeaderException ex,
-                                                                          @NonNull WebRequest request) {
-        Locale locale = request.getLocale();
-        HttpStatusCode status = HttpStatus.BAD_REQUEST;
-        Map<String, String> namedArgs = Map.of("headerName", ex.getHeaderName());
-        String errorMessage = messageSource.getMessageWithNamedArgs(
-            ErrorConstants.HEADER_MISSING, namedArgs, locale);
-        ProblemDetail problem = ProblemDetail.forStatusAndDetail(status, errorMessage);
-        return handleExceptionInternal(ex, problem, new HttpHeaders(), status, request);
+    @ExceptionHandler(MissingRequestIdException.class)
+    protected ResponseEntity<Object> handleMissingRequestIdException(@NonNull MissingRequestIdException ex,
+                                                                     @NonNull WebRequest request) {
+        return createProblemDetailResponse(ex, HttpStatus.BAD_REQUEST,
+            ErrorConstants.REQUEST_ID_MISSING, new HttpHeaders(), request);
+    }
+
+    @ExceptionHandler(MissingCorrelationIdException.class)
+    protected ResponseEntity<Object> handleMissingCorrelationIdException(
+        @NonNull MissingRequestIdException ex,
+        @NonNull WebRequest request) {
+        return createProblemDetailResponse(ex, HttpStatus.BAD_REQUEST,
+            ErrorConstants.CORRELATION_ID_MISSING, new HttpHeaders(), request);
     }
 
     @ExceptionHandler(AuthenticationException.class)

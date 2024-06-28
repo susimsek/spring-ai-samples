@@ -7,9 +7,13 @@ import java.io.IOException;
 
 public interface HeaderValidationExceptionHandler {
 
-    void handle(HttpServletRequest request, HttpServletResponse response,
-                                      HeaderException exception) throws IOException, ServletException;
+    void handleMissingHeaderException(
+        HttpServletRequest request,
+        HttpServletResponse response,
+        MissingHeaderException exception) throws IOException, ServletException;
 
-    void handleHeaderValidationException(HttpServletRequest request, HttpServletResponse response,
-                                         HeaderConstraintViolationException exception) throws IOException, ServletException;
+    void handleHeaderValidationException(
+        HttpServletRequest request,
+        HttpServletResponse response,
+        HeaderConstraintViolationException exception) throws IOException, ServletException;
 }

@@ -1,7 +1,7 @@
 package io.github.susimsek.springaisamples.config;
 
 import io.github.susimsek.springaisamples.enums.FilterOrder;
-import io.github.susimsek.springaisamples.exception.header.HeaderValidationProblemSupport;
+import io.github.susimsek.springaisamples.exception.trace.TraceProblemSupport;
 import io.github.susimsek.springaisamples.trace.TraceFilter;
 import io.micrometer.tracing.Tracer;
 import org.springframework.context.annotation.Bean;
@@ -13,7 +13,7 @@ public class TraceConfig {
     @Bean
     public TraceFilter traceFilter(
         RequestMatchersConfig requestMatchersConfig,
-        HeaderValidationProblemSupport problemSupport,
+        TraceProblemSupport problemSupport,
         Tracer tracer) {
         return TraceFilter.builder(tracer, problemSupport)
             .order(FilterOrder.TRACE.order())

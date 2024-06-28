@@ -1,9 +1,7 @@
 package io.github.susimsek.springaisamples.exception.header;
 
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerExceptionResolver;
@@ -16,8 +14,8 @@ public class HeaderValidationProblemSupport implements HeaderValidationException
 
 
     @Override
-    public void handle(HttpServletRequest request, HttpServletResponse response, HeaderException ex)
-        throws IOException, ServletException {
+    public void handleMissingHeaderException(HttpServletRequest request, HttpServletResponse response,
+                       MissingHeaderException ex) {
         handlerExceptionResolver.resolveException(request, response, null, ex);
     }
 
