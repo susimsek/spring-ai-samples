@@ -4,8 +4,6 @@ import static io.github.susimsek.springaisamples.trace.TraceConstants.CORRELATIO
 import static io.github.susimsek.springaisamples.trace.TraceConstants.REQUEST_ID_HEADER_NAME;
 
 import io.github.susimsek.springaisamples.enums.FilterOrder;
-import io.github.susimsek.springaisamples.exception.trace.MissingCorrelationIdException;
-import io.github.susimsek.springaisamples.exception.trace.MissingRequestIdException;
 import io.github.susimsek.springaisamples.exception.trace.TraceExceptionHandler;
 import io.micrometer.tracing.Span;
 import io.micrometer.tracing.Tracer;
@@ -60,13 +58,13 @@ public class TraceFilter extends OncePerRequestFilter implements Ordered {
         throws ServletException, IOException {
         String requestId = request.getHeader(REQUEST_ID_HEADER_NAME);
         if (!StringUtils.hasText(requestId)) {
-            handleMissingRequestIdException(request, response);
+            filterChain.doFilter(request, response);
             return;
         }
 
         String correlationId = request.getHeader(CORRELATION_ID_HEADER_NAME);
         if (!StringUtils.hasText(correlationId)) {
-            handleMissingCorrelationIdException(request, response);
+            filterChain.doFilter(request, response);
             return;
         }
 
@@ -97,19 +95,6 @@ public class TraceFilter extends OncePerRequestFilter implements Ordered {
             TraceContextHolder.clear();
             MDC.clear();
         }
-    }
-
-
-    private void handleMissingRequestIdException(HttpServletRequest request,
-                                              HttpServletResponse response) throws IOException, ServletException {
-        traceExceptionHandler.handle(request, response,
-            new MissingRequestIdException("Request ID is missing"));
-    }
-
-    private void handleMissingCorrelationIdException(HttpServletRequest request,
-                                                 HttpServletResponse response) throws IOException, ServletException {
-        traceExceptionHandler.handle(request, response,
-            new MissingCorrelationIdException("Correlation ID is missing"));
     }
 
     @AllArgsConstructor

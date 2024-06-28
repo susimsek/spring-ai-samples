@@ -17,7 +17,6 @@ import io.github.susimsek.springaisamples.logging.model.MethodLog;
 import io.github.susimsek.springaisamples.logging.utils.HttpRequestMatcher;
 import io.github.susimsek.springaisamples.logging.utils.Obfuscator;
 import io.github.susimsek.springaisamples.trace.Trace;
-import io.github.susimsek.springaisamples.trace.TraceConstants;
 import jakarta.servlet.http.HttpServletRequest;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
@@ -157,7 +156,7 @@ public class HttpLoggingHandler implements LoggingHandler {
     private HttpLog.HttpLogBuilder initLogBuilder(HttpLogType type, HttpMethod method, URI uri,
                                                   HttpHeaders headers, Source source) {
 
-        Trace trace = createTrace(headers);
+        Trace trace = createTrace();
 
         return HttpLog.builder()
             .type(type)
@@ -170,7 +169,7 @@ public class HttpLoggingHandler implements LoggingHandler {
 
     private MethodLog.MethodLogBuilder initMethodLogBuilder(MethodLogType type,
                                                             String className, String methodName) {
-        Trace trace = createTrace(null);
+        Trace trace = createTrace();
 
         return MethodLog.builder()
             .type(type)
@@ -196,12 +195,9 @@ public class HttpLoggingHandler implements LoggingHandler {
         log.info(message, formattedLog);
     }
 
-    private Trace createTrace(HttpHeaders headers) {
-        String requestId = headers != null
-            ? headers.getFirst(TraceConstants.REQUEST_ID_HEADER_NAME)
-            : MDC.get(REQUEST_ID);
-        String correlationId = headers != null ? headers.getFirst(TraceConstants.CORRELATION_ID_HEADER_NAME)
-            : MDC.get(CORRELATION_ID);
+    private Trace createTrace() {
+        String requestId = MDC.get(REQUEST_ID);
+        String correlationId = MDC.get(CORRELATION_ID);
         return Trace.builder()
             .traceId(MDC.get(TRACE_ID))
             .spanId(MDC.get(SPAN_ID))
