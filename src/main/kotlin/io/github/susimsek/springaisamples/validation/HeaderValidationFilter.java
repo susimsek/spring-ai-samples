@@ -11,7 +11,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -63,6 +62,9 @@ public class HeaderValidationFilter extends OncePerRequestFilter implements Orde
             currentHeaderConfigs = defaultHeaderConfigs;
             return !defaultValidated;
         } else {
+            defaultHeaderConfigs.forEach((key, value) ->
+                currentHeaderConfigs.putIfAbsent(key, value)
+            );
             return optionalConfig.get();
         }
     }
@@ -224,7 +226,7 @@ public class HeaderValidationFilter extends OncePerRequestFilter implements Orde
             for (String pattern : patterns) {
                 this.requestMatcherConfigs.add(new RequestMatcherConfig(
                     new AntPathRequestMatcher(pattern, method.name()), true,
-                    Collections.emptyMap()));
+                    new HashMap<>()));
             }
             return this;
         }
@@ -234,7 +236,7 @@ public class HeaderValidationFilter extends OncePerRequestFilter implements Orde
             lastIndex = requestMatcherConfigs.size();
             for (String pattern : patterns) {
                 this.requestMatcherConfigs.add(new RequestMatcherConfig(
-                    new AntPathRequestMatcher(pattern), true, Collections.emptyMap()));
+                    new AntPathRequestMatcher(pattern), true, new HashMap<>()));
             }
             return this;
         }
@@ -244,7 +246,7 @@ public class HeaderValidationFilter extends OncePerRequestFilter implements Orde
             lastIndex = requestMatcherConfigs.size();
             for (RequestMatcher requestMatcher : requestMatchers) {
                 this.requestMatcherConfigs.add(new RequestMatcherConfig(
-                    requestMatcher, true, Collections.emptyMap()));
+                    requestMatcher, true, new HashMap<>()));
             }
             return this;
         }
@@ -262,6 +264,7 @@ public class HeaderValidationFilter extends OncePerRequestFilter implements Orde
                 requestMatcherConfigs.stream()
                     .skip(lastIndex)
                     .forEach(config -> {
+                        this.headerName = headerName;
                         HeaderConfig headerConfig = new HeaderConfig();
                         headerConfig.setHeaderName(headerName);
                         config.headerConfigs.put(headerName, headerConfig);
@@ -361,7 +364,6 @@ public class HeaderValidationFilter extends OncePerRequestFilter implements Orde
                     .skip(lastIndex)
                     .forEach(config -> config.validated = true);
             }
-            this.headerName = null;
             return this;
         }
 

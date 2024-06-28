@@ -3,6 +3,7 @@ package io.github.susimsek.springaisamples.config;
 import io.github.susimsek.springaisamples.enums.FilterOrder;
 import io.github.susimsek.springaisamples.exception.header.HeaderValidationProblemSupport;
 import io.github.susimsek.springaisamples.i18n.ParameterMessageSource;
+import io.github.susimsek.springaisamples.idempotency.IdempotencyConstants;
 import io.github.susimsek.springaisamples.trace.TraceConstants;
 import io.github.susimsek.springaisamples.validation.HeaderValidationFilter;
 import org.springframework.context.annotation.Bean;
@@ -10,6 +11,8 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration(proxyBeanMethods = false)
 public class ValidationConfig {
+
+    private static final String HEADER_PATTERN_REGEX = "^[a-zA-Z0-9-]*$";
 
     @Bean
     public HeaderValidationFilter headerValidationFilter(
@@ -22,11 +25,15 @@ public class ValidationConfig {
             .permitAll()
             .requestMatchers(requestMatchersConfig.swaggerPaths()).permitAll()
             .requestMatchers(requestMatchersConfig.actuatorPaths()).permitAll()
+            .requestMatchers(requestMatchersConfig.signPath())
+            .headerName(IdempotencyConstants.IDEMPOTENCY_HEADER_NAME)
+            .notBlank().min(8).max(36).regexp(HEADER_PATTERN_REGEX)
+            .validated()
             .anyRequest()
             .headerName(TraceConstants.REQUEST_ID_HEADER_NAME)
-            .notBlank().min(8).max(36).regexp("^[a-zA-Z0-9-]*$")
+            .notBlank().min(8).max(36).regexp(HEADER_PATTERN_REGEX)
             .headerName(TraceConstants.CORRELATION_ID_HEADER_NAME)
-            .notBlank().min(8).max(36).regexp("^[a-zA-Z0-9-]*$")
+            .notBlank().min(8).max(36).regexp(HEADER_PATTERN_REGEX)
             .validated()
             .build();
     }
