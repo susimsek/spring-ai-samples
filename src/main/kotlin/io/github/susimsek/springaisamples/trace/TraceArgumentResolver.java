@@ -1,9 +1,5 @@
 package io.github.susimsek.springaisamples.trace;
 
-import static io.github.susimsek.springaisamples.trace.TraceConstants.SPAN_ID;
-import static io.github.susimsek.springaisamples.trace.TraceConstants.TRACE_ID;
-
-import org.slf4j.MDC;
 import org.springframework.core.MethodParameter;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
@@ -24,15 +20,8 @@ public class TraceArgumentResolver implements HandlerMethodArgumentResolver {
     @Override
     public Object resolveArgument(@NonNull MethodParameter parameter,
                                   ModelAndViewContainer mavContainer,
-                                  NativeWebRequest webRequest,
+                                  @NonNull NativeWebRequest webRequest,
                                   WebDataBinderFactory binderFactory) {
-        String requestId = webRequest.getHeader(TraceConstants.REQUEST_ID_HEADER_NAME);
-        String correlationId = webRequest.getHeader(TraceConstants.CORRELATION_ID_HEADER_NAME);
-        return Trace.builder()
-            .traceId(MDC.get(TRACE_ID))
-            .spanId(MDC.get(SPAN_ID))
-            .requestId(requestId)
-            .correlationId(correlationId)
-            .build();
+        return TraceContextHolder.getTrace();
     }
 }

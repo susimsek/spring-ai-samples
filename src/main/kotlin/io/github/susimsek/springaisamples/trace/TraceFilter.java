@@ -80,10 +80,21 @@ public class TraceFilter extends OncePerRequestFilter implements Ordered {
         MDC.put("correlationId", correlationId);
         response.setHeader(REQUEST_ID_HEADER_NAME, requestId);
         response.setHeader(CORRELATION_ID_HEADER_NAME, correlationId);
+        String traceId = MDC.get("traceId");
+        String spanId = MDC.get("spanId");
+
+        Trace trace = Trace.builder()
+            .traceId(traceId)
+            .spanId(spanId)
+            .requestId(requestId)
+            .correlationId(correlationId)
+            .build();
+        TraceContextHolder.setTrace(trace);
 
         try {
             filterChain.doFilter(request, response);
         } finally {
+            TraceContextHolder.clear();
             MDC.clear();
         }
     }
