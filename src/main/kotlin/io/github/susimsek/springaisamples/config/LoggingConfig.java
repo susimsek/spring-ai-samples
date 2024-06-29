@@ -45,14 +45,19 @@ public class LoggingConfig {
     private static final String LOKI_APPENDER_NAME = "LOKI";
     private static final String ASYNC_LOKI_APPENDER_NAME = "ASYNC_LOKI";
 
-    @Bean
-    public HttpLoggingWrapper httpLoggingWrapper(LoggingHandler loggingHandler) {
-        return new HttpLoggingWrapper(loggingHandler);
-    }
+    @Configuration
+    @ConditionalOnProperty(name = "logging.http.enabled", havingValue = "true", matchIfMissing = true)
+    static class HttpLoggingConfig {
 
-    @Bean
-    public LoggingFilter loggingFilter(LoggingHandler loggingHandler) {
-        return new LoggingFilter(loggingHandler);
+        @Bean
+        public HttpLoggingWrapper httpLoggingWrapper(LoggingHandler loggingHandler) {
+            return new HttpLoggingWrapper(loggingHandler);
+        }
+
+        @Bean
+        public LoggingFilter loggingFilter(LoggingHandler loggingHandler) {
+            return new LoggingFilter(loggingHandler);
+        }
     }
 
     @Bean
@@ -96,87 +101,94 @@ public class LoggingConfig {
         return new Obfuscator(obfuscationStrategy);
     }
 
-    @Bean
+    @Configuration
     @ConditionalOnProperty(name = "logging.loki.enabled", havingValue = "true")
-    public AsyncAppender asyncLoki4jAppender(Environment environment) {
-        LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
-        var loki4jAppender = getLoki4jAppender(context, environment);
+    @RequiredArgsConstructor
+    static class LokiLoggingConfig {
 
-        AsyncAppender asyncAppender = getLokiAsyncAppender(context);
-        asyncAppender.addAppender(loki4jAppender);
-        asyncAppender.start();
+        private final LoggingProperties loggingProperties;
 
-        Logger rootLogger = context.getLogger(ROOT_LOGGER_NAME);
-        rootLogger.addAppender(asyncAppender);
-        return asyncAppender;
-    }
+        @Bean
+        public AsyncAppender asyncLoki4jAppender(Environment environment) {
+            LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
+            var loki4jAppender = getLoki4jAppender(context, environment);
 
-    private AsyncAppender getLokiAsyncAppender(LoggerContext context) {
-        AsyncAppender asyncAppender = new AsyncAppender();
-        asyncAppender.setContext(context);
-        asyncAppender.setName(ASYNC_LOKI_APPENDER_NAME);
-        asyncAppender.setQueueSize(loggingProperties.getAsync().getQueueSize());
-        asyncAppender.setDiscardingThreshold(loggingProperties.getAsync().getDiscardingThreshold());
-        asyncAppender.setMaxFlushTime(loggingProperties.getAsync().getMaxFlushTime());
-        asyncAppender.setIncludeCallerData(loggingProperties.getAsync().isIncludeCallerData());
-        return asyncAppender;
-    }
+            AsyncAppender asyncAppender = getLokiAsyncAppender(context);
+            asyncAppender.addAppender(loki4jAppender);
+            asyncAppender.start();
 
-    private Loki4jAppender getLoki4jAppender(LoggerContext context,
-                                             Environment environment) {
-        var loki4jAppender = new Loki4jAppender();
-        loki4jAppender.setContext(context);
-        loki4jAppender.setName(LOKI_APPENDER_NAME);
+            Logger rootLogger = context.getLogger(ROOT_LOGGER_NAME);
+            rootLogger.addAppender(asyncAppender);
+            return asyncAppender;
+        }
 
-        var httpSender = getJavaHttpSender();
-        loki4jAppender.setHttp(httpSender);
+        private AsyncAppender getLokiAsyncAppender(LoggerContext context) {
+            AsyncAppender asyncAppender = new AsyncAppender();
+            asyncAppender.setContext(context);
+            asyncAppender.setName(ASYNC_LOKI_APPENDER_NAME);
+            asyncAppender.setQueueSize(loggingProperties.getAsync().getQueueSize());
+            asyncAppender.setDiscardingThreshold(loggingProperties.getAsync().getDiscardingThreshold());
+            asyncAppender.setMaxFlushTime(loggingProperties.getAsync().getMaxFlushTime());
+            asyncAppender.setIncludeCallerData(loggingProperties.getAsync().isIncludeCallerData());
+            return asyncAppender;
+        }
 
-        var encoder = getJsonEncoder(context, environment);
-        loki4jAppender.setFormat(encoder);
+        private Loki4jAppender getLoki4jAppender(LoggerContext context,
+                                                 Environment environment) {
+            var loki4jAppender = new Loki4jAppender();
+            loki4jAppender.setContext(context);
+            loki4jAppender.setName(LOKI_APPENDER_NAME);
 
-        loki4jAppender.setBatchMaxItems(loggingProperties.getLoki().getBatchMaxItems());
-        loki4jAppender.setBatchMaxBytes((int) loggingProperties.getLoki().getBatchMaxBytes().toBytes());
-        loki4jAppender.setBatchTimeoutMs(loggingProperties.getLoki().getBatchTimeout().toMillis());
+            var httpSender = getJavaHttpSender();
+            loki4jAppender.setHttp(httpSender);
 
-        loki4jAppender.start();
-        return loki4jAppender;
-    }
+            var encoder = getJsonEncoder(context, environment);
+            loki4jAppender.setFormat(encoder);
 
-    private JsonEncoder getJsonEncoder(LoggerContext context, Environment environment) {
-        String applicationName = environment.getProperty("spring.application.name", "my-app");
-        String applicationEnvironment = environment.getProperty("spring.profiles.active", "default");
-        String hostname = environment.getProperty("HOSTNAME", "localhost");
-        var encoder = new JsonEncoder();
-        encoder.setContext(context);
-        var label = new AbstractLoki4jEncoder.LabelCfg();
-        label.setReadMarkers(true);
-        String labelPattern = String.format(
-            "app=%s,host=%s,env=%s,level=%%level,"
-                + "traceId=%%X{traceId:-unknown},spanId=%%X{spanId:-unknown},"
-                + "requestId=%%X{requestId:-unknown},correlationId=%%X{correlationId:-unknown}",
-            applicationName, hostname, applicationEnvironment
-        );
-        label.setPattern(labelPattern);
-        encoder.setLabel(label);
-        encoder.setSortByTime(true);
-        encoder.setMessage(getPatternLayout(context));
-        encoder.start();
-        return encoder;
-    }
+            loki4jAppender.setBatchMaxItems(loggingProperties.getLoki().getBatchMaxItems());
+            loki4jAppender.setBatchMaxBytes((int) loggingProperties.getLoki().getBatchMaxBytes().toBytes());
+            loki4jAppender.setBatchTimeoutMs(loggingProperties.getLoki().getBatchTimeout().toMillis());
 
-    private Layout<ILoggingEvent> getPatternLayout(LoggerContext context) {
-        var layout = new ch.qos.logback.classic.PatternLayout();
-        layout.setContext(context);
-        layout.setPattern(loggingProperties.getPattern());
-        layout.start();
-        return layout;
-    }
+            loki4jAppender.start();
+            return loki4jAppender;
+        }
 
-    public JavaHttpSender getJavaHttpSender() {
-        JavaHttpSender httpSender = new JavaHttpSender();
-        String lokiUrl = loggingProperties.getLoki().getUrl();
-        httpSender.setUrl(lokiUrl);
-        httpSender.setInnerThreadsExpirationMs(loggingProperties.getLoki().getInnerThreadsExpiration().toMillis());
-        return httpSender;
+        private JsonEncoder getJsonEncoder(LoggerContext context, Environment environment) {
+            String applicationName = environment.getProperty("spring.application.name", "my-app");
+            String applicationEnvironment = environment.getProperty("spring.profiles.active", "default");
+            String hostname = environment.getProperty("HOSTNAME", "localhost");
+            var encoder = new JsonEncoder();
+            encoder.setContext(context);
+            var label = new AbstractLoki4jEncoder.LabelCfg();
+            label.setReadMarkers(true);
+            String labelPattern = String.format(
+                "app=%s,host=%s,env=%s,level=%%level,"
+                    + "traceId=%%X{traceId:-unknown},spanId=%%X{spanId:-unknown},"
+                    + "requestId=%%X{requestId:-unknown},correlationId=%%X{correlationId:-unknown}",
+                applicationName, hostname, applicationEnvironment
+            );
+            label.setPattern(labelPattern);
+            encoder.setLabel(label);
+            encoder.setSortByTime(true);
+            encoder.setMessage(getPatternLayout(context));
+            encoder.start();
+            return encoder;
+        }
+
+        private Layout<ILoggingEvent> getPatternLayout(LoggerContext context) {
+            var layout = new ch.qos.logback.classic.PatternLayout();
+            layout.setContext(context);
+            layout.setPattern(loggingProperties.getPattern());
+            layout.start();
+            return layout;
+        }
+
+        public JavaHttpSender getJavaHttpSender() {
+            JavaHttpSender httpSender = new JavaHttpSender();
+            String lokiUrl = loggingProperties.getLoki().getUrl();
+            httpSender.setUrl(lokiUrl);
+            httpSender.setInnerThreadsExpirationMs(loggingProperties.getLoki().getInnerThreadsExpiration().toMillis());
+            return httpSender;
+        }
     }
 }

@@ -36,7 +36,8 @@ class LoggingConfigTest {
     @Test
     void testHttpLoggingWrapperBeanCreation() {
         HttpLoggingHandler httpLoggingHandlerMock = mock(HttpLoggingHandler.class);
-        HttpLoggingWrapper httpLoggingWrapper = loggingConfig.httpLoggingWrapper(httpLoggingHandlerMock);
+        var httpLoggingConfig = new LoggingConfig.HttpLoggingConfig();
+        HttpLoggingWrapper httpLoggingWrapper = httpLoggingConfig.httpLoggingWrapper(httpLoggingHandlerMock);
         assertNotNull(httpLoggingWrapper);
         assertEquals(HttpLoggingWrapper.class, httpLoggingWrapper.getClass());
     }
@@ -125,9 +126,10 @@ class LoggingConfigTest {
     void testLoggingFilter_ShouldReturnInstanceOfLoggingFilter() {
         // Arrange
         LoggingHandler loggingHandler = Mockito.mock(LoggingHandler.class);
+        var httpLoggingConfig = new LoggingConfig.HttpLoggingConfig();
 
         // Act
-        Filter filter = loggingConfig.loggingFilter(loggingHandler);
+        Filter filter = httpLoggingConfig.loggingFilter(loggingHandler);
 
         // Assert
         assertNotNull(filter);
