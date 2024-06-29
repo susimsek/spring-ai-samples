@@ -2,18 +2,30 @@ package io.github.susimsek.springaisamples.config;
 
 import io.github.susimsek.springaisamples.i18n.NamedParameterMessageSource;
 import io.github.susimsek.springaisamples.i18n.ParameterMessageSource;
+import jakarta.validation.MessageInterpolator;
+import jakarta.validation.Validator;
 import java.time.Duration;
+import org.hibernate.validator.messageinterpolation.ResourceBundleMessageInterpolator;
 import org.springframework.boot.autoconfigure.context.MessageSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.context.MessageSourceProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.util.StringUtils;
+import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
 
 @Configuration(proxyBeanMethods = false)
 @Import(MessageSourceAutoConfiguration.class)
 public class LocaleConfig {
+
+    @Bean
+    public MessageInterpolator messageInterpolator(Validator validator) {
+        if (validator instanceof LocalValidatorFactoryBean localValidatorFactoryBean) {
+            return localValidatorFactoryBean.getMessageInterpolator();
+        }
+        return new ResourceBundleMessageInterpolator();
+    }
 
     @Bean
     public ParameterMessageSource messageSource(MessageSourceProperties properties) {

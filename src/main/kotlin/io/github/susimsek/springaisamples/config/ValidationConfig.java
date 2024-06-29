@@ -10,22 +10,11 @@ import io.github.susimsek.springaisamples.idempotency.IdempotencyConstants;
 import io.github.susimsek.springaisamples.trace.TraceConstants;
 import io.github.susimsek.springaisamples.validation.HeaderValidationFilter;
 import jakarta.validation.MessageInterpolator;
-import jakarta.validation.Validator;
-import org.hibernate.validator.messageinterpolation.ResourceBundleMessageInterpolator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
 @Configuration(proxyBeanMethods = false)
 public class ValidationConfig {
-
-    @Bean
-    public MessageInterpolator messageInterpolator(Validator validator) {
-        if (validator instanceof LocalValidatorFactoryBean localValidatorFactoryBean) {
-            return localValidatorFactoryBean.getMessageInterpolator();
-        }
-        return new ResourceBundleMessageInterpolator();
-    }
 
     @Bean
     public HeaderValidationFilter headerValidationFilter(
