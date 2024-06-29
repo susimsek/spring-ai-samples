@@ -14,7 +14,7 @@ public class HttpHeadersUtil {
     public void setHttpHeadersToResponse(HttpHeaders httpHeaders, HttpServletResponse response) {
         httpHeaders.forEach((headerName, headerValues) ->
             headerValues.forEach(headerValue ->
-                response.addHeader(headerName, headerValue)
+                response.setHeader(headerName, headerValue)
             )
         );
     }

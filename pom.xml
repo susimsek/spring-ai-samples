@@ -40,6 +40,7 @@
         <springdoc.version>2.5.0</springdoc.version>
         <spring-ai.version>0.8.1</spring-ai.version>
         <commons-text.version>1.12.0</commons-text.version>
+        <loki-logback.version>1.5.1</loki-logback.version>
         <jib-maven-plugin.version>3.4.2</jib-maven-plugin.version>
         <jib-maven-plugin.architecture>amd64</jib-maven-plugin.architecture>
         <jib.from.image>eclipse-temurin:17-jre-focal</jib.from.image>
@@ -112,6 +113,11 @@
         <dependency>
             <groupId>io.micrometer</groupId>
             <artifactId>micrometer-tracing-bridge-otel</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.github.loki4j</groupId>
+            <artifactId>loki-logback-appender</artifactId>
+            <version>${loki-logback.version}</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.module</groupId>
