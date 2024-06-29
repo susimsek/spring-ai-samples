@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.function.Consumer;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -95,24 +96,35 @@ public class HeaderValidationFilter extends OncePerRequestFilter implements Orde
         List<Violation> violations = new ArrayList<>();
 
         if (headerConfig.isNotBlank() && !StringUtils.hasText(headerValue)) {
-            violations.add(
-                createViolation("{validation.field.notBlank}",
-                    headerConfig.getHeaderName(), headerValue, locale, null));
+            violations.add(createViolation(
+                headerConfig.getNotBlankMessage(),
+                headerConfig.getHeaderName(),
+                headerValue,
+                locale,
+                null
+            ));
         }
 
         if (headerValue != null) {
             if (headerValue.length() < headerConfig.getMin() || headerValue.length() > headerConfig.getMax()) {
-                Map<String, Object> args = Map.of("min", headerConfig.getMin(),
-                    "max", headerConfig.getMax());
-                violations.add(
-                    createViolation("{validation.field.size}",
-                        headerConfig.getHeaderName(), headerValue, locale, args));
+                Map<String, Object> args = Map.of("min", headerConfig.getMin(), "max", headerConfig.getMax());
+                violations.add(createViolation(
+                    headerConfig.getSizeMessage(),
+                    headerConfig.getHeaderName(),
+                    headerValue,
+                    locale,
+                    args
+                ));
             }
 
             if (!headerValue.matches(headerConfig.getRegexp())) {
-                violations.add(
-                    createViolation("{validation.field.pattern}",
-                        headerConfig.getHeaderName(), headerValue, locale, null));
+                violations.add(createViolation(
+                    headerConfig.getPatternMessage(),
+                    headerConfig.getHeaderName(),
+                    headerValue,
+                    locale,
+                    null
+                ));
             }
         }
 
@@ -160,6 +172,10 @@ public class HeaderValidationFilter extends OncePerRequestFilter implements Orde
         private int max = Integer.MAX_VALUE;
         private boolean notBlank = false;
         private String regexp;
+
+        private String notBlankMessage = "{validation.field.notBlank}";
+        private String sizeMessage = "{validation.field.size}";
+        private String patternMessage = "{validation.field.pattern}";
     }
 
     public interface InitialBuilder {
@@ -186,6 +202,12 @@ public class HeaderValidationFilter extends OncePerRequestFilter implements Orde
         AfterHeaderConfigBuilder notBlank();
 
         AfterHeaderConfigBuilder regexp(String regexp);
+
+        AfterHeaderConfigBuilder notBlankMessage(String message);
+
+        AfterHeaderConfigBuilder sizeMessage(String message);
+
+        AfterHeaderConfigBuilder patternMessage(String message);
 
         InitialBuilder validated();
     }
@@ -257,105 +279,72 @@ public class HeaderValidationFilter extends OncePerRequestFilter implements Orde
 
         @Override
         public Builder headerName(String headerName) {
-            Assert.state(anyRequestConfigured || !requestMatcherConfigs.isEmpty(),
-                "headerName() can only be called after requestMatchers() or anyRequest()");
+            validateState();
             if (anyRequestConfigured) {
                 this.headerName = headerName;
                 HeaderConfig headerConfig = new HeaderConfig();
                 headerConfig.setHeaderName(headerName);
                 defaultHeaderConfigs.put(headerName, headerConfig);
             } else {
-                requestMatcherConfigs.stream()
-                    .skip(lastIndex)
-                    .forEach(config -> {
-                        this.headerName = headerName;
-                        HeaderConfig headerConfig = new HeaderConfig();
-                        headerConfig.setHeaderName(headerName);
-                        config.headerConfigs.put(headerName, headerConfig);
-                    });
+                requestMatcherConfigs.stream().skip(lastIndex).forEach(config -> {
+                    this.headerName = headerName;
+                    HeaderConfig headerConfig = new HeaderConfig();
+                    headerConfig.setHeaderName(headerName);
+                    config.headerConfigs.put(headerName, headerConfig);
+                });
             }
             return this;
         }
 
         @Override
         public Builder min(int min) {
-            Assert.state(anyRequestConfigured || !requestMatcherConfigs.isEmpty(),
-                "min() can only be called after requestMatchers() or anyRequest()");
-            if (anyRequestConfigured) {
-                if (!CollectionUtils.isEmpty(defaultHeaderConfigs)) {
-                    HeaderConfig headerConfig = defaultHeaderConfigs.get(headerName);
-                    headerConfig.setMin(min);
-                }
-            } else {
-                requestMatcherConfigs.stream()
-                    .skip(lastIndex)
-                    .forEach(config -> {
-                        HeaderConfig headerConfig = config.headerConfigs.get(headerName);
-                        headerConfig.setMin(min);
-                    });
-            }
+            validateState();
+            applyHeaderConfig(headerConfig -> headerConfig.setMin(min));
             return this;
         }
 
         @Override
         public Builder max(int max) {
-            Assert.state(anyRequestConfigured || !requestMatcherConfigs.isEmpty(),
-                "max() can only be called after requestMatchers() or anyRequest()");
-            if (anyRequestConfigured) {
-                if (!CollectionUtils.isEmpty(defaultHeaderConfigs)) {
-                    HeaderConfig headerConfig = defaultHeaderConfigs.get(headerName);
-                    headerConfig.setMax(max);
-                }
-            } else {
-                requestMatcherConfigs.stream()
-                    .skip(lastIndex)
-                    .forEach(config -> {
-                        HeaderConfig headerConfig = config.headerConfigs.get(headerName);
-                        headerConfig.setMax(max);
-                    });
-            }
+            validateState();
+            applyHeaderConfig(headerConfig -> headerConfig.setMax(max));
             return this;
         }
 
         @Override
         public Builder notBlank() {
-            Assert.state(anyRequestConfigured || !requestMatcherConfigs.isEmpty(),
-                "notBlank() can only be called after requestMatchers() or anyRequest()");
-            if (anyRequestConfigured) {
-                if (!CollectionUtils.isEmpty(defaultHeaderConfigs)) {
-                    HeaderConfig headerConfig = defaultHeaderConfigs.get(headerName);
-                    headerConfig.setNotBlank(true);
-                }
-            } else {
-                requestMatcherConfigs.stream()
-                    .skip(lastIndex)
-                    .forEach(config -> {
-                        HeaderConfig headerConfig = config.headerConfigs.get(headerName);
-                        headerConfig.setNotBlank(true);
-                    });
-            }
+            validateState();
+            applyHeaderConfig(headerConfig -> headerConfig.setNotBlank(true));
             return this;
         }
 
         @Override
         public Builder regexp(String regexp) {
-            Assert.state(anyRequestConfigured || !requestMatcherConfigs.isEmpty(),
-                "regexp() can only be called after requestMatchers() or anyRequest()");
-            if (anyRequestConfigured) {
-                if (!CollectionUtils.isEmpty(defaultHeaderConfigs)) {
-                    HeaderConfig headerConfig = defaultHeaderConfigs.get(headerName);
-                    headerConfig.setRegexp(regexp);
-                }
-            } else {
-                requestMatcherConfigs.stream()
-                    .skip(lastIndex)
-                    .forEach(config -> {
-                        HeaderConfig headerConfig = config.headerConfigs.get(headerName);
-                        headerConfig.setRegexp(regexp);
-                    });
-            }
+            validateState();
+            applyHeaderConfig(headerConfig -> headerConfig.setRegexp(regexp));
             return this;
         }
+
+        @Override
+        public Builder notBlankMessage(String message) {
+            validateState();
+            applyHeaderConfig(headerConfig -> headerConfig.setNotBlankMessage(message));
+            return this;
+        }
+
+        @Override
+        public Builder sizeMessage(String message) {
+            validateState();
+            applyHeaderConfig(headerConfig -> headerConfig.setSizeMessage(message));
+            return this;
+        }
+
+        @Override
+        public Builder patternMessage(String message) {
+            validateState();
+            applyHeaderConfig(headerConfig -> headerConfig.setPatternMessage(message));
+            return this;
+        }
+
 
         @Override
         public Builder validated() {
@@ -409,6 +398,25 @@ public class HeaderValidationFilter extends OncePerRequestFilter implements Orde
         protected Builder chainRequestMatchers(List<RequestMatcher> requestMatchers) {
             this.requestMatchers(requestMatchers.toArray(new RequestMatcher[0]));
             return this;
+        }
+
+        private void validateState() {
+            Assert.state(anyRequestConfigured || !requestMatcherConfigs.isEmpty(),
+                "This method can only be called after requestMatchers() or anyRequest()");
+        }
+
+        private void applyHeaderConfig(Consumer<HeaderConfig> consumer) {
+            if (anyRequestConfigured) {
+                if (!CollectionUtils.isEmpty(defaultHeaderConfigs)) {
+                    HeaderConfig headerConfig = defaultHeaderConfigs.get(headerName);
+                    consumer.accept(headerConfig);
+                }
+            } else {
+                requestMatcherConfigs.stream().skip(lastIndex).forEach(config -> {
+                    HeaderConfig headerConfig = config.headerConfigs.get(headerName);
+                    consumer.accept(headerConfig);
+                });
+            }
         }
     }
 }
