@@ -133,7 +133,8 @@ public class HeaderValidationFilter extends OncePerRequestFilter implements Orde
 
     private Violation createViolation(String messageTemplate, String headerName, Object invalidValue, Locale locale,
                                       Map<String, Object> parameters) {
-        MessageContext context = new MessageContext(parameters, null, invalidValue);
+        MessageContext context = new
+            MessageContext(messageTemplate, parameters, invalidValue);
         String localizedMessage = messageInterpolator.interpolate(
             messageTemplate, context, locale);
 

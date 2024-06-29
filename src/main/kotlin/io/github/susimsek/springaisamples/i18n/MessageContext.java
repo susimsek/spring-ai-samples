@@ -6,21 +6,33 @@ import jakarta.validation.MessageInterpolator;
 import jakarta.validation.Payload;
 import jakarta.validation.metadata.ConstraintDescriptor;
 import jakarta.validation.metadata.ValidateUnwrappedValue;
+
 import java.lang.annotation.Annotation;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
-public record MessageContext(Map<String, Object> attributes,
+public record MessageContext(String messageTemplate,
+                             Map<String, Object> attributes,
                              ConstraintDescriptor<?> constraintDescriptor,
                              Object validatedValue) implements MessageInterpolator.Context {
 
+    public MessageContext(
+        String messageTemplate,
+        Map<String, Object> attributes,
+        Object validatedValue) {
+        this(
+            messageTemplate,
+            attributes,
+            new DynamicConstraintDescriptor(attributes, messageTemplate),
+            validatedValue);
+    }
+
     @Override
     public ConstraintDescriptor<?> getConstraintDescriptor() {
-        return constraintDescriptor != null
-            ? constraintDescriptor
-            : new DynamicConstraintDescriptor(attributes);
+        return this.constraintDescriptor;
     }
 
     @Override
@@ -30,10 +42,13 @@ public record MessageContext(Map<String, Object> attributes,
 
     @Override
     public <T> T unwrap(Class<T> type) {
-        return null;
+        if (type.isInstance(this)) {
+            return type.cast(this);
+        }
+        throw new IllegalArgumentException("Type " + type + " not supported");
     }
 
-    public record DynamicConstraintDescriptor(Map<String, Object> attributes)
+    public record DynamicConstraintDescriptor(Map<String, Object> attributes, String messageTemplate)
         implements ConstraintDescriptor<Annotation> {
 
         @Override
@@ -43,7 +58,7 @@ public record MessageContext(Map<String, Object> attributes,
 
         @Override
         public String getMessageTemplate() {
-            return null;
+            return messageTemplate;
         }
 
         @Override
@@ -68,9 +83,8 @@ public record MessageContext(Map<String, Object> attributes,
 
         @Override
         public Map<String, Object> getAttributes() {
-            return attributes != null
-                ? attributes
-                : Collections.emptyMap();
+            return Optional.ofNullable(attributes)
+                .orElse(Collections.emptyMap());
         }
 
         @Override
@@ -90,7 +104,10 @@ public record MessageContext(Map<String, Object> attributes,
 
         @Override
         public <U> U unwrap(Class<U> type) {
-            return null;
+            if (type.isInstance(this)) {
+                return type.cast(this);
+            }
+            throw new IllegalArgumentException("Type " + type + " not supported");
         }
     }
 }
