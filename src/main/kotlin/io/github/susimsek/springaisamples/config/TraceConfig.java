@@ -1,7 +1,6 @@
 package io.github.susimsek.springaisamples.config;
 
 import io.github.susimsek.springaisamples.enums.FilterOrder;
-import io.github.susimsek.springaisamples.exception.trace.TraceProblemSupport;
 import io.github.susimsek.springaisamples.trace.TraceArgumentResolver;
 import io.github.susimsek.springaisamples.trace.TraceFilter;
 import io.micrometer.tracing.Tracer;
@@ -14,9 +13,8 @@ public class TraceConfig {
     @Bean
     public TraceFilter traceFilter(
         RequestMatchersConfig requestMatchersConfig,
-        TraceProblemSupport problemSupport,
         Tracer tracer) {
-        return TraceFilter.builder(tracer, problemSupport)
+        return TraceFilter.builder(tracer)
             .order(FilterOrder.TRACE.order())
             .requestMatchers(requestMatchersConfig.staticResources()).permitAll()
             .requestMatchers(requestMatchersConfig.swaggerPaths()).permitAll()

@@ -4,9 +4,6 @@ import static io.github.susimsek.springaisamples.trace.TraceConstants.CORRELATIO
 import static io.github.susimsek.springaisamples.trace.TraceConstants.REQUEST_ID_HEADER_NAME;
 
 import io.github.susimsek.springaisamples.enums.FilterOrder;
-import io.github.susimsek.springaisamples.exception.trace.MissingCorrelationIdException;
-import io.github.susimsek.springaisamples.exception.trace.MissingRequestIdException;
-import io.github.susimsek.springaisamples.exception.trace.TraceExceptionHandler;
 import io.micrometer.tracing.Span;
 import io.micrometer.tracing.Tracer;
 import jakarta.servlet.FilterChain;
@@ -26,14 +23,12 @@ import org.springframework.security.config.annotation.web.AbstractRequestMatcher
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 @RequiredArgsConstructor
 public class TraceFilter extends OncePerRequestFilter implements Ordered {
 
     private final Tracer tracer;
-    private final TraceExceptionHandler traceExceptionHandler;
     private final List<RequestMatcherConfig> requestMatcherConfigs;
     private final boolean defaultTraced;
     private final int order;
@@ -59,14 +54,14 @@ public class TraceFilter extends OncePerRequestFilter implements Ordered {
         @NonNull FilterChain filterChain)
         throws ServletException, IOException {
         String requestId = request.getHeader(REQUEST_ID_HEADER_NAME);
-        if (!StringUtils.hasText(requestId)) {
-            handleMissingRequestIdException(request, response);
+        if (!TraceHeaderUtils.isValidRequestId(requestId)) {
+            filterChain.doFilter(request, response);
             return;
         }
 
         String correlationId = request.getHeader(CORRELATION_ID_HEADER_NAME);
-        if (!StringUtils.hasText(correlationId)) {
-            handleMissingCorrelationIdException(request, response);
+        if (!TraceHeaderUtils.isValidCorrelationId(correlationId)) {
+            filterChain.doFilter(request, response);
             return;
         }
 
@@ -99,19 +94,6 @@ public class TraceFilter extends OncePerRequestFilter implements Ordered {
         }
     }
 
-
-    private void handleMissingRequestIdException(HttpServletRequest request,
-                                              HttpServletResponse response) throws IOException, ServletException {
-        traceExceptionHandler.handle(request, response,
-            new MissingRequestIdException("Request ID is missing"));
-    }
-
-    private void handleMissingCorrelationIdException(HttpServletRequest request,
-                                                 HttpServletResponse response) throws IOException, ServletException {
-        traceExceptionHandler.handle(request, response,
-            new MissingCorrelationIdException("Correlation ID is missing"));
-    }
-
     @AllArgsConstructor
     private static class RequestMatcherConfig {
         private final RequestMatcher requestMatcher;
@@ -138,26 +120,22 @@ public class TraceFilter extends OncePerRequestFilter implements Ordered {
         InitialBuilder traced();
     }
 
-    public static InitialBuilder builder(Tracer tracer,
-                                         TraceExceptionHandler traceExceptionHandler) {
-        return new Builder(tracer, traceExceptionHandler);
+    public static InitialBuilder builder(Tracer tracer) {
+        return new Builder(tracer);
     }
 
     private static class Builder extends AbstractRequestMatcherRegistry<Builder>
         implements InitialBuilder, AfterRequestMatchersBuilder {
 
         private final Tracer tracer;
-        private final TraceExceptionHandler traceExceptionHandler;
         private final List<RequestMatcherConfig> requestMatcherConfigs = new ArrayList<>();
         private boolean anyRequestConfigured = false;
         private boolean defaultTraced = true;
         private int order = FilterOrder.TRACE.order();
         private int lastIndex = 0;
 
-        private Builder(Tracer tracer,
-                        TraceExceptionHandler traceExceptionHandler) {
+        private Builder(Tracer tracer) {
             this.tracer = tracer;
-            this.traceExceptionHandler = traceExceptionHandler;
         }
 
         @Override
@@ -228,7 +206,6 @@ public class TraceFilter extends OncePerRequestFilter implements Ordered {
 
         public TraceFilter build() {
             return new TraceFilter(tracer,
-                traceExceptionHandler,
                 requestMatcherConfigs, defaultTraced, order);
         }
 

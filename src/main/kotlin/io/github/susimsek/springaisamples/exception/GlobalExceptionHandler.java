@@ -13,8 +13,6 @@ import io.github.susimsek.springaisamples.exception.header.HeaderConstraintViola
 import io.github.susimsek.springaisamples.exception.idempotency.MissingIdempotencyKeyException;
 import io.github.susimsek.springaisamples.exception.ratelimit.RateLimitExceededException;
 import io.github.susimsek.springaisamples.exception.security.JwsException;
-import io.github.susimsek.springaisamples.exception.trace.MissingCorrelationIdException;
-import io.github.susimsek.springaisamples.exception.trace.MissingRequestIdException;
 import io.github.susimsek.springaisamples.i18n.ParameterMessageSource;
 import jakarta.validation.ConstraintViolationException;
 import java.net.SocketTimeoutException;
@@ -193,21 +191,6 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                                                         @NonNull WebRequest request) {
         return createProblemDetailResponse(ex, HttpStatus.BAD_REQUEST,
             ErrorConstants.IDEMPOTENCY_KEY_MISSING, new HttpHeaders(), request);
-    }
-
-    @ExceptionHandler(MissingRequestIdException.class)
-    protected ResponseEntity<Object> handleMissingRequestIdException(@NonNull MissingRequestIdException ex,
-                                                                     @NonNull WebRequest request) {
-        return createProblemDetailResponse(ex, HttpStatus.BAD_REQUEST,
-            ErrorConstants.REQUEST_ID_MISSING, new HttpHeaders(), request);
-    }
-
-    @ExceptionHandler(MissingCorrelationIdException.class)
-    protected ResponseEntity<Object> handleMissingCorrelationIdException(
-        @NonNull MissingRequestIdException ex,
-        @NonNull WebRequest request) {
-        return createProblemDetailResponse(ex, HttpStatus.BAD_REQUEST,
-            ErrorConstants.CORRELATION_ID_MISSING, new HttpHeaders(), request);
     }
 
     @ExceptionHandler(AuthenticationException.class)
