@@ -45,29 +45,19 @@
         </http>
         <format>
             <label>
-                <pattern>app=${application.name},host=${hostname},env=${application.environment}</pattern>
+                <pattern>
+                    app=${application.name},
+                    host=${hostname},
+                    env=${application.environment},
+                    level=%level,
+                    traceId=%X{traceId:-unknown},
+                    spanId=%X{spanId:-unknown},
+                    requestId=%X{requestId:-unknown},
+                    correlationId=%X{correlationId:-unknown}
+                </pattern>
             </label>
-            <message class="com.github.loki4j.logback.JsonLayout">
-                <jsonPattern>
-                    {
-                    "timestamp": "%date{yyyy-MM-dd'T'HH:mm:ss.SSSXXX}",
-                    "level": "%-5level",
-                    "thread": "%.10thread",
-                    "logger": "%logger{20}",
-                    "message": "%msg",
-                    "exception": "%ex",
-                    "context": {
-                    "application": "${application.name:-my-app}",
-                    "environment": "${application.environment:-default}",
-                    "host": "${hostname:-localhost}",
-                    "traceId": "%X{traceId:-}",
-                    "spanId": "%X{spanId:-}",
-                    "requestId": "%X{requestId:-}",
-                    "correlationId": "%X{correlationId:-}"
-                    }
-                    }
-                </jsonPattern>
-                <prettyPrint>true</prettyPrint>
+            <message>
+                <pattern>${logging.pattern}</pattern>
             </message>
         </format>
     </appender>
@@ -90,5 +80,6 @@
 
     <root level="${logging.level.root}">
         <appender-ref ref="ASYNC_CONSOLE"/>
+        <appender-ref ref="ASYNC_LOKI"/>
     </root>
 </configuration>
