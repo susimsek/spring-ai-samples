@@ -59,8 +59,15 @@ logging:
   async:
     queueSize: 10000
     discardingThreshold: 0
-    maxFlushTime: 1000
+    maxFlushTime: 5000
     includeCallerData: false
+  loki:
+    enabled: false
+    url: http://localhost:3100/loki/api/v1/push
+    inner-threads-expiration: 5m
+    batch-max-items: 500
+    batch-max-bytes: 2MB
+    batch-timeout: 2s
   aspect:
     enabled: true
     log-level: FULL
