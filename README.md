@@ -74,6 +74,7 @@ mvn verify jib:dockerBuild
 - Spring Boot Aop
 - Micrometer tracing
 - Micrometer tracing bridge otel
+- Loki logback appender
 - Commons text
 - Internationalization(i18n)
 - Lombok
