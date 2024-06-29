@@ -28,7 +28,7 @@ class NamedParameterMessageSourceTest {
 
     @Test
     void testGetMessageWithNamedArgs() {
-        Map<String, String> args = new HashMap<>();
+        Map<String, Object> args = new HashMap<>();
         args.put("name", "John");
 
         String result = messageSource.getMessageWithNamedArgs("greeting.named", args);
@@ -37,7 +37,7 @@ class NamedParameterMessageSourceTest {
 
     @Test
     void testGetMessageWithNamedArgs_Locale() {
-        Map<String, String> args = new HashMap<>();
+        Map<String, Object> args = new HashMap<>();
         args.put("name", "John");
 
         String result = messageSource.getMessageWithNamedArgs("greeting.named", args, Locale.ENGLISH);
@@ -58,7 +58,7 @@ class NamedParameterMessageSourceTest {
 
     @Test
     void testGetMessageWithNamedArgs_MultipleArgs() {
-        Map<String, String> args = new HashMap<>();
+        Map<String, Object> args = new HashMap<>();
         args.put("firstName", "John");
         args.put("lastName", "Doe");
 
@@ -68,7 +68,7 @@ class NamedParameterMessageSourceTest {
 
     @Test
     void testGetMessageWithNamedArgs_MultipleArgs_Locale() {
-        Map<String, String> args = new HashMap<>();
+        Map<String, Object> args = new HashMap<>();
         args.put("firstName", "John");
         args.put("lastName", "Doe");
 
@@ -78,7 +78,7 @@ class NamedParameterMessageSourceTest {
 
     @Test
     void testGetMessageWithNamedArgs_Turkish() {
-        Map<String, String> args = new HashMap<>();
+        Map<String, Object> args = new HashMap<>();
         args.put("name", "Ahmet");
 
         String result = messageSource.getMessageWithNamedArgs("greeting.named", args, new Locale("tr"));
@@ -87,7 +87,7 @@ class NamedParameterMessageSourceTest {
 
     @Test
     void testGetMessageWithNamedArgs_MultipleArgs_Turkish() {
-        Map<String, String> args = new HashMap<>();
+        Map<String, Object> args = new HashMap<>();
         args.put("firstName", "Ahmet");
         args.put("lastName", "Yılmaz");
 
@@ -111,7 +111,7 @@ class NamedParameterMessageSourceTest {
 
     @Test
     void testGetMessageWithNamedArgs_MissingMessage() {
-        Map<String, String> args = new HashMap<>();
+        Map<String, Object> args = new HashMap<>();
         args.put("name", "John");
 
         assertThrows(NoSuchMessageException.class, () -> {
@@ -127,14 +127,14 @@ class NamedParameterMessageSourceTest {
 
     @Test
     void testGetMessageWithNamedArgs_EmptyArgs() {
-        Map<String, String> args = new HashMap<>();
+        Map<String, Object> args = new HashMap<>();
         String result = messageSource.getMessageWithNamedArgs("greeting.named", args, Locale.ENGLISH);
         assertEquals("Hello, {name}!", result);
     }
 
     @Test
     void testReplaceNamedParameters_PartialArgs() {
-        Map<String, String> args = new HashMap<>();
+        Map<String, Object> args = new HashMap<>();
         args.put("firstName", "John");
         // lastName eksik
 
@@ -169,5 +169,15 @@ class NamedParameterMessageSourceTest {
         assertNotNull(messages);
         // Assuming i18n/messages contains more than 2 entries
         assertTrue(messages.size() > 2);
+    }
+
+    @Test
+    void testGetMessageWithNamedArgs_Integer() {
+        Map<String, Object> args = new HashMap<>();
+        args.put("min", 5);
+        args.put("max", 20);
+
+        String result = messageSource.getMessageWithNamedArgs("validation.field.size", args, Locale.ENGLISH);
+        assertEquals("Field must be between 5 and 20 characters", result);
     }
 }

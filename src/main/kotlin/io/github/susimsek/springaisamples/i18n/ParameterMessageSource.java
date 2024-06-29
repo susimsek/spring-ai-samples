@@ -20,7 +20,7 @@ import org.springframework.lang.Nullable;
  * {@code
  * ParameterMessageSource messageSource = new NamedParameterMessageSource();
  * messageSource.setBasename("i18n/messages");
- * Map<String, String> params = Map.of("name", "John");
+ * Map<String, Object> params = Map.of("name", "John");
  * String message = messageSource.getMessageWithNamedArgs("greeting.named", params);
  * }
  * </pre>
@@ -45,7 +45,7 @@ public interface ParameterMessageSource extends MessageSource {
      * @return the resolved message with replaced named parameters
      * @throws NoSuchMessageException if the message with the specified code is not found
      */
-    String getMessageWithNamedArgs(String code, @Nullable Map<String, String> namedArgs) throws NoSuchMessageException;
+    String getMessageWithNamedArgs(String code, @Nullable Map<String, Object> namedArgs) throws NoSuchMessageException;
 
     /**
      * Retrieve a message from the message source, replacing named parameters in the message with provided values.
@@ -56,7 +56,7 @@ public interface ParameterMessageSource extends MessageSource {
      * @return the resolved message with replaced named parameters
      * @throws NoSuchMessageException if the message with the specified code is not found
      */
-    String getMessageWithNamedArgs(String code, @Nullable Map<String, String> namedArgs,
+    String getMessageWithNamedArgs(String code, @Nullable Map<String, Object> namedArgs,
                                    Locale locale) throws NoSuchMessageException;
 
     /**

@@ -109,7 +109,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         @NonNull HttpStatusCode status,
         @NonNull WebRequest request) {
         Locale locale = request.getLocale();
-        Map<String, String> namedArgs = Map.of("paramName", ex.getParameterName());
+        Map<String, Object> namedArgs = Map.of("paramName", ex.getParameterName());
         String errorMessage = messageSource.getMessageWithNamedArgs(
             ErrorConstants.MISSING_PARAMETER, namedArgs, locale);
         ProblemDetail problem = ProblemDetail.forStatusAndDetail(status, errorMessage);
@@ -123,7 +123,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         @NonNull HttpStatusCode status,
         @NonNull WebRequest request) {
         Locale locale = request.getLocale();
-        Map<String, String> namedArgs = Map.of("partName", ex.getRequestPartName());
+        Map<String, Object> namedArgs = Map.of("partName", ex.getRequestPartName());
         String errorMessage = messageSource.getMessageWithNamedArgs(
             ErrorConstants.MISSING_PART, namedArgs, locale);
         ProblemDetail problem = ProblemDetail.forStatusAndDetail(status, errorMessage);
@@ -353,10 +353,10 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         }
     }
 
-    private Map<String, String> createNamedArgs(String resourceName,
+    private Map<String, Object> createNamedArgs(String resourceName,
                                                        String searchCriteria,
                                                        Object searchValue) {
-        Map<String, String> namedArgs = new HashMap<>();
+        Map<String, Object> namedArgs = new HashMap<>();
         namedArgs.put("resource", resourceName);
         namedArgs.put("criteria", searchCriteria);
         namedArgs.put("value", searchValue.toString());

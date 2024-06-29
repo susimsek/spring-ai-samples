@@ -6,22 +6,33 @@ import static io.github.susimsek.springaisamples.trace.TraceConstants.REQUEST_ID
 
 import io.github.susimsek.springaisamples.enums.FilterOrder;
 import io.github.susimsek.springaisamples.exception.header.HeaderValidationProblemSupport;
-import io.github.susimsek.springaisamples.i18n.ParameterMessageSource;
 import io.github.susimsek.springaisamples.idempotency.IdempotencyConstants;
 import io.github.susimsek.springaisamples.trace.TraceConstants;
 import io.github.susimsek.springaisamples.validation.HeaderValidationFilter;
+import jakarta.validation.MessageInterpolator;
+import jakarta.validation.Validator;
+import org.hibernate.validator.messageinterpolation.ResourceBundleMessageInterpolator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
 @Configuration(proxyBeanMethods = false)
 public class ValidationConfig {
 
     @Bean
+    public MessageInterpolator messageInterpolator(Validator validator) {
+        if (validator instanceof LocalValidatorFactoryBean localValidatorFactoryBean) {
+            return localValidatorFactoryBean.getMessageInterpolator();
+        }
+        return new ResourceBundleMessageInterpolator();
+    }
+
+    @Bean
     public HeaderValidationFilter headerValidationFilter(
         RequestMatchersConfig requestMatchersConfig,
         HeaderValidationProblemSupport problemSupport,
-        ParameterMessageSource messageSource) {
-        return HeaderValidationFilter.builder(messageSource, problemSupport)
+        MessageInterpolator messageInterpolator) {
+        return HeaderValidationFilter.builder(messageInterpolator, problemSupport)
             .order(FilterOrder.HEADER_VALIDATION.order())
             .requestMatchers(requestMatchersConfig.staticResources())
             .permitAll()

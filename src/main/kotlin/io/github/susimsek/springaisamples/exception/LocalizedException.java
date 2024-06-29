@@ -7,7 +7,7 @@ import org.springframework.http.HttpStatusCode;
 @Getter
 public class LocalizedException extends RuntimeException {
     private final transient Object[] args;
-    private final Map<String, String> namedArgs;
+    private final Map<String, Object> namedArgs;
     private final HttpStatusCode status;
 
     public LocalizedException(String message, HttpStatusCode status) {
@@ -24,7 +24,7 @@ public class LocalizedException extends RuntimeException {
         this.namedArgs = null;
     }
  
-    public LocalizedException(String message, HttpStatusCode status, Map<String, String> namedArgs) {
+    public LocalizedException(String message, HttpStatusCode status, Map<String, Object> namedArgs) {
         super(message);
         this.status = status;
         this.args = null;

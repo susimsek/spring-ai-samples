@@ -33,14 +33,14 @@ public class NamedParameterMessageSource extends ResourceBundleMessageSource imp
      * @param args            the map containing parameter names and their values
      * @return the message with named parameters replaced by their values
      */
-    private String replaceNamedParameters(String messageTemplate, Map<String, String> args) {
+    private String replaceNamedParameters(String messageTemplate, Map<String, Object> args) {
         Matcher matcher = NAMED_PATTERN.matcher(messageTemplate);
         StringBuilder result = new StringBuilder();
         while (matcher.find()) {
             String paramName = matcher.group(1);
-            String paramValue = args.get(paramName);
+            Object paramValue = args.get(paramName);
             if (paramValue != null) {
-                matcher.appendReplacement(result, paramValue);
+                matcher.appendReplacement(result, paramValue.toString());
             }
         }
         matcher.appendTail(result);
@@ -70,7 +70,7 @@ public class NamedParameterMessageSource extends ResourceBundleMessageSource imp
      */
     @Override
     public String getMessageWithNamedArgs(String code,
-                                          @Nullable Map<String, String> args) throws NoSuchMessageException {
+                                          @Nullable Map<String, Object> args) throws NoSuchMessageException {
         return getMessageWithNamedArgs(code, args, LocaleContextHolder.getLocale());
     }
 
@@ -85,7 +85,7 @@ public class NamedParameterMessageSource extends ResourceBundleMessageSource imp
      */
     @Override
     public String getMessageWithNamedArgs(String code,
-                                          @Nullable Map<String, String> args,
+                                          @Nullable Map<String, Object> args,
                                           Locale locale) throws NoSuchMessageException {
         String message = super.getMessage(code, null, locale);
         if (!CollectionUtils.isEmpty(args)) {

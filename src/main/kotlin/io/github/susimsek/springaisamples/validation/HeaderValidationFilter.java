@@ -4,11 +4,12 @@ import io.github.susimsek.springaisamples.enums.FilterOrder;
 import io.github.susimsek.springaisamples.exception.Violation;
 import io.github.susimsek.springaisamples.exception.header.HeaderConstraintViolationException;
 import io.github.susimsek.springaisamples.exception.header.HeaderValidationExceptionHandler;
-import io.github.susimsek.springaisamples.i18n.ParameterMessageSource;
+import io.github.susimsek.springaisamples.i18n.MessageContext;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.MessageInterpolator;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -34,7 +35,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 @RequiredArgsConstructor
 public class HeaderValidationFilter extends OncePerRequestFilter implements Ordered {
 
-    private final ParameterMessageSource messageSource;
+    private final MessageInterpolator messageInterpolator;
     private final HeaderValidationExceptionHandler headerValidationExceptionHandler;
     private final List<RequestMatcherConfig> requestMatcherConfigs;
     private final boolean defaultValidated;
@@ -95,21 +96,22 @@ public class HeaderValidationFilter extends OncePerRequestFilter implements Orde
 
         if (headerConfig.isNotBlank() && !StringUtils.hasText(headerValue)) {
             violations.add(
-                createViolation("validation.field.notBlank",
+                createViolation("{validation.field.notBlank}",
                     headerConfig.getHeaderName(), headerValue, locale, null));
         }
 
         if (headerValue != null) {
             if (headerValue.length() < headerConfig.getMin() || headerValue.length() > headerConfig.getMax()) {
-                var args = Map.of("min", String.valueOf(headerConfig.getMin()),
-                    "max", String.valueOf(headerConfig.getMax()));
+                Map<String, Object> args = Map.of("min", headerConfig.getMin(),
+                    "max", headerConfig.getMax());
                 violations.add(
-                    createViolation("validation.field.size", headerConfig.getHeaderName(), headerValue, locale, args));
+                    createViolation("{validation.field.size}",
+                        headerConfig.getHeaderName(), headerValue, locale, args));
             }
 
             if (!headerValue.matches(headerConfig.getRegexp())) {
                 violations.add(
-                    createViolation("validation.field.pattern",
+                    createViolation("{validation.field.pattern}",
                         headerConfig.getHeaderName(), headerValue, locale, null));
             }
         }
@@ -118,8 +120,10 @@ public class HeaderValidationFilter extends OncePerRequestFilter implements Orde
     }
 
     private Violation createViolation(String messageTemplate, String headerName, Object invalidValue, Locale locale,
-                                      Map<String, String> args) {
-        String localizedMessage = messageSource.getMessageWithNamedArgs(messageTemplate, args, locale);
+                                      Map<String, Object> parameters) {
+        MessageContext context = new MessageContext(parameters, null, invalidValue);
+        String localizedMessage = messageInterpolator.interpolate(
+            messageTemplate, context, locale);
 
         return new Violation(
             null,
@@ -196,15 +200,15 @@ public class HeaderValidationFilter extends OncePerRequestFilter implements Orde
         AfterHeaderConfigBuilder headerName(String headerName);
     }
 
-    public static InitialBuilder builder(ParameterMessageSource messageSource,
+    public static InitialBuilder builder(MessageInterpolator messageInterpolator,
                                          HeaderValidationExceptionHandler headerValidationExceptionHandler) {
-        return new Builder(messageSource, headerValidationExceptionHandler);
+        return new Builder(messageInterpolator, headerValidationExceptionHandler);
     }
 
     private static class Builder extends AbstractRequestMatcherRegistry<Builder>
         implements InitialBuilder, AfterRequestMatchersBuilder, AfterHeaderConfigBuilder {
 
-        private final ParameterMessageSource messageSource;
+        private final MessageInterpolator messageInterpolator;
         private final HeaderValidationExceptionHandler headerValidationExceptionHandler;
         private final List<RequestMatcherConfig> requestMatcherConfigs = new ArrayList<>();
         private boolean anyRequestConfigured = false;
@@ -214,9 +218,9 @@ public class HeaderValidationFilter extends OncePerRequestFilter implements Orde
         private final Map<String, HeaderConfig> defaultHeaderConfigs = new HashMap<>();
         private String headerName = null;
 
-        private Builder(ParameterMessageSource messageSource,
+        private Builder(MessageInterpolator messageInterpolator,
                         HeaderValidationExceptionHandler headerValidationExceptionHandler) {
-            this.messageSource = messageSource;
+            this.messageInterpolator = messageInterpolator;
             this.headerValidationExceptionHandler = headerValidationExceptionHandler;
         }
 
@@ -396,7 +400,7 @@ public class HeaderValidationFilter extends OncePerRequestFilter implements Orde
 
         @Override
         public HeaderValidationFilter build() {
-            return new HeaderValidationFilter(messageSource,
+            return new HeaderValidationFilter(messageInterpolator,
                 headerValidationExceptionHandler,
                 requestMatcherConfigs, defaultValidated, order, defaultHeaderConfigs);
         }
