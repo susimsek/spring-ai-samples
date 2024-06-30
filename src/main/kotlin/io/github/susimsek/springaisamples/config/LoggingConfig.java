@@ -40,6 +40,7 @@ import org.springframework.core.env.Environment;
 @RequiredArgsConstructor
 public class LoggingConfig {
 
+    private static final org.slf4j.Logger log = LoggerFactory.getLogger(LoggingConfig.class);
     private final LoggingProperties loggingProperties;
 
     private static final String LOKI_APPENDER_NAME = "LOKI";
@@ -145,10 +146,25 @@ public class LoggingConfig {
             var encoder = getJsonEncoder(context, environment);
             loki4jAppender.setFormat(encoder);
 
-            loki4jAppender.setBatchMaxItems(loggingProperties.getLoki().getBatchMaxItems());
-            loki4jAppender.setBatchMaxBytes((int) loggingProperties.getLoki().getBatchMaxBytes().toBytes());
-            loki4jAppender.setBatchTimeoutMs(loggingProperties.getLoki().getBatchTimeout().toMillis());
+            var lokiProps = loggingProperties.getLoki();
 
+            loki4jAppender.setBatchMaxItems(lokiProps.getBatchMaxItems());
+            loki4jAppender.setBatchMaxBytes((int) lokiProps.getBatchMaxBytes().toBytes());
+            loki4jAppender.setBatchTimeoutMs(lokiProps.getBatchTimeout().toMillis());
+
+            LoggingProperties.Loki.Retry retryProps = lokiProps.getRetry();
+            loki4jAppender.setMaxRetries(retryProps.getMaxRetries());
+            loki4jAppender.setMinRetryBackoffMs(retryProps.getMinRetryBackoff().toMillis());
+            loki4jAppender.setMaxRetryBackoffMs(retryProps.getMaxRetryBackoff().toMillis());
+            loki4jAppender.setMaxRetryJitterMs((int) retryProps.getMaxRetryJitter().toMillis());
+
+            loki4jAppender.setSendQueueMaxBytes(lokiProps.getBatchMaxBytes().toBytes() * 10);
+            loki4jAppender.setInternalQueuesCheckTimeoutMs(lokiProps.getInternalQueuesCheckTimeout().toMillis());
+            loki4jAppender.setDropRateLimitedBatches(lokiProps.isDropRateLimitedBatches());
+            loki4jAppender.setMetricsEnabled(lokiProps.isMetricsEnabled());
+            loki4jAppender.setDrainOnStop(lokiProps.isDrainOnStop());
+            loki4jAppender.setUseDirectBuffers(lokiProps.isUseDirectBuffers());
+            loki4jAppender.setVerbose(lokiProps.isVerbose());
             loki4jAppender.start();
             return loki4jAppender;
         }

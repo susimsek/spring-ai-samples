@@ -60,11 +60,27 @@ public class LoggingProperties {
     @Getter
     @Setter
     public static class Loki {
-        private  boolean enabled = false;
+        private boolean enabled = false;
         private  String url = "http://localhost:3100/loki/api/v1/push";
         private Duration innerThreadsExpiration = Duration.ofMinutes(5);
         private int batchMaxItems = 100;
         private DataSize batchMaxBytes = DataSize.ofMegabytes(1);
         private Duration batchTimeout = Duration.ofSeconds(5);
+        private Retry retry = new Retry();
+        private boolean useDirectBuffers = true;
+        private boolean drainOnStop = true;
+        private boolean metricsEnabled = false;
+        private boolean dropRateLimitedBatches = false;
+        private boolean verbose = false;
+        private Duration internalQueuesCheckTimeout = Duration.ofMillis(25);
+
+        @Getter
+        @Setter
+        public static class Retry {
+            private int maxRetries = 3;
+            private Duration minRetryBackoff = Duration.ofMillis(500);
+            private Duration maxRetryBackoff = Duration.ofMinutes(1);
+            private Duration maxRetryJitter = Duration.ofMillis(500);
+        }
     }
 }

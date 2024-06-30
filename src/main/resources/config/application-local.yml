@@ -68,6 +68,17 @@ logging:
     batch-max-items: 500
     batch-max-bytes: 2MB
     batch-timeout: 2s
+    use-direct-buffers: true
+    drain-on-stop: true
+    metrics-enabled: false
+    drop-rate-limited-batches: false
+    verbose: false
+    internal-queues-check-timeout: 25ms
+    retry:
+      max-retries: 3
+      min-retry-backoff: 500ms
+      max-retry-backoff: 1m
+      max-retry-jitter: 500ms
   aspect:
     enabled: true
     log-level: FULL
