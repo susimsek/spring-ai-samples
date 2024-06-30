@@ -62,12 +62,12 @@ logging:
     maxFlushTime: 5000
     includeCallerData: false
   loki:
-    enabled: false
+    enabled: true
     url: http://localhost:3100/loki/api/v1/push
     inner-threads-expiration: 5m
-    batch-max-items: 500
+    batch-max-items: 1000
     batch-max-bytes: 2MB
-    batch-timeout: 2s
+    batch-timeout: 5s
     use-direct-buffers: true
     drain-on-stop: true
     metrics-enabled: false
