@@ -27,6 +27,7 @@ public class LocalizedOpenApiCustomizer implements OpenApiCustomizer {
         customiseOpenApiInfo(openApi, locale);
         customiseOperations(openApi);
         sortTags(openApi);
+        addSecurityScheme(openApi);
     }
 
     private void customiseOpenApiInfo(OpenAPI openApi, Locale locale) {
@@ -91,5 +92,18 @@ public class LocalizedOpenApiCustomizer implements OpenApiCustomizer {
                 return Integer.compare(index1, index2);
             });
         }
+    }
+
+    private void addSecurityScheme(OpenAPI openApi) {
+        openApi.getComponents()
+            .addSecuritySchemes("bearerAuth",
+                new io.swagger.v3.oas.models.security.SecurityScheme()
+                    .type(io.swagger.v3.oas.models.security.SecurityScheme.Type.HTTP)
+                    .scheme("bearer")
+                    .bearerFormat("JWT")
+                    .in(io.swagger.v3.oas.models.security.SecurityScheme.In.HEADER)
+                    .description(
+                        "JWT Authorization header using the Bearer scheme. "
+                            + "Example: \"Authorization: Bearer {token}\""));
     }
 }

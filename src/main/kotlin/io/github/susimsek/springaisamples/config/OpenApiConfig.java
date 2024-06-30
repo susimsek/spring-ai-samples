@@ -4,16 +4,15 @@ import static io.github.susimsek.springaisamples.idempotency.IdempotencyConstant
 import static io.github.susimsek.springaisamples.security.signature.SignatureConstants.JWS_SIGNATURE_HEADER_NAME;
 import static io.github.susimsek.springaisamples.trace.TraceConstants.CORRELATION_ID_HEADER_NAME;
 import static io.github.susimsek.springaisamples.trace.TraceConstants.REQUEST_ID_HEADER_NAME;
+import static org.springdoc.core.utils.Constants.ALL_PATTERN;
 
 import io.github.susimsek.springaisamples.openapi.LocalizedOpenApiCustomizer;
 import io.github.susimsek.springaisamples.openapi.OpenApiProperties;
 import io.github.susimsek.springaisamples.openapi.annotation.Idempotent;
 import io.github.susimsek.springaisamples.openapi.annotation.RequireJwsSignature;
 import io.github.susimsek.springaisamples.trace.TraceContext;
-import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
-import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
-import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.models.Operation;
+import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.media.StringSchema;
 import io.swagger.v3.oas.models.parameters.HeaderParameter;
 import io.swagger.v3.oas.models.parameters.Parameter;
@@ -22,27 +21,51 @@ import java.util.Arrays;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.customizers.OpenApiCustomizer;
 import org.springdoc.core.customizers.OperationCustomizer;
+import org.springdoc.core.models.GroupedOpenApi;
+import org.springframework.boot.actuate.autoconfigure.endpoint.web.WebEndpointProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.web.method.HandlerMethod;
 
 @Configuration
 @RequiredArgsConstructor
-@SecurityScheme(
-    name = "bearerAuth",
-    type = SecuritySchemeType.HTTP,
-    bearerFormat = "JWT",
-    scheme = "bearer",
-    in = SecuritySchemeIn.HEADER,
-    description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\""
-)
 @EnableConfigurationProperties(OpenApiProperties.class)
 public class OpenApiConfig {
 
     private final OpenApiProperties openApiProperties;
+
+    @Bean
+    public GroupedOpenApi defaultApi(
+        OpenApiCustomizer openApiCustomizer,
+        OperationCustomizer operationCustomizer) {
+        return GroupedOpenApi.builder()
+            .group("default")
+            .addOpenApiCustomizer(openApiCustomizer)
+            .addOperationCustomizer(operationCustomizer)
+            .pathsToMatch("/api/**")
+            .build();
+    }
+
+    @Bean
+    @Profile("!prod")
+    public GroupedOpenApi actuatorApi(
+        OpenApiCustomizer actuatorOpenApiCustomizer,
+        OperationCustomizer actuatorCustomizer,
+        WebEndpointProperties endpointProperties) {
+        return GroupedOpenApi.builder()
+            .group("actuator")
+            .pathsToMatch(endpointProperties.getBasePath() + ALL_PATTERN)
+            .addOpenApiCustomizer(actuatorOpenApiCustomizer)
+            .addOperationCustomizer(actuatorCustomizer)
+            .pathsToExclude("/health/*")
+            .addOpenApiCustomizer(openApi -> openApi.info(new Info()
+                .title("Actuator API")))
+            .build();
+    }
 
     @Bean
     public OpenApiCustomizer openApiCustomizer(
@@ -78,7 +101,8 @@ public class OpenApiConfig {
                 addIdempotentHeader(operation);
             }
 
-            if (isJwsSignatureRequired(handlerMethod.getMethod()) || isJwsSignatureRequired(handlerMethod.getBeanType())) {
+            if (isJwsSignatureRequired(handlerMethod.getMethod()) ||
+                isJwsSignatureRequired(handlerMethod.getBeanType())) {
                 addJwsSignatureHeader(operation);
             }
 

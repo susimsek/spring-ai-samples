@@ -84,6 +84,7 @@ springdoc:
     show-extensions: true
     try-it-out-enabled: true
     persist-authorization: true
+  show-actuator: true
 
 logging:
   level:
