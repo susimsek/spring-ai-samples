@@ -12,7 +12,6 @@ import io.github.susimsek.springaisamples.openapi.annotation.Idempotent;
 import io.github.susimsek.springaisamples.openapi.annotation.RequireJwsSignature;
 import io.github.susimsek.springaisamples.trace.TraceContext;
 import io.swagger.v3.oas.models.Operation;
-import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.media.StringSchema;
 import io.swagger.v3.oas.models.parameters.HeaderParameter;
 import io.swagger.v3.oas.models.parameters.Parameter;
@@ -62,8 +61,9 @@ public class OpenApiConfig {
             .addOpenApiCustomizer(actuatorOpenApiCustomizer)
             .addOperationCustomizer(actuatorCustomizer)
             .pathsToExclude("/health/*")
-            .addOpenApiCustomizer(openApi -> openApi.info(new Info()
-                .title("Actuator API")))
+            .addOpenApiCustomizer(openApi -> openApi.info(new io.swagger.v3.oas.models.info.Info()
+                .title("Actuator API Documentation")
+                .description("API Documentation for Spring Boot Actuator endpoints")))
             .build();
     }
 
