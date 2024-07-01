@@ -2,6 +2,8 @@ package io.github.susimsek.springaisamples.logging.config;
 
 import io.github.susimsek.springaisamples.logging.enums.HttpLogLevel;
 import io.github.susimsek.springaisamples.logging.enums.MethodLogLevel;
+import io.github.susimsek.springaisamples.validation.DataSizeMax;
+import io.github.susimsek.springaisamples.validation.DataSizeMin;
 import io.github.susimsek.springaisamples.validation.EnumFormat;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
@@ -117,6 +119,8 @@ public class LoggingProperties {
         private int batchMaxItems = 100;
 
         @NotNull(message = "{validation.field.notNull}")
+        @DataSizeMin(value = "1MB", message = "{validation.field.min}")
+        @DataSizeMax(value = "10MB", message = "{validation.field.max}")
         private DataSize batchMaxBytes = DataSize.ofMegabytes(1);
 
         @NotNull(message = "{validation.field.notNull}")
