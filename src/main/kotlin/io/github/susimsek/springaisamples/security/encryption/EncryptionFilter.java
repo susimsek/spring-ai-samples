@@ -83,7 +83,7 @@ public class EncryptionFilter extends OncePerRequestFilter implements Ordered {
             Link selfLink = Link.of(uri.toString()).withSelfRel().withType(request.getMethod());
             encryptResponse.add(selfLink);
             String baseUrl = uri.getScheme() + "://" + uri.getAuthority() + request.getContextPath();
-            Link decryptLink = Link.of(baseUrl + "/api/security/decrypt")
+            Link decryptLink = Link.of(baseUrl + "/api/v1/security/decrypt")
                 .withRel("decrypt").withType(HttpMethod.POST.name());
             encryptResponse.add(decryptLink);
         }

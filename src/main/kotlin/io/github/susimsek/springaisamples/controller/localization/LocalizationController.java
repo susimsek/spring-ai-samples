@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @Tag(name = "localization", description = "Localization related APIs")
-@RequestMapping("/api/locales")
+@RequestMapping("/api/v1/locales")
 @RequiredArgsConstructor
 public class LocalizationController {
 

@@ -10,7 +10,7 @@ function changeLanguage(lang) {
 }
 
 function updateTextContent(lang) {
-    fetch(`/api/locales`, {
+    fetch(`/api/v1/locales`, {
         headers: { 'Accept-Language': lang }
     })
         .then(response => response.json())

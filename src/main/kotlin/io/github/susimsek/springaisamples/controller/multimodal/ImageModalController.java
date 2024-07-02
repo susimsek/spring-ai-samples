@@ -30,7 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @Tag(name = "ai", description = "Spring AI related APIS")
 @SecurityRequirement(name = "bearerAuth")
-@RequestMapping("/api/ai/images")
+@RequestMapping("/api/v1/ai/images")
 @Validated
 public class ImageModalController {
 

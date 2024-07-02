@@ -70,7 +70,7 @@ public class SongController {
             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                 schema = @Schema(implementation = ProblemDetail.class)))
     })
-    @GetMapping("/api/ai/songs-as-list")
+    @GetMapping("/api/v1/ai/songs-as-list")
     public List<String> getSongsByArtistAsList(
         @Parameter(description = "Name of the artist", example = "Taylor Swift")
         @RequestParam(value = ARTIST, defaultValue = DEFAULT_ARTIST)
@@ -110,7 +110,7 @@ public class SongController {
             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                 schema = @Schema(implementation = ProblemDetail.class)))
     })
-    @GetMapping("/api/ai/songs")
+    @GetMapping("/api/v1/ai/songs")
     public String getSongsByArtist(
         @Parameter(description = "Name of the artist", example = "Taylor Swift")
         @RequestParam(value = ARTIST, defaultValue = DEFAULT_ARTIST)

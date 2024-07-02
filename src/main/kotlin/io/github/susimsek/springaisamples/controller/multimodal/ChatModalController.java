@@ -28,7 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @Tag(name = "ai", description = "Spring AI related APIS")
 @SecurityRequirement(name = "bearerAuth")
-@RequestMapping("/api/ai/chat")
+@RequestMapping("/api/v1/ai/chat")
 @Validated
 public class ChatModalController {
 

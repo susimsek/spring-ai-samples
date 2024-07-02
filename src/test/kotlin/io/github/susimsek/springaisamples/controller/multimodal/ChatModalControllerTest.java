@@ -43,7 +43,7 @@ class ChatModalControllerTest {
     void testJokesWithDogsTopic() throws Exception {
         when(chatClient.call(any(Prompt.class))).thenReturn(chatResponse);
 
-        mockMvc.perform(get("/api/ai/chat/dad-jokes")
+        mockMvc.perform(get("/api/v1/ai/chat/dad-jokes")
                 .param("topic", "Dogs")
                 .contentType(MediaType.TEXT_PLAIN))
             .andExpect(status().isOk())

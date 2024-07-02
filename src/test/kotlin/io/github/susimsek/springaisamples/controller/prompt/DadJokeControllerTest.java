@@ -36,7 +36,7 @@ class DadJokeControllerTest {
         when(chatClient.call(any(Prompt.class))).thenReturn(new ChatResponse(
             List.of(new Generation(expectedJoke))));
 
-        mockMvc.perform(get("/api/ai/jokes")
+        mockMvc.perform(get("/api/v1/v1/ai/jokes")
                 .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(content().string(expectedJoke));

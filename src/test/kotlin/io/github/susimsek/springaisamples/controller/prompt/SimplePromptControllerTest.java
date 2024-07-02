@@ -37,7 +37,7 @@ class SimplePromptControllerTest {
 
         when(chatClient.call(any(Prompt.class))).thenReturn(chatResponse);
 
-        mockMvc.perform(get("/api/ai/simple-prompt")
+        mockMvc.perform(get("/api/v1/ai/simple-prompt")
                 .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(content().string(expectedResponse));

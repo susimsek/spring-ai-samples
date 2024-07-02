@@ -50,7 +50,7 @@ public class ChatController {
             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                 schema = @Schema(implementation = ProblemDetail.class)))
     })
-    @GetMapping("/api/ai/chat/generate")
+    @GetMapping("/api/v1/ai/chat/generate")
     public ResponseEntity<String> generate(
         @Parameter(description = "Message", example = "Tell me a dad joke about dogs")
         @RequestParam(value = "message", defaultValue = "Tell me a dad joke about dogs")

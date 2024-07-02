@@ -47,7 +47,7 @@ public class DadJokeController {
             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                 schema = @Schema(implementation = ProblemDetail.class)))
     })
-    @GetMapping("/api/ai/jokes")
+    @GetMapping("/api/v1/ai/jokes")
     public ResponseEntity<String> jokes() {
         var system = new SystemMessage(
             "You primary function is to tell Dad Jokes. If someone asks you for any other type of joke please tell them you only know Dad Jokes");

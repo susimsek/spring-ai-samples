@@ -32,7 +32,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @Tag(name = "ai", description = "Spring AI related APIS")
 @SecurityRequirement(name = "bearerAuth")
-@RequestMapping("/api/ai/youtube")
+@RequestMapping("/api/v1/ai/youtube")
 @Validated
 public class YouTubeController {
 

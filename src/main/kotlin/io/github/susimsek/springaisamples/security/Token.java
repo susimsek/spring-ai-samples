@@ -19,11 +19,11 @@ import org.springframework.hateoas.RepresentationModel;
             "refreshTokenExpiresIn": 86400,
             "_links": {
                 "self": {
-                    "href": "http://localhost:8071/api/auth/token",
+                    "href": "http://localhost:8071/api/v1/auth/token",
                     "type": "POST"
                 },
                 "refresh_token": {
-                    "href": "http://localhost:8071/api/auth/refresh",
+                    "href": "http://localhost:8071/api/v1/auth/refresh",
                     "type": "POST"
                 }
             }

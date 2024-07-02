@@ -44,7 +44,7 @@ public class SimplePromptController {
             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                 schema = @Schema(implementation = ProblemDetail.class)))
     })
-    @GetMapping("/api/ai/simple-prompt")
+    @GetMapping("/api/v1/ai/simple-prompt")
     public ResponseEntity<String> simple() {
         String response = chatClient.call(
                 new Prompt("How long has The Java Programming language been around?"))

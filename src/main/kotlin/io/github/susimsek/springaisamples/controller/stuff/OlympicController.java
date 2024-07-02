@@ -32,7 +32,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/ai/olympics")
+@RequestMapping("/api/v1/ai/olympics")
 @RequiredArgsConstructor
 @Tag(name = "ai", description = "Spring AI related APIS")
 @SecurityRequirement(name = "bearerAuth")

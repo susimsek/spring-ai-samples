@@ -35,7 +35,7 @@ class ChatControllerTest {
 
         when(chatClient.call(anyString())).thenReturn(expectedResponse);
 
-        mockMvc.perform(get("/api/ai/chat/generate")
+        mockMvc.perform(get("/api/v1/ai/chat/generate")
                 .param("message", message)
                 .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
@@ -48,7 +48,7 @@ class ChatControllerTest {
 
         when(chatClient.call(anyString())).thenReturn(expectedResponse);
 
-        mockMvc.perform(get("/api/ai/chat/generate")
+        mockMvc.perform(get("/api/v1/ai/chat/generate")
                 .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(content().string(expectedResponse));
@@ -56,7 +56,7 @@ class ChatControllerTest {
 
     @Test
     void testGenerate_WithBlankMessage_ShouldReturnBadRequest() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/ai/chat/generate")
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/ai/chat/generate")
                 .param("message", "a")
                 .contentType(MediaType.TEXT_PLAIN))
             .andExpect(MockMvcResultMatchers.status().isBadRequest())

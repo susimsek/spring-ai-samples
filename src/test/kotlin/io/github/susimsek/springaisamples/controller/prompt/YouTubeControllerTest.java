@@ -44,7 +44,7 @@ class YouTubeControllerTest {
 
         when(chatClient.call(any(Prompt.class))).thenReturn(chatResponse);
 
-        mockMvc.perform(get("/api/ai/youtube/popular-step-one")
+        mockMvc.perform(get("/api/v1/ai/youtube/popular-step-one")
                 .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(content().string(expectedResponse));
@@ -52,7 +52,7 @@ class YouTubeControllerTest {
 
     @Test
     void whenGenreIsTooShort_thenBadRequest() throws Exception {
-        mockMvc.perform(get("/api/ai/youtube/popular-step-one")
+        mockMvc.perform(get("/api/v1/ai/youtube/popular-step-one")
                 .param("genre", "a"))
             .andExpect(status().isBadRequest())
             .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON));
@@ -70,7 +70,7 @@ class YouTubeControllerTest {
 
         when(chatClient.call(any(Prompt.class))).thenReturn(chatResponse);
 
-        mockMvc.perform(get("/api/ai/youtube/popular")
+        mockMvc.perform(get("/api/v1/ai/youtube/popular")
                 .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(content().string(expectedResponse));

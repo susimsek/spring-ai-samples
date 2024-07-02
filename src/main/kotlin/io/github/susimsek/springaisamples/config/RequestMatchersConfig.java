@@ -39,7 +39,8 @@ public class RequestMatchersConfig {
             mvc.pattern("/swagger-ui.html"),
             mvc.pattern("/swagger-ui/**"),
             mvc.pattern("/v3/api-docs/**"),
-            mvc.pattern("/api-docs/**")
+            mvc.pattern("/api-docs/**"),
+            mvc.pattern("/api/v1/locales")
         };
     }
 
@@ -75,16 +76,16 @@ public class RequestMatchersConfig {
 
     public RequestMatcher[] encryptionPaths() {
         return new MvcRequestMatcher[] {
-            mvc.pattern("/api/security/encrypt"),
-            mvc.pattern("/api/security/decrypt")
+            mvc.pattern("/api/v*/security/encrypt"),
+            mvc.pattern("/api/v*/security/decrypt")
         };
     }
 
     public RequestMatcher signPath() {
-        return  mvc.pattern("/api/security/sign");
+        return  mvc.pattern("/api/v*/security/sign");
     }
 
     public RequestMatcher tokenPath() {
-        return  mvc.pattern("/api/auth/token");
+        return  mvc.pattern("/api/v*/auth/token");
     }
 }

@@ -40,7 +40,7 @@ class BookControllerTest {
         when(chatClient.call(any(Prompt.class))).thenReturn(new ChatResponse(List.of(new Generation(output))));
 
         // When
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/ai/books/craig")
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/ai/books/craig")
                 .contentType(MediaType.TEXT_PLAIN))
 
             // Then
@@ -58,7 +58,7 @@ class BookControllerTest {
             (new Generation(output))));
 
         // When
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/ai/books/by-author")
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/ai/books/by-author")
                 .param("author", author)
                 .contentType(MediaType.APPLICATION_JSON))
 
@@ -73,7 +73,7 @@ class BookControllerTest {
 
     @Test
     void testGetBooksByAuthor_WithInvalidAuthorName_ShouldReturnBadRequest() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/ai/books/by-author")
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/ai/books/by-author")
                 .param("author", "1"))
             .andExpect(MockMvcResultMatchers.status().isBadRequest())
             .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON));
@@ -87,7 +87,7 @@ class BookControllerTest {
         when(chatClient.call(any(Prompt.class))).thenReturn(new ChatResponse(List.of(new Generation(output))));
 
         // When
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/ai/books/author/{author}", author)
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/ai/books/author/{author}", author)
                 .contentType(MediaType.APPLICATION_JSON))
 
             // Then

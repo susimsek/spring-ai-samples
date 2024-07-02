@@ -54,9 +54,9 @@ class ImageModalControllerTest {
 
     private static Stream<Arguments> provideEndpoints() {
         return Stream.of(
-            Arguments.of("/api/ai/images/image-describe"),
-            Arguments.of("/api/ai/images/code-describe"),
-            Arguments.of("/api/ai/images/image-to-code")
+            Arguments.of("/api/v1/ai/images/image-describe"),
+            Arguments.of("/api/v1/ai/images/code-describe"),
+            Arguments.of("/api/v1/ai/images/image-to-code")
         );
     }
 }

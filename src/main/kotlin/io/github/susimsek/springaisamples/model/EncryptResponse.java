@@ -13,11 +13,11 @@ import org.springframework.hateoas.RepresentationModel;
             "jweToken": "eyJhbGciOiJSU0EtT0FFUCIsImVuYyI6IkEyNTZHQ00ifQ...",
             "_links": {
                 "self": {
-                    "href": "http://localhost:8071/api/security/encrypt",
+                    "href": "http://localhost:8071/api/v1/security/encrypt",
                     "type": "POST"
                 },
                 "decrypt": {
-                    "href": "http://localhost:8071/api/security/decrypt",
+                    "href": "http://localhost:8071/api/v1/security/decrypt",
                     "type": "POST"
                 }
             }

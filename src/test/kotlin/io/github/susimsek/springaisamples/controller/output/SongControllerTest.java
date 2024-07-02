@@ -42,7 +42,7 @@ class SongControllerTest {
         when(chatClient.call(any(Prompt.class))).thenReturn(chatResponse);
 
         // When
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/ai/songs-as-list")
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/ai/songs-as-list")
                 .param("artist", artist)
                 .contentType(MediaType.APPLICATION_JSON))
 
@@ -55,7 +55,7 @@ class SongControllerTest {
 
     @Test
     void testGetSongsByArtist_WithShortArtistName_ShouldReturnBadRequest() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/ai/songs")
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/ai/songs")
                 .param("artist", "A"))
             .andExpect(MockMvcResultMatchers.status().isBadRequest())
             .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON));
@@ -72,7 +72,7 @@ class SongControllerTest {
         when(chatClient.call(any(Prompt.class))).thenReturn(chatResponse);
 
         // When
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/ai/songs")
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/ai/songs")
                 .param("artist", artist)
                 .contentType(MediaType.TEXT_PLAIN))
 

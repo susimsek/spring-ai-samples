@@ -36,7 +36,7 @@ class LocalizationControllerTest {
             .thenReturn(translations);
 
         // Perform the GET request and verify the response
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/locales")
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/locales")
                 .header("Accept-Language", "en"))
             .andExpect(MockMvcResultMatchers.status().isOk())
             .andExpect(MockMvcResultMatchers.jsonPath("$.message1").value("Test Message 1"))

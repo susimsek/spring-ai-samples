@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @Tag(name = "security", description = "Security APIs")
-@RequestMapping("/api/security")
+@RequestMapping("/api/v1/security")
 @RequiredArgsConstructor
 public class SignatureController {
 

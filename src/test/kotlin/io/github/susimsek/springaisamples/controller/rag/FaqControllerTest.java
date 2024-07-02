@@ -59,7 +59,7 @@ class FaqControllerTest {
         when(chatClient.call(any(Prompt.class))).thenReturn(chatResponse);
 
         // When/Then
-        mockMvc.perform(get("/api/ai/faq")
+        mockMvc.perform(get("/api/v1/ai/faq")
                 .param("message", message))
             .andExpect(status().isOk())
             .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_PLAIN))
@@ -79,7 +79,7 @@ class FaqControllerTest {
             new RuntimeException("SimSearch failed"));
 
         // When/Then
-        mockMvc.perform(get("/api/ai/faq")
+        mockMvc.perform(get("/api/v1/ai/faq")
                 .param("message", message))
             .andExpect(status().isInternalServerError());
 
@@ -90,7 +90,7 @@ class FaqControllerTest {
     @Test
     void faq_ReturnsBadRequest_WhenBlankMessageProvided() throws Exception {
         // When/Then
-        mockMvc.perform(get("/api/ai/faq")
+        mockMvc.perform(get("/api/v1/ai/faq")
                 .param("message", "1"))
             .andExpect(status().isBadRequest())
             .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON));

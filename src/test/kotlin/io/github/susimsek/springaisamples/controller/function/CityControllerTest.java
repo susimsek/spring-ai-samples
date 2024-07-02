@@ -43,7 +43,7 @@ class CityControllerTest {
         // Stubbing the chatClient call
         when(chatClient.call(any(Prompt.class))).thenReturn(mockResponse);
 
-        mockMvc.perform(get("/api/ai/cities")
+        mockMvc.perform(get("/api/v1/ai/cities")
                 .param("message", userMessage))
             .andExpect(status().isOk())
             .andExpect(content().string(expectedResponse));
@@ -51,7 +51,7 @@ class CityControllerTest {
 
     @Test
     void testCityFaqInvalidInput() throws Exception {
-        mockMvc.perform(get("/api/ai/cities")
+        mockMvc.perform(get("/api/v1/ai/cities")
                 .param("message", ""))
             .andExpect(status().isBadRequest());
     }

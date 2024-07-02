@@ -90,7 +90,7 @@ public class JwksController {
                           "type": "GET"
                         },
                         "token": {
-                          "href": "http://localhost:8071/api/auth/token",
+                          "href": "http://localhost:8071/api/v1/auth/token",
                           "type": "POST"
                         },
                         "refresh": {
@@ -98,15 +98,15 @@ public class JwksController {
                            "type": "POST"
                         },
                         "signature": {
-                          "href": "http://localhost:8071/api/security/sign",
+                          "href": "http://localhost:8071/api/v1/security/sign",
                           "type": "POST"
                         },
                         "encrypt": {
-                          "href": "http://localhost:8071/api/security/encrypt",
+                          "href": "http://localhost:8071/api/v1/security/encrypt",
                           "type": "POST"
                         },
                         "decrypt": {
-                          "href": "http://localhost:8071/api/security/decrypt",
+                          "href": "http://localhost:8071/api/v1/security/decrypt",
                           "type": "POST"
                         }
                       }
