@@ -5,6 +5,7 @@ import io.github.susimsek.springaisamples.exception.encryption.EncryptionExcepti
 import io.github.susimsek.springaisamples.exception.encryption.JweException;
 import io.github.susimsek.springaisamples.model.EncryptResponse;
 import io.github.susimsek.springaisamples.service.EncryptionService;
+import io.github.susimsek.springaisamples.utils.ApiVersionUtil;
 import io.github.susimsek.springaisamples.utils.JsonUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -83,7 +84,8 @@ public class EncryptionFilter extends OncePerRequestFilter implements Ordered {
             Link selfLink = Link.of(uri.toString()).withSelfRel().withType(request.getMethod());
             encryptResponse.add(selfLink);
             String baseUrl = uri.getScheme() + "://" + uri.getAuthority() + request.getContextPath();
-            Link decryptLink = Link.of(baseUrl + "/api/v1/security/decrypt")
+            String version = ApiVersionUtil.getVersionFromUri(uri.getPath());
+            Link decryptLink = Link.of(baseUrl + "/api/" + version + "/security/decrypt")
                 .withRel("decrypt").withType(HttpMethod.POST.name());
             encryptResponse.add(decryptLink);
         }
