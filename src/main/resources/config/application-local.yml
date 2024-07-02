@@ -43,6 +43,10 @@ spring:
       shutdown:
         await-termination: true
         await-termination-period: 60s
+    tasks:
+      report:
+        enabled: false
+        cron: "0 0 6 * * ?"
   ai:
     openai:
       api-key: ${OPENAI_API_KEY}
