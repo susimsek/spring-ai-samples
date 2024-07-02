@@ -14,6 +14,8 @@ import io.github.susimsek.springaisamples.model.RefreshTokenRequest;
 import io.github.susimsek.springaisamples.model.SignatureRequest;
 import io.github.susimsek.springaisamples.trace.Trace;
 import io.github.susimsek.springaisamples.trace.TraceContext;
+import io.github.susimsek.springaisamples.versioning.ApiInfo;
+import io.github.susimsek.springaisamples.versioning.CurrentApiInfo;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -123,8 +125,10 @@ public class JwksController {
     @GetMapping("/jwks.json")
     @Cacheable("jwksCache")
     public ResponseEntity<EntityModel<Map<String, Object>>> getJwks(
-        @TraceContext Trace trace) {
+        @TraceContext Trace trace,
+        @CurrentApiInfo ApiInfo apiInfo) {
         log.info("Trace: {}", trace);
+        log.info("API Info: {}", apiInfo);
         // JWS Key
         RSAPublicKey jwsPublicKey = (RSAPublicKey) jwsKeyPair.getPublic();
         RSAKey jwsJwk = new RSAKey.Builder(jwsPublicKey)
@@ -156,7 +160,7 @@ public class JwksController {
         // Add HATEOAS links
         EntityModel<Map<String, Object>> entityModel = EntityModel.of(jwks);
         entityModel.add(WebMvcLinkBuilder.linkTo(methodOn(JwksController.class)
-            .getJwks(null)).withSelfRel().withType(HttpMethod.GET.name()));
+            .getJwks(null ,null)).withSelfRel().withType(HttpMethod.GET.name()));
         entityModel.add(WebMvcLinkBuilder.linkTo(methodOn(AuthController.class).login(
             new LoginRequest("username", "password")))
             .withRel("token").withType(HttpMethod.POST.name()));

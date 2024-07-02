@@ -71,8 +71,20 @@ public class ApiVersionFilter extends OncePerRequestFilter implements Ordered {
 
         if (!isSupportedVersion(apiVersion)) {
             handleUnsupportedApiVersionException(request, response, apiVersion);
-        } else {
+            return;
+        }
+
+        ApiInfo apiInfo = ApiInfo.builder()
+            .apiVersion(apiVersion)
+            .endpoint(uri)
+            .build();
+        ApiInfoContextHolder.setApiInfo(apiInfo);
+        filterChain.doFilter(request, response);
+
+        try {
             filterChain.doFilter(request, response);
+        } finally {
+            ApiInfoContextHolder.clear();
         }
     }
 

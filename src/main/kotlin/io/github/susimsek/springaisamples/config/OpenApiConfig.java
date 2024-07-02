@@ -11,6 +11,7 @@ import io.github.susimsek.springaisamples.openapi.OpenApiProperties;
 import io.github.susimsek.springaisamples.openapi.annotation.Idempotent;
 import io.github.susimsek.springaisamples.openapi.annotation.RequireJwsSignature;
 import io.github.susimsek.springaisamples.trace.TraceContext;
+import io.github.susimsek.springaisamples.versioning.CurrentApiInfo;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.media.StringSchema;
 import io.swagger.v3.oas.models.parameters.HeaderParameter;
@@ -45,7 +46,7 @@ public class OpenApiConfig {
             .group("default")
             .addOpenApiCustomizer(openApiCustomizer)
             .addOperationCustomizer(operationCustomizer)
-            .pathsToMatch("/api/**")
+            .pathsToMatch("/api/**", "/.well-known/jwks.json")
             .build();
     }
 
@@ -101,12 +102,12 @@ public class OpenApiConfig {
                 addIdempotentHeader(operation);
             }
 
-            if (isJwsSignatureRequired(handlerMethod.getMethod()) ||
-                isJwsSignatureRequired(handlerMethod.getBeanType())) {
+            if (isJwsSignatureRequired(handlerMethod.getMethod())
+                || isJwsSignatureRequired(handlerMethod.getBeanType())) {
                 addJwsSignatureHeader(operation);
             }
 
-            removeTraceContextParameters(operation, handlerMethod.getMethod());
+            removeCustomParameters(operation, handlerMethod.getMethod());
 
             return operation;
         };
@@ -147,9 +148,10 @@ public class OpenApiConfig {
         operation.addParametersItem(jwsSignatureHeader);
     }
 
-    private void removeTraceContextParameters(Operation operation, Method method) {
+    private void removeCustomParameters(Operation operation, Method method) {
         Arrays.stream(method.getParameters())
-            .filter(parameter -> AnnotatedElementUtils.hasAnnotation(parameter, TraceContext.class))
+            .filter(parameter -> AnnotatedElementUtils.hasAnnotation(parameter, TraceContext.class)
+                || AnnotatedElementUtils.hasAnnotation(parameter, CurrentApiInfo.class))
             .map(java.lang.reflect.Parameter::getName)
             .forEach(paramName -> operation.getParameters().removeIf(param -> param.getName().equals(paramName)));
     }
