@@ -2,6 +2,7 @@ package io.github.susimsek.springaisamples.task;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -10,8 +11,16 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class ReportGenerationTask {
 
+    @Async
     @Scheduled(cron = "${spring.task.tasks.report.cron}")
     public void generateReports() {
-        log.info("Report generation task executed at {}", System.currentTimeMillis());
+        log.info("Report generation task started at {}", System.currentTimeMillis());
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            log.error("Error occurred while generating reports", e);
+            Thread.currentThread().interrupt();
+        }
+        log.info("Report generation task finished at {}", System.currentTimeMillis());
     }
 }
