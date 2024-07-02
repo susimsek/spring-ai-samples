@@ -27,4 +27,5 @@ public final class ErrorConstants {
     public static final String UNSUPPORTED_OPERATION = "error.unsupportedOperation";
     public static final String CIRCUIT_BREAKER_ERROR = "error.circuitBreaker";
     public static final String GATEWAY_TIMEOUT = "error.gatewayTimeout";
+    public static final String UNSUPPORTED_API_VERSION = "error.unsupportedApiVersion";
 }

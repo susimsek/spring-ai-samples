@@ -13,6 +13,7 @@ import io.github.susimsek.springaisamples.exception.header.HeaderConstraintViola
 import io.github.susimsek.springaisamples.exception.idempotency.MissingIdempotencyKeyException;
 import io.github.susimsek.springaisamples.exception.ratelimit.RateLimitExceededException;
 import io.github.susimsek.springaisamples.exception.security.JwsException;
+import io.github.susimsek.springaisamples.exception.versioning.UnsupportedApiVersionException;
 import io.github.susimsek.springaisamples.i18n.ParameterMessageSource;
 import jakarta.validation.ConstraintViolationException;
 import java.net.SocketTimeoutException;
@@ -290,6 +291,14 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         @NonNull WebRequest request) {
         return createProblemDetailResponse(ex, HttpStatus.NOT_IMPLEMENTED,
             ErrorConstants.UNSUPPORTED_OPERATION, new HttpHeaders(), request);
+    }
+
+    @ExceptionHandler(UnsupportedApiVersionException.class)
+    public ResponseEntity<Object> handleUnsupportedApiVersionException(
+        @NonNull UnsupportedApiVersionException ex,
+        @NonNull WebRequest request) {
+        return createProblemDetailResponse(ex, HttpStatus.NOT_FOUND,
+            ErrorConstants.UNSUPPORTED_API_VERSION, new HttpHeaders(), request);
     }
 
     @ExceptionHandler(SocketTimeoutException.class)
