@@ -79,7 +79,6 @@ public class ApiVersionFilter extends OncePerRequestFilter implements Ordered {
             .endpoint(uri)
             .build();
         ApiInfoContextHolder.setApiInfo(apiInfo);
-        filterChain.doFilter(request, response);
 
         try {
             filterChain.doFilter(request, response);
