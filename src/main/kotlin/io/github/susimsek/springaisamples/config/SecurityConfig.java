@@ -118,7 +118,7 @@ public class SecurityConfig {
                     .requestMatchers(requestMatchersConfig.actuatorPaths()).permitAll()
                     .requestMatchers(requestMatchersConfig.encryptionPaths()).permitAll()
                     .requestMatchers(requestMatchersConfig.signPath()).permitAll()
-                    .requestMatchers(mvc.pattern("/.well-known/jwks.json")).permitAll()
+                    .requestMatchers(requestMatchersConfig.jwksPath()).permitAll()
                     .requestMatchers(requestMatchersConfig.tokenPath()).permitAll()
                     .requestMatchers(mvc.pattern("/api/v{version}/locales")).permitAll()
                     .requestMatchers(mvc.pattern("/api/v{version}/ai/**")).hasAuthority(ADMIN)
