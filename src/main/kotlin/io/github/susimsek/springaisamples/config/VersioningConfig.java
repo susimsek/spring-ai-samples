@@ -16,12 +16,15 @@ public class VersioningConfig {
         ApiVersionProblemSupport problemSupport) {
         return ApiVersionFilter.builder(problemSupport)
             .order(FilterOrder.API_VERSION.order())
-            .supportedVersions(ApiVersion.V1.version())
             .requestMatchers(requestMatchersConfig.staticResources())
             .permitAll()
             .requestMatchers(requestMatchersConfig.swaggerPaths()).permitAll()
             .requestMatchers(requestMatchersConfig.actuatorPaths()).permitAll()
+            .requestMatchers(requestMatchersConfig.signPath())
+            .supportedVersions(ApiVersion.V2.version())
+            .versioned()
             .anyRequest()
+            .supportedVersions(ApiVersion.V1.version())
             .versioned()
             .build();
     }

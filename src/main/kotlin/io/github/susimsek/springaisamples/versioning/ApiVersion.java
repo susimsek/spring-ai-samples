@@ -9,7 +9,8 @@ import lombok.experimental.Accessors;
 @Accessors(fluent = true)
 @RequiredArgsConstructor
 public enum ApiVersion {
-    V1("v1");
+    V1("v1"),
+    V2("v2");
 
     private final String version;
 

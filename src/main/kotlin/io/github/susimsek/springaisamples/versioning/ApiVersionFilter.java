@@ -30,7 +30,10 @@ public class ApiVersionFilter extends OncePerRequestFilter implements Ordered {
     private final List<RequestMatcherConfig> requestMatcherConfigs;
     private final boolean defaultVersioned;
     private final int order;
-    private final List<String> supportedVersions;
+    private final List<String> defaultSupportedVersions;
+
+
+    private List<String> currentSupportedVersions;
 
     @Override
     public int getOrder() {
@@ -39,11 +42,23 @@ public class ApiVersionFilter extends OncePerRequestFilter implements Ordered {
 
     @Override
     protected boolean shouldNotFilter(@NonNull HttpServletRequest request) {
-        return requestMatcherConfigs.stream()
+        var optionalConfig = requestMatcherConfigs.stream()
             .filter(config -> config.requestMatcher.matches(request))
-            .map(config -> !config.versioned)
             .findFirst()
-            .orElse(!defaultVersioned);
+            .map(config -> {
+                currentSupportedVersions = config.supportedVersions;
+                return !config.versioned;
+            });
+
+        if (optionalConfig.isEmpty()) {
+            currentSupportedVersions = defaultSupportedVersions;
+            return !defaultVersioned;
+        } else {
+            defaultSupportedVersions.stream()
+                .filter(version -> !currentSupportedVersions.contains(version))
+                .forEach(currentSupportedVersions::add);
+            return optionalConfig.get();
+        }
     }
 
     @Override
@@ -71,19 +86,18 @@ public class ApiVersionFilter extends OncePerRequestFilter implements Ordered {
 
 
     private boolean isSupportedVersion(String apiVersion) {
-        return supportedVersions.contains(apiVersion);
+        return currentSupportedVersions.contains(apiVersion);
     }
 
     @AllArgsConstructor
     private static class RequestMatcherConfig {
         private final RequestMatcher requestMatcher;
         private boolean versioned;
+        private final List<String> supportedVersions;
     }
 
     public interface InitialBuilder {
         InitialBuilder order(int order);
-
-        InitialBuilder supportedVersions(String... versions);
 
         AfterRequestMatchersBuilder anyRequest();
 
@@ -97,8 +111,14 @@ public class ApiVersionFilter extends OncePerRequestFilter implements Ordered {
     }
 
     public interface AfterRequestMatchersBuilder {
+        AfterVersioningConfigBuilder supportedVersions(String... versions);
+
         InitialBuilder permitAll();
 
+        InitialBuilder versioned();
+    }
+
+    public interface AfterVersioningConfigBuilder {
         InitialBuilder versioned();
     }
 
@@ -107,14 +127,14 @@ public class ApiVersionFilter extends OncePerRequestFilter implements Ordered {
     }
 
     private static class Builder extends AbstractRequestMatcherRegistry<Builder>
-        implements InitialBuilder, AfterRequestMatchersBuilder {
+        implements InitialBuilder, AfterRequestMatchersBuilder, AfterVersioningConfigBuilder  {
         private final ApiVersionExceptionHandler apiVersionExceptionHandler;
         private final List<RequestMatcherConfig> requestMatcherConfigs = new ArrayList<>();
         private boolean anyRequestConfigured = false;
         private boolean defaultVersioned = true;
         private int order = FilterOrder.API_VERSION.order();
         private int lastIndex = 0;
-        private final List<String> supportedVersions = new ArrayList<>();
+        private final List<String> defaultSupportedVersions = new ArrayList<>();
 
         private Builder(ApiVersionExceptionHandler apiVersionExceptionHandler) {
             this.apiVersionExceptionHandler = apiVersionExceptionHandler;
@@ -125,7 +145,8 @@ public class ApiVersionFilter extends OncePerRequestFilter implements Ordered {
             lastIndex = requestMatcherConfigs.size();
             for (String pattern : patterns) {
                 this.requestMatcherConfigs.add(new RequestMatcherConfig(
-                    new AntPathRequestMatcher(pattern, method.name()), true));
+                    new AntPathRequestMatcher(pattern, method.name()),
+                    true, new ArrayList<>()));
             }
             return this;
         }
@@ -134,7 +155,8 @@ public class ApiVersionFilter extends OncePerRequestFilter implements Ordered {
         public Builder requestMatchers(String... patterns) {
             lastIndex = requestMatcherConfigs.size();
             for (String pattern : patterns) {
-                this.requestMatcherConfigs.add(new RequestMatcherConfig(new AntPathRequestMatcher(pattern), true));
+                this.requestMatcherConfigs.add(new RequestMatcherConfig(
+                    new AntPathRequestMatcher(pattern), true, new ArrayList<>()));
             }
             return this;
         }
@@ -143,7 +165,8 @@ public class ApiVersionFilter extends OncePerRequestFilter implements Ordered {
         public Builder requestMatchers(RequestMatcher... requestMatchers) {
             lastIndex = requestMatcherConfigs.size();
             for (RequestMatcher requestMatcher : requestMatchers) {
-                this.requestMatcherConfigs.add(new RequestMatcherConfig(requestMatcher, true));
+                this.requestMatcherConfigs.add(new RequestMatcherConfig(
+                    requestMatcher, true, new ArrayList<>()));
             }
             return this;
         }
@@ -187,14 +210,22 @@ public class ApiVersionFilter extends OncePerRequestFilter implements Ordered {
         }
 
         public Builder supportedVersions(String... versions) {
-            this.supportedVersions.clear();
-            this.supportedVersions.addAll(List.of(versions));
+            var supportedVersions = List.of(versions);
+            if (anyRequestConfigured) {
+                defaultSupportedVersions.clear();
+                defaultSupportedVersions.addAll(supportedVersions);
+            } else {
+                requestMatcherConfigs.stream().skip(lastIndex).forEach(config -> {
+                    config.supportedVersions.clear();
+                    config.supportedVersions.addAll((supportedVersions));
+                });
+            }
             return this;
         }
 
         public ApiVersionFilter build() {
             return new ApiVersionFilter(apiVersionExceptionHandler,
-                requestMatcherConfigs, defaultVersioned, order, supportedVersions);
+                requestMatcherConfigs, defaultVersioned, order, defaultSupportedVersions);
         }
 
         @Override
