@@ -21,7 +21,7 @@ public class IdempotencyConfig {
             .requestMatchers(requestMatchersConfig.swaggerPaths()).permitAll()
             .requestMatchers(requestMatchersConfig.actuatorPaths()).permitAll()
             .requestMatchers(requestMatchersConfig.actuatorPaths()).permitAll()
-            .requestMatchers("/api/v*/security/sign").idempotent()
+            .requestMatchers("/api/v{version}/security/sign").idempotent()
             .anyRequest().permitAll()
             .build();
     }

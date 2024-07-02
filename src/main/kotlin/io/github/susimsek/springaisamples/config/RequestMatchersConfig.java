@@ -76,16 +76,16 @@ public class RequestMatchersConfig {
 
     public RequestMatcher[] encryptionPaths() {
         return new MvcRequestMatcher[] {
-            mvc.pattern("/api/v*/security/encrypt"),
-            mvc.pattern("/api/v*/security/decrypt")
+            mvc.pattern("/api/v{version}/security/encrypt"),
+            mvc.pattern("/api/v{version}/security/decrypt")
         };
     }
 
     public RequestMatcher signPath() {
-        return  mvc.pattern("/api/v*/security/sign");
+        return  mvc.pattern("/api/v{version}/security/sign");
     }
 
     public RequestMatcher tokenPath() {
-        return  mvc.pattern("/api/v*/auth/token");
+        return  mvc.pattern("/api/v{version}/auth/token");
     }
 }

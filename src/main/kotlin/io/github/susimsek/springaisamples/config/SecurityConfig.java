@@ -118,8 +118,8 @@ public class SecurityConfig {
                     .requestMatchers(requestMatchersConfig.signPath()).permitAll()
                     .requestMatchers(mvc.pattern("/.well-known/jwks.json")).permitAll()
                     .requestMatchers(requestMatchersConfig.tokenPath()).permitAll()
-                    .requestMatchers(mvc.pattern("/api/v*/locales")).permitAll()
-                    .requestMatchers(mvc.pattern("/api/v*/ai/**")).hasAuthority(ADMIN)
+                    .requestMatchers(mvc.pattern("/api/v{version}/locales")).permitAll()
+                    .requestMatchers(mvc.pattern("/api/v{version}/ai/**")).hasAuthority(ADMIN)
                     .anyRequest().authenticated())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .oauth2ResourceServer(oauth2 -> oauth2
