@@ -4,7 +4,7 @@ import io.github.susimsek.springaisamples.logging.enums.HttpLogLevel;
 import io.github.susimsek.springaisamples.logging.enums.MethodLogLevel;
 import io.github.susimsek.springaisamples.validation.DataSizeMax;
 import io.github.susimsek.springaisamples.validation.DataSizeMin;
-import io.github.susimsek.springaisamples.validation.EnumFormat;
+import io.github.susimsek.springaisamples.validation.Enum;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -57,7 +57,7 @@ public class LoggingProperties {
         private boolean enabled = true;
 
         @NotNull(message = "{validation.field.notNull}")
-        @EnumFormat(enumClass = HttpLogLevel.class, message = "{validation.field.enum}")
+        @Enum(enumClass = HttpLogLevel.class, message = "{validation.field.enum}")
         private HttpLogLevel logLevel = HttpLogLevel.BASIC;
     }
 
@@ -67,7 +67,7 @@ public class LoggingProperties {
         private boolean enabled = true;
 
         @NotNull(message = "{validation.field.notNull}")
-        @EnumFormat(enumClass = MethodLogLevel.class, message = "{validation.field.enum}")
+        @Enum(enumClass = MethodLogLevel.class, message = "{validation.field.enum}")
         private MethodLogLevel logLevel = MethodLogLevel.BASIC;
     }
 

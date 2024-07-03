@@ -8,15 +8,15 @@ import java.util.stream.Collectors;
 import org.hibernate.validator.constraintvalidation.HibernateConstraintValidatorContext;
 
 
-public class EnumValidator implements ConstraintValidator<EnumFormat, Object> {
+public class EnumValidator implements ConstraintValidator<Enum, Object> {
 
     private Set<String> allowedValues;
     private String message;
 
     @Override
-    public void initialize(EnumFormat annotation) {
+    public void initialize(Enum annotation) {
         allowedValues = Arrays.stream(annotation.enumClass().getEnumConstants())
-            .map(Enum::name)
+            .map(java.lang.Enum::name)
             .collect(Collectors.toSet());
         this.message = annotation.message();
     }
@@ -29,7 +29,7 @@ public class EnumValidator implements ConstraintValidator<EnumFormat, Object> {
 
         boolean isValid = value instanceof String stringValue
             ? allowedValues.contains(stringValue)
-            : value instanceof Enum<?> enumValue && allowedValues.contains(enumValue.name());
+            : value instanceof java.lang.Enum<?> enumValue && allowedValues.contains(enumValue.name());
 
         if (!isValid) {
             String allowedValuesString = String.join(", ", allowedValues);
