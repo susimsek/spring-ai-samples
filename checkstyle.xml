@@ -261,7 +261,7 @@
     <module name="AbbreviationAsWordInName">
       <property name="ignoreFinal" value="false"/>
       <property name="allowedAbbreviationLength" value="1"/>
-      <property name="allowedAbbreviations" value="XML, URL, ID, FTP, DTO, VO, DO, TO, PO, BO, POJO, HTTP, IP, GraphQL, SHA256"/>
+      <property name="allowedAbbreviations" value="XML, URL, ID, FTP, DTO, VO, DO, TO, PO, BO, POJO, HTTP, IP, GraphQL, SHA256, TCKN"/>
       <property name="tokens"
                 value="CLASS_DEF, INTERFACE_DEF, ENUM_DEF, ANNOTATION_DEF, ANNOTATION_FIELD_DEF,
                     PARAMETER_DEF, VARIABLE_DEF, METHOD_DEF, PATTERN_VARIABLE_DEF, RECORD_DEF,
