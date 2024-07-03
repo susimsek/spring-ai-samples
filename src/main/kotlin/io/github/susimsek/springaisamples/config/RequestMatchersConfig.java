@@ -40,7 +40,8 @@ public class RequestMatchersConfig {
             mvc.pattern("/swagger-ui/**"),
             mvc.pattern("/v3/api-docs/**"),
             mvc.pattern("/api-docs/**"),
-            mvc.pattern("/api/v1/locales")
+            mvc.pattern("/api/v1/locales"),
+            mvc.pattern("/api/users")
         };
     }
 
