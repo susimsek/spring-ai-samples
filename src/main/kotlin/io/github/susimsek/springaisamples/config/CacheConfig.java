@@ -25,7 +25,13 @@ public class CacheConfig {
         caches.forEach((name, config) -> {
             CacheProperties.CacheConfig cacheConfig = caches.getOrDefault(name, caches.get("default"));
             var caffeine = Caffeine.newBuilder()
-                .expireAfterWrite(cacheConfig.getTtl());
+                .expireAfterWrite(cacheConfig.getTtl())
+                .initialCapacity(config.getInitialCapacity())
+                .maximumSize(config.getMaximumSize())
+                .refreshAfterWrite(config.getRefreshAfterWrite())
+                .weakKeys()
+                .weakValues()
+                .recordStats();
             cacheManager.setCaffeine(caffeine);
         });
         return cacheManager;

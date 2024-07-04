@@ -23,5 +23,14 @@ public class CacheProperties {
     public static class CacheConfig {
         @NotNull(message = "{validation.field.notNull}")
         private Duration ttl = Duration.ofHours(1);
+
+        @NotNull(message = "{validation.field.notNull}")
+        private Integer initialCapacity = 1000;
+
+        @NotNull(message = "{validation.field.notNull}")
+        private Long maximumSize = 10000L;
+
+        @NotNull(message = "{validation.field.notNull}")
+        private Duration refreshAfterWrite = Duration.ofMinutes(30);
     }
 }
