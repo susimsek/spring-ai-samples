@@ -27,4 +27,18 @@
         </createTable>
     </changeSet>
 
+    <changeSet id="1699333174982-2-data" author="susimsek (generated)" context="faker">
+        <loadData
+                file="config/liquibase/fake-data/city.csv"
+                separator=";"
+                tableName="city">
+            <column name="id" type="numeric"/>
+            <column name="name" type="string"/>
+            <column name="created_at" type="datetime"/>
+            <column name="created_by" type="string"/>
+            <column name="updated_at" type="datetime"/>
+            <column name="updated_by" type="string"/>
+        </loadData>
+    </changeSet>
+
 </databaseChangeLog>
