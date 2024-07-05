@@ -1,6 +1,6 @@
 package io.github.susimsek.springaisamples.client;
 
-import io.github.susimsek.springaisamples.model.WeatherResponse;
+import io.github.susimsek.springaisamples.dto.WeatherResponse;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.service.annotation.GetExchange;
 import org.springframework.web.service.annotation.HttpExchange;

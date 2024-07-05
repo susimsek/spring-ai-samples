@@ -1,9 +1,9 @@
-package io.github.susimsek.springaisamples.model;
+package io.github.susimsek.springaisamples.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 
-@Schema(description = "Decrypt request model containing the payload to be decrypted")
+@Schema(description = "Decrypt request dto containing the payload to be decrypted")
 public record DecryptRequest(
     @Schema(
         description = "The JWE token to be decrypted",

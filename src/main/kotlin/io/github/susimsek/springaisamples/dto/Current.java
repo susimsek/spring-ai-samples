@@ -1,4 +1,4 @@
-package io.github.susimsek.springaisamples.model;
+package io.github.susimsek.springaisamples.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.LocalDateTime;

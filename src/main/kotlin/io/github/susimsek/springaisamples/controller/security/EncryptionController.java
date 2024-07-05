@@ -2,10 +2,10 @@ package io.github.susimsek.springaisamples.controller.security;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
-import io.github.susimsek.springaisamples.model.DecryptRequest;
-import io.github.susimsek.springaisamples.model.DecryptResponse;
-import io.github.susimsek.springaisamples.model.EncryptRequest;
-import io.github.susimsek.springaisamples.model.EncryptResponse;
+import io.github.susimsek.springaisamples.dto.DecryptRequest;
+import io.github.susimsek.springaisamples.dto.DecryptResponse;
+import io.github.susimsek.springaisamples.dto.EncryptRequest;
+import io.github.susimsek.springaisamples.dto.EncryptResponse;
 import io.github.susimsek.springaisamples.service.EncryptionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;

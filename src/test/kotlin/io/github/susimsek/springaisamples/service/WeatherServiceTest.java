@@ -5,11 +5,11 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 import io.github.susimsek.springaisamples.client.WeatherClient;
-import io.github.susimsek.springaisamples.model.Condition;
-import io.github.susimsek.springaisamples.model.Current;
-import io.github.susimsek.springaisamples.model.Location;
-import io.github.susimsek.springaisamples.model.WeatherRequest;
-import io.github.susimsek.springaisamples.model.WeatherResponse;
+import io.github.susimsek.springaisamples.dto.Condition;
+import io.github.susimsek.springaisamples.dto.Current;
+import io.github.susimsek.springaisamples.dto.Location;
+import io.github.susimsek.springaisamples.dto.WeatherRequest;
+import io.github.susimsek.springaisamples.dto.WeatherResponse;
 import java.time.LocalDateTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

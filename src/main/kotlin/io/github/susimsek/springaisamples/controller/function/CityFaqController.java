@@ -35,7 +35,7 @@ import org.springframework.web.bind.annotation.RestController;
 @SecurityRequirement(name = "bearerAuth")
 @RequestMapping("/api/v1/ai/cities")
 @Validated
-public class CityController {
+public class CityFaqController {
 
     private final ChatClient chatClient;
 

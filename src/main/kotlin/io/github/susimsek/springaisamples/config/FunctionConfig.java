@@ -1,8 +1,8 @@
 package io.github.susimsek.springaisamples.config;
 
 import io.github.susimsek.springaisamples.client.WeatherClient;
-import io.github.susimsek.springaisamples.model.WeatherRequest;
-import io.github.susimsek.springaisamples.model.WeatherResponse;
+import io.github.susimsek.springaisamples.dto.WeatherRequest;
+import io.github.susimsek.springaisamples.dto.WeatherResponse;
 import io.github.susimsek.springaisamples.service.WeatherService;
 import java.util.function.Function;
 import org.springframework.context.annotation.Bean;

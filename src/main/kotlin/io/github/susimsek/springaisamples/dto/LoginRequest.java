@@ -1,9 +1,9 @@
-package io.github.susimsek.springaisamples.model;
+package io.github.susimsek.springaisamples.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 
-@Schema(description = "Login request model containing username and password")
+@Schema(description = "Login request dto containing username and password")
 public record LoginRequest(
     @Schema(description = "The username of the user", example = "admin")
     @NotBlank(message = "{validation.field.notBlank}")

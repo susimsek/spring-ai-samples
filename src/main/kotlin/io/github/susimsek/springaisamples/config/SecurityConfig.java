@@ -122,6 +122,7 @@ public class SecurityConfig {
                     .requestMatchers(requestMatchersConfig.tokenPath()).permitAll()
                     .requestMatchers(mvc.pattern("/api/v{version}/locales")).permitAll()
                     .requestMatchers(mvc.pattern("/api/v{version}/ai/**")).hasAuthority(ADMIN)
+                    .requestMatchers(requestMatchersConfig.cityPath()).hasAuthority(ADMIN)
                     .anyRequest().authenticated())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .oauth2ResourceServer(oauth2 -> oauth2

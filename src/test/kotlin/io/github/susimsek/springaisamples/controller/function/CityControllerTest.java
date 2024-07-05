@@ -19,7 +19,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.web.servlet.MockMvc;
 
-@WebMvcTest(CityController.class)
+@WebMvcTest(CityFaqController.class)
 @Import(LocaleConfig.class)
 class CityControllerTest {
 

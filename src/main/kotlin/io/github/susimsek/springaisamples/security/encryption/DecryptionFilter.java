@@ -4,7 +4,7 @@ import io.github.susimsek.springaisamples.enums.FilterOrder;
 import io.github.susimsek.springaisamples.exception.encryption.EncryptionExceptionHandler;
 import io.github.susimsek.springaisamples.exception.encryption.JweException;
 import io.github.susimsek.springaisamples.exception.encryption.MissingJweException;
-import io.github.susimsek.springaisamples.model.DecryptRequest;
+import io.github.susimsek.springaisamples.dto.DecryptRequest;
 import io.github.susimsek.springaisamples.service.EncryptionService;
 import io.github.susimsek.springaisamples.utils.CachedBodyHttpServletRequestWrapper;
 import io.github.susimsek.springaisamples.utils.JsonUtil;

@@ -75,6 +75,7 @@ openapi:
   priority-tags:
     - security
     - auth
+    - city
     - localization
     - ai
 springdoc:

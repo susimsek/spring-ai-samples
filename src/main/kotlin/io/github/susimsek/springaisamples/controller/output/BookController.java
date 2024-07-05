@@ -2,7 +2,7 @@ package io.github.susimsek.springaisamples.controller.output;
 
 import static io.github.susimsek.springaisamples.utils.ChatUtils.FORMAT;
 
-import io.github.susimsek.springaisamples.model.Author;
+import io.github.susimsek.springaisamples.dto.Author;
 import io.github.susimsek.springaisamples.utils.ChatUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;

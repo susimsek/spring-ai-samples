@@ -1,8 +1,8 @@
 package io.github.susimsek.springaisamples.controller.security;
 
 import io.github.susimsek.springaisamples.logging.annotation.Loggable;
-import io.github.susimsek.springaisamples.model.SignatureRequest;
-import io.github.susimsek.springaisamples.model.SignatureResponse;
+import io.github.susimsek.springaisamples.dto.SignatureRequest;
+import io.github.susimsek.springaisamples.dto.SignatureResponse;
 import io.github.susimsek.springaisamples.openapi.annotation.Idempotent;
 import io.github.susimsek.springaisamples.service.SignatureService;
 import io.swagger.v3.oas.annotations.Operation;

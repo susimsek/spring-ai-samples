@@ -3,8 +3,8 @@ package io.github.susimsek.springaisamples.config;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import io.github.susimsek.springaisamples.client.WeatherClient;
-import io.github.susimsek.springaisamples.model.WeatherRequest;
-import io.github.susimsek.springaisamples.model.WeatherResponse;
+import io.github.susimsek.springaisamples.dto.WeatherRequest;
+import io.github.susimsek.springaisamples.dto.WeatherResponse;
 import java.util.function.Function;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

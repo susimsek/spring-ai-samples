@@ -1,4 +1,4 @@
-package io.github.susimsek.springaisamples.model;
+package io.github.susimsek.springaisamples.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.hateoas.RepresentationModel;
 
-@Schema(description = "Response model for encrypted data", example = """
+@Schema(description = "Response dto for encrypted data", example = """
         {
             "jweToken": "eyJhbGciOiJSU0EtT0FFUCIsImVuYyI6IkEyNTZHQ00ifQ...",
             "_links": {

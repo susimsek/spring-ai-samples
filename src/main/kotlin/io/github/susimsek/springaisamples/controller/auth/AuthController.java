@@ -2,9 +2,9 @@ package io.github.susimsek.springaisamples.controller.auth;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
-import io.github.susimsek.springaisamples.model.DecryptRequest;
-import io.github.susimsek.springaisamples.model.LoginRequest;
-import io.github.susimsek.springaisamples.model.RefreshTokenRequest;
+import io.github.susimsek.springaisamples.dto.DecryptRequest;
+import io.github.susimsek.springaisamples.dto.LoginRequest;
+import io.github.susimsek.springaisamples.dto.RefreshTokenRequest;
 import io.github.susimsek.springaisamples.openapi.annotation.RequireJwsSignature;
 import io.github.susimsek.springaisamples.security.Token;
 import io.github.susimsek.springaisamples.service.AuthenticationService;

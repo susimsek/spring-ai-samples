@@ -89,6 +89,10 @@ public class RequestMatchersConfig {
         return  mvc.pattern("/api/v{version}/auth/token");
     }
 
+    public RequestMatcher cityPath() {
+        return  mvc.pattern("/api/v{version}/cities/**");
+    }
+
     public RequestMatcher jwksPath() {
         return  mvc.pattern("/.well-known/jwks.json");
     }

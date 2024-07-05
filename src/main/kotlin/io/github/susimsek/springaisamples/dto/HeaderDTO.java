@@ -1,4 +1,4 @@
-package io.github.susimsek.springaisamples.model;
+package io.github.susimsek.springaisamples.dto;
 
 import io.github.susimsek.springaisamples.trace.TraceConstants;
 import io.github.susimsek.springaisamples.validation.HeaderFormat;

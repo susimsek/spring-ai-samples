@@ -1,4 +1,4 @@
-package io.github.susimsek.springaisamples.model;
+package io.github.susimsek.springaisamples.dto;
 
 public record Condition(
     String text,

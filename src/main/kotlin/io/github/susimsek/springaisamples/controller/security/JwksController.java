@@ -3,11 +3,11 @@ package io.github.susimsek.springaisamples.controller.security;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 import io.github.susimsek.springaisamples.controller.auth.AuthController;
-import io.github.susimsek.springaisamples.model.DecryptRequest;
-import io.github.susimsek.springaisamples.model.EncryptRequest;
-import io.github.susimsek.springaisamples.model.LoginRequest;
-import io.github.susimsek.springaisamples.model.RefreshTokenRequest;
-import io.github.susimsek.springaisamples.model.SignatureRequest;
+import io.github.susimsek.springaisamples.dto.DecryptRequest;
+import io.github.susimsek.springaisamples.dto.EncryptRequest;
+import io.github.susimsek.springaisamples.dto.LoginRequest;
+import io.github.susimsek.springaisamples.dto.RefreshTokenRequest;
+import io.github.susimsek.springaisamples.dto.SignatureRequest;
 import io.github.susimsek.springaisamples.service.JwksService;
 import io.github.susimsek.springaisamples.trace.Trace;
 import io.github.susimsek.springaisamples.trace.TraceContext;
