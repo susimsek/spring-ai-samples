@@ -88,11 +88,19 @@ spring:
           model: gpt-4o
   cache:
     caches:
+      default:
+        ttl: 1h
+        initial-capacity: 5000
+        maximum-size: 10000
       jwksCache:
         ttl: 1h
         initial-capacity: 20
         maximum-size: 100
       translationsCache:
+        ttl: 1h
+        initial-capacity: 500
+        maximum-size: 2000
+      citiesByNameCache:
         ttl: 1h
         initial-capacity: 500
         maximum-size: 2000
