@@ -11,6 +11,8 @@ spring:
     name: spring-ai-samples
   main:
     allow-bean-definition-overriding: true
+  liquibase:
+    change-log: classpath:config/liquibase/master.xml
   output:
     ansi:
       enabled: always

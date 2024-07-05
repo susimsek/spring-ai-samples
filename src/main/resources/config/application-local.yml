@@ -6,6 +6,39 @@ server:
     min-response-size: 1024
     mime-types: text/html,text/xml,text/plain,text/css,application/javascript,application/json,image/svg+xml
 spring:
+  datasource:
+    url: jdbc:h2:mem:springaidb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;
+    username: springai
+    password: root
+    hikari:
+      maximum-pool-size: 30
+      minimum-idle: 1
+      pool-name: Hikari
+      auto-commit: false
+  jpa:
+    hibernate:
+      ddl-auto: none
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
+        implicit-strategy: org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy
+    show-sql: true
+    open-in-view: false
+    properties:
+      hibernate.connection.provider_disables_autocommit: true
+      hibernate.cache.use_second_level_cache: true
+      hibernate.cache.use_query_cache: true
+      hibernate.generate_statistics: false
+      hibernate.jdbc.batch_size: 25
+      hibernate.order_inserts: true
+      hibernate.order_updates: true
+      hibernate.query.fail_on_pagination_over_collection_fetch: true
+      hibernate.query.in_clause_parameter_padding: true
+      jakarta.persistence.sharedCache.mode: ENABLE_SELECTIVE
+  h2:
+    console:
+      enabled: true
+  liquibase:
+    contexts: local, faker
   mvc:
     cors:
       enabled: true
@@ -55,11 +88,6 @@ spring:
           model: gpt-4o
   cache:
     caches:
-      default:
-        ttl: 1h
-        initial-capacity: 1000
-        maximum-size: 10000
-        refresh-after-write: 30m
       jwksCache:
         ttl: 1h
         initial-capacity: 20
@@ -70,6 +98,33 @@ spring:
         initial-capacity: 500
         maximum-size: 2000
         refresh-after-write: 30m
+    regions:
+      entityCache:
+        ttl: 1h
+        initial-capacity: 5000
+        maximum-size: 10000
+        refresh-after-write: 30m
+      collectionCache:
+        ttl: 1h
+        initial-capacity: 5000
+        maximum-size: 10000
+        refresh-after-write: 30m
+      naturalIdCache:
+        ttl: 1h
+        initial-capacity: 5000
+        maximum-size: 10000
+        refresh-after-write: 30m
+      queryCache:
+        ttl: 1h
+        initial-capacity: 5000
+        maximum-size: 10000
+        refresh-after-write: 30m
+      timestampsCache:
+        ttl: 1h
+        initial-capacity: 5000
+        maximum-size: 10000
+        refresh-after-write: 30m
+
   devtools:
     restart:
       enabled: true

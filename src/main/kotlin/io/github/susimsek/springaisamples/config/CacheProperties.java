@@ -17,6 +17,7 @@ import org.springframework.validation.annotation.Validated;
 public class CacheProperties {
     @Valid
     private Map<String, CacheConfig> caches = new HashMap<>();
+    private Map<String, CacheConfig> regions = new HashMap<>();
 
     @Getter
     @Setter
