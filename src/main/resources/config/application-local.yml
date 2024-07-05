@@ -103,6 +103,7 @@ spring:
         ttl: 1h
         initial-capacity: 5000
         maximum-size: 10000
+        refresh-after-write: 30m
       default-update-timestamps-region:
         ttl: 1h
         initial-capacity: 5000
