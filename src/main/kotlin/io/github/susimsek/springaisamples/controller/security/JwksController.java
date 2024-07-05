@@ -120,11 +120,11 @@ public class JwksController {
         log.info("Trace: {}", trace);
         log.info("API Info: {}", apiInfo);
 
-       Map<String, Object> jwks = jwksService.getJwks();
+        Map<String, Object> jwks = jwksService.getJwks();
 
         EntityModel<Map<String, Object>> entityModel = EntityModel.of(jwks);
         entityModel.add(WebMvcLinkBuilder.linkTo(methodOn(JwksController.class)
-            .getJwks(null ,null)).withSelfRel().withType(HttpMethod.GET.name()));
+            .getJwks(null, null)).withSelfRel().withType(HttpMethod.GET.name()));
         entityModel.add(WebMvcLinkBuilder.linkTo(methodOn(AuthController.class).login(
                 new LoginRequest("username", "password")))
             .withRel("token").withType(HttpMethod.POST.name()));
