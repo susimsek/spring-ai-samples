@@ -1,17 +1,6 @@
 package io.github.susimsek.springaisamples.controller.security;
 
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
-
-import com.nimbusds.jose.JWEAlgorithm;
-import com.nimbusds.jose.JWSAlgorithm;
-import com.nimbusds.jose.jwk.JWKSet;
-import com.nimbusds.jose.jwk.RSAKey;
-import io.github.susimsek.springaisamples.controller.auth.AuthController;
-import io.github.susimsek.springaisamples.model.DecryptRequest;
-import io.github.susimsek.springaisamples.model.EncryptRequest;
-import io.github.susimsek.springaisamples.model.LoginRequest;
-import io.github.susimsek.springaisamples.model.RefreshTokenRequest;
-import io.github.susimsek.springaisamples.model.SignatureRequest;
+import io.github.susimsek.springaisamples.service.JwksService;
 import io.github.susimsek.springaisamples.trace.Trace;
 import io.github.susimsek.springaisamples.trace.TraceContext;
 import io.github.susimsek.springaisamples.versioning.ApiInfo;
@@ -22,16 +11,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import java.security.KeyPair;
-import java.security.interfaces.RSAPublicKey;
-import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.hateoas.EntityModel;
-import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
@@ -48,9 +31,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 public class JwksController {
 
-    private final KeyPair jwtKeyPair;
-    private final KeyPair jwsKeyPair;
-    private final KeyPair jweKeyPair;
+    private final JwksService jwksService;
 
     @Operation(summary = "Get JWKS",
         description = "Provides the JSON Web Key Set (JWKS) containing the public keys for JWS signature verification, "
@@ -123,58 +104,13 @@ public class JwksController {
                 schema = @Schema(implementation = ProblemDetail.class)))
     })
     @GetMapping("/jwks.json")
-    @Cacheable("jwksCache")
     public ResponseEntity<EntityModel<Map<String, Object>>> getJwks(
         @TraceContext Trace trace,
         @CurrentApiInfo ApiInfo apiInfo) {
         log.info("Trace: {}", trace);
         log.info("API Info: {}", apiInfo);
-        // JWS Key
-        RSAPublicKey jwsPublicKey = (RSAPublicKey) jwsKeyPair.getPublic();
-        RSAKey jwsJwk = new RSAKey.Builder(jwsPublicKey)
-            .keyUse(com.nimbusds.jose.jwk.KeyUse.SIGNATURE)
-            .algorithm(JWSAlgorithm.RS256)
-            .keyID("1")
-            .build();
 
-        // JWT Key
-        RSAPublicKey jwtPublicKey = (RSAPublicKey) jwtKeyPair.getPublic();
-        RSAKey jwtJwk = new RSAKey.Builder(jwtPublicKey)
-            .keyUse(com.nimbusds.jose.jwk.KeyUse.SIGNATURE)
-            .algorithm(JWSAlgorithm.RS256)
-            .keyID("2")
-            .build();
-
-        // JWE Key
-        RSAPublicKey jwePublicKey = (RSAPublicKey) jweKeyPair.getPublic();
-        RSAKey jweJwk = new RSAKey.Builder(jwePublicKey)
-            .keyUse(com.nimbusds.jose.jwk.KeyUse.ENCRYPTION)
-            .algorithm(JWEAlgorithm.RSA_OAEP_256)
-            .keyID("3")
-            .build();
-
-        // Create JWKSet with all keys
-        JWKSet jwkSet = new JWKSet(List.of(jwsJwk, jwtJwk, jweJwk));
-        Map<String, Object> jwks = jwkSet.toJSONObject();
-
-        // Add HATEOAS links
-        EntityModel<Map<String, Object>> entityModel = EntityModel.of(jwks);
-        entityModel.add(WebMvcLinkBuilder.linkTo(methodOn(JwksController.class)
-            .getJwks(null ,null)).withSelfRel().withType(HttpMethod.GET.name()));
-        entityModel.add(WebMvcLinkBuilder.linkTo(methodOn(AuthController.class).login(
-            new LoginRequest("username", "password")))
-            .withRel("token").withType(HttpMethod.POST.name()));
-        entityModel.add(WebMvcLinkBuilder.linkTo(methodOn(AuthController.class)
-                .refresh(new RefreshTokenRequest("refreshToken")))
-            .withRel("refresh").withType(HttpMethod.POST.name()));
-        entityModel.add(WebMvcLinkBuilder.linkTo(methodOn(SignatureController.class)
-            .createJws(new SignatureRequest("data")))
-            .withRel("signature").withType(HttpMethod.POST.name()));
-        entityModel.add(WebMvcLinkBuilder.linkTo(methodOn(EncryptionController.class)
-            .encryptData(new EncryptRequest("data"))).withRel("encrypt").withType(HttpMethod.POST.name()));
-        entityModel.add(WebMvcLinkBuilder.linkTo(methodOn(EncryptionController.class)
-                .decryptData(new DecryptRequest("jweToken")))
-            .withRel("decrypt").withType(HttpMethod.POST.name()));
+        EntityModel<Map<String, Object>> entityModel = jwksService.getJwks();
 
         return ResponseEntity.ok(entityModel);
     }
