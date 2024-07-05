@@ -61,7 +61,9 @@ public class CacheConfig {
     @ConditionalOnProperty(name = "spring.jpa.properties.hibernate.cache.use_second_level_cache",
         havingValue = "true")
     public HibernatePropertiesCustomizer hibernatePropertiesCustomizer(javax.cache.CacheManager jcacheManager) {
-        return hibernateProperties -> hibernateProperties.put(ConfigSettings.CACHE_MANAGER, jcacheManager);
+        return hibernateProperties -> {
+            hibernateProperties.put(ConfigSettings.CACHE_MANAGER, jcacheManager);
+        };
     }
 
     @Bean
@@ -78,8 +80,11 @@ public class CacheConfig {
         caffeineConfiguration.setExpireAfterWrite(OptionalLong.of(
             TimeUnit.SECONDS.toNanos(config.getTtl().getSeconds())));
         caffeineConfiguration.setStatisticsEnabled(true);
-        caffeineConfiguration.setRefreshAfterWrite(OptionalLong.of(TimeUnit.SECONDS.toNanos(
-            config.getRefreshAfterWrite().getSeconds())));
+        if (config.getRefreshAfterWrite() != null) {
+            caffeineConfiguration.setRefreshAfterWrite(
+                OptionalLong.of(TimeUnit.SECONDS.toNanos(
+                    config.getRefreshAfterWrite().getSeconds())));
+        }
         caffeineConfiguration.setStatisticsEnabled(true);
 
         cm.createCache(cacheName, caffeineConfiguration);

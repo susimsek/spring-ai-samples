@@ -103,27 +103,14 @@ spring:
         ttl: 1h
         initial-capacity: 5000
         maximum-size: 10000
-        refresh-after-write: 30m
-      collectionCache:
+      default-update-timestamps-region:
         ttl: 1h
         initial-capacity: 5000
         maximum-size: 10000
-        refresh-after-write: 30m
-      naturalIdCache:
+      default-query-results-region:
         ttl: 1h
         initial-capacity: 5000
         maximum-size: 10000
-        refresh-after-write: 30m
-      queryCache:
-        ttl: 1h
-        initial-capacity: 5000
-        maximum-size: 10000
-        refresh-after-write: 30m
-      timestampsCache:
-        ttl: 1h
-        initial-capacity: 5000
-        maximum-size: 10000
-        refresh-after-write: 30m
 
   devtools:
     restart:

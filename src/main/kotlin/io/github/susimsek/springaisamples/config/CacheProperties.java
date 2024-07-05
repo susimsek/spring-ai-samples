@@ -31,7 +31,7 @@ public class CacheProperties {
         @NotNull(message = "{validation.field.notNull}")
         private Long maximumSize = 10000L;
 
-        @NotNull(message = "{validation.field.notNull}")
-        private Duration refreshAfterWrite = Duration.ofMinutes(30);
+
+        private Duration refreshAfterWrite;
     }
 }
