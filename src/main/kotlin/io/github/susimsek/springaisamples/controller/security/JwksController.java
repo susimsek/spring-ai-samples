@@ -1,5 +1,13 @@
 package io.github.susimsek.springaisamples.controller.security;
 
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+
+import io.github.susimsek.springaisamples.controller.auth.AuthController;
+import io.github.susimsek.springaisamples.model.DecryptRequest;
+import io.github.susimsek.springaisamples.model.EncryptRequest;
+import io.github.susimsek.springaisamples.model.LoginRequest;
+import io.github.susimsek.springaisamples.model.RefreshTokenRequest;
+import io.github.susimsek.springaisamples.model.SignatureRequest;
 import io.github.susimsek.springaisamples.service.JwksService;
 import io.github.susimsek.springaisamples.trace.Trace;
 import io.github.susimsek.springaisamples.trace.TraceContext;
@@ -15,6 +23,8 @@ import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
@@ -110,7 +120,25 @@ public class JwksController {
         log.info("Trace: {}", trace);
         log.info("API Info: {}", apiInfo);
 
-        EntityModel<Map<String, Object>> entityModel = jwksService.getJwks();
+       Map<String, Object> jwks = jwksService.getJwks();
+
+        EntityModel<Map<String, Object>> entityModel = EntityModel.of(jwks);
+        entityModel.add(WebMvcLinkBuilder.linkTo(methodOn(JwksController.class)
+            .getJwks(null ,null)).withSelfRel().withType(HttpMethod.GET.name()));
+        entityModel.add(WebMvcLinkBuilder.linkTo(methodOn(AuthController.class).login(
+                new LoginRequest("username", "password")))
+            .withRel("token").withType(HttpMethod.POST.name()));
+        entityModel.add(WebMvcLinkBuilder.linkTo(methodOn(AuthController.class)
+                .refresh(new RefreshTokenRequest("refreshToken")))
+            .withRel("refresh").withType(HttpMethod.POST.name()));
+        entityModel.add(WebMvcLinkBuilder.linkTo(methodOn(SignatureController.class)
+                .createJws(new SignatureRequest("data")))
+            .withRel("signature").withType(HttpMethod.POST.name()));
+        entityModel.add(WebMvcLinkBuilder.linkTo(methodOn(EncryptionController.class)
+            .encryptData(new EncryptRequest("data"))).withRel("encrypt").withType(HttpMethod.POST.name()));
+        entityModel.add(WebMvcLinkBuilder.linkTo(methodOn(EncryptionController.class)
+                .decryptData(new DecryptRequest("jweToken")))
+            .withRel("decrypt").withType(HttpMethod.POST.name()));
 
         return ResponseEntity.ok(entityModel);
     }
