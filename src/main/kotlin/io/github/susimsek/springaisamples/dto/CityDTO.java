@@ -24,15 +24,15 @@ import org.springframework.hateoas.RepresentationModel;
             "updatedBy": "admin",
             "_links": {
                 "self": {
-                    "href": "http://localhost:8080/api/cities/1",
+                    "href": "http://localhost:8080/api/v1/cities/1",
                     "type": "GET"
                 },
                 "update": {
-                    "href": "http://localhost:8080/api/cities/1",
+                    "href": "http://localhost:8080/api/v1/cities/1",
                     "type": "PUT"
                 },
                 "delete": {
-                    "href": "http://localhost:8080/api/cities/1",
+                    "href": "http://localhost:8080/api/v1/cities/1",
                     "type": "DELETE"
                 }
             }

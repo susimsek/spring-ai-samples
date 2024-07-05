@@ -6,7 +6,7 @@
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd"
         objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
     <changeSet id="1699333174982-1" author="susimsek">
-        <createSequence incrementBy="1" minValue="1" maxValue="9999999999999999" cycle="false" cacheSize="50000" sequenceName="seq_city" startValue="1"/>
+        <createSequence incrementBy="1" minValue="1" maxValue="9999999999999999" cycle="false" cacheSize="50000" sequenceName="seq_city" startValue="1001"/>
     </changeSet>
     <changeSet id="1699333174982-2" author="susimsek">
         <createTable tableName="city">
