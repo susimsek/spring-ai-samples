@@ -92,18 +92,15 @@ spring:
         ttl: 1h
         initial-capacity: 20
         maximum-size: 100
-        refresh-after-write: 30m
       translationsCache:
         ttl: 1h
         initial-capacity: 500
         maximum-size: 2000
-        refresh-after-write: 30m
     regions:
       entityCache:
         ttl: 1h
         initial-capacity: 5000
         maximum-size: 10000
-        refresh-after-write: 30m
       default-update-timestamps-region:
         ttl: 1h
         initial-capacity: 5000
@@ -118,7 +115,9 @@ spring:
       enabled: true
     livereload:
       enabled: true
-
+  aop:
+    proxy-target-class: false
+    auto: true
 
 management:
   tracing:

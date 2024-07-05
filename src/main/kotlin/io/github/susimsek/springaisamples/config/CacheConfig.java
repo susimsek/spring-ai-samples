@@ -37,10 +37,12 @@ public class CacheConfig {
                 .expireAfterWrite(config.getTtl())
                 .initialCapacity(config.getInitialCapacity())
                 .maximumSize(config.getMaximumSize())
-                .refreshAfterWrite(config.getRefreshAfterWrite())
                 .weakKeys()
                 .weakValues()
                 .recordStats();
+            if (config.getRefreshAfterWrite() != null) {
+                caffeine.refreshAfterWrite(config.getRefreshAfterWrite());
+            }
             cacheManager.setCaffeine(caffeine);
         });
         return cacheManager;
