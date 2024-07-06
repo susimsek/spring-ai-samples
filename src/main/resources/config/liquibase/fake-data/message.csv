@@ -1,0 +1,151 @@
+id;locale;code;content;created_at;created_by;updated_at;updated_by
+1;tr;error.mediaType.notAcceptable;İstenilen medya tipi kabul edilemez.;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+2;en;error.mediaType.notAcceptable;Requested media type is not acceptable.;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+3;tr;error.mediaType.notSupported;İstenilen medya tipi desteklenmiyor.;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+4;en;error.mediaType.notSupported;Requested media type is not supported.;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+5;tr;error.requestMethod.notSupported;İstenilen HTTP yöntemi desteklenmiyor.;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+6;en;error.requestMethod.notSupported;Requested HTTP method is not supported.;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+7;tr;error.messageNotReadable;İstek mesajı okunamadı. Lütfen formatı kontrol edip tekrar deneyin.;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+8;en;error.messageNotReadable;The request message could not be read. Please check the format and try again.;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+9;tr;error.typeMismatch;İstek parametresi yanlış türde. Lütfen formatı kontrol edip tekrar deneyin.;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+10;en;error.typeMismatch;The request parameter is of the wrong type. Please check the format and try again.;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+11;tr;error.missingParameter;İstek parametresi '{paramName}' eksik. Lütfen gerekli parametreyi sağlayıp tekrar deneyin.;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+12;en;error.missingParameter;The request parameter '{paramName}' is missing. Please provide the required parameter and try again.;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+13;tr;error.missingPart;İstek parçası '{partName}' eksik. Lütfen gerekli parçayı sağlayıp tekrar deneyin.;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+14;en;error.missingPart;The request part '{partName}' is missing. Please provide the required part and try again.;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+15;tr;error.requestBindingError;İstek işleme işleminde bir hata oluştu. Lütfen girdileri kontrol edip tekrar deneyin.;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+16;en;error.requestBindingError;There was an error binding the request. Please check the input and try again.;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+17;tr;error.multipartError;Çok parçalı isteği işlerken bir hata oluştu. Lütfen dosyayı kontrol edip tekrar deneyin.;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+18;en;error.multipartError;There was an error processing the multipart request. Please check the file and try again.;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+19;tr;error.validation;Doğrulama hatası oluştu.;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+20;en;error.validation;Validation error occurred.;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+21;tr;error.authentication;Geçersiz Token;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+22;en;error.authentication;Invalid Token;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+23;tr;error.encryption.invalid_data;Geçersiz şifrelenmiş veri. Lütfen girdinizi kontrol edin.;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+24;en;error.encryption;Invalid encrypted data. Please check your input;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+25;tr;error.signature;Geçersiz İmza;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+26;en;error.signature;Invalid Signature;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+27;tr;error.header.missing;Gerekli header eksik: {headerName};2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+28;en;error.header.missing;Missing required header: {headerName};2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+29;tr;error.idempotencyKey.missing;Idempotency anahtarı eksik;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+30;en;error.idempotencyKey.missing;Idempotency key is missing;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+31;tr;error.requestId.missing;İstek anahtarı eksik;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+32;en;error.requestId.missing;Request ID is missing;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+33;tr;error.correlationId.missing;Korelasyon anahtarı eksik;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+34;en;error.correlationId.missing;Correlation ID is missing;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+35;tr;error.accessDenied;İzin verilmedi;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+36;en;error.accessDenied;Insufficient rights;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+37;tr;error.noHandlerFound;İstenen yol için hiçbir kaynak bulunamadı.;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+38;en;error.noHandlerFound;No handler found for the requested path.;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+39;tr;error.rateLimiting;Erişim sıklığı limiti aşımı;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+40;en;error.rateLimiting;Too many requests;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+41;tr;error.circuitBreaker;Hizmet geçici olarak devre kesici nedeniyle kullanılamıyor. Lütfen daha sonra tekrar deneyin.;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+42;en;error.circuitBreaker;The service is temporarily unavailable due to a circuit breaker. Please try again later.;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+43;tr;error.unsupportedOperation;İstenen işlem desteklenmiyor. Lütfen dokümantasyonu kontrol edip tekrar deneyin.;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+44;en;error.unsupportedOperation;The requested operation is not supported. Please check the documentation and try again.;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+45;tr;error.unsupportedApiVersion;Desteklenmeyen API sürümü;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+46;en;error.unsupportedApiVersion;Unsupported API version;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+47;tr;error.gatewayTimeout;Servis isteği zaman aşımına uğradı. Lütfen daha sonra tekrar deneyin.;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+48;en;error.gatewayTimeout;The service request timed out. Please try again later.;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+49;tr;error.internalServerError;Beklenmeyen bir durumla karşılaşıldı. Lütfen daha sonra tekrar deneyin.;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+50;en;error.internalServerError;An internal server error occurred. Please try again later.;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+51;tr;validation.field.notNull;Alan boş olamaz;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+52;en;validation.field.notNull;Field cannot be null;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+53;tr;validation.field.notBlank;Alan boş olamaz;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+54;en;validation.field.notBlank;Field must not be blank;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+55;tr;validation.field.size;Alan {min} ile {max} karakter arasında olmalıdır;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+56;en;validation.field.size;Field must be between {min} and {max} characters;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+57;tr;validation.field.pattern;Alan formatı geçersiz;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+58;en;validation.field.pattern;Field format is invalid;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+59;tr;validation.field.min;Alan en az {value} olmalıdır;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+60;en;validation.field.min;Field must be at least {value};2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+61;tr;validation.field.max;Alan en fazla {value} olmalıdır;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+62;en;validation.field.max;Field must be at most {value};2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+63;tr;validation.field.email;Geçerli bir e-posta adresi olmalıdır;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+64;en;validation.field.email;Email should be valid;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+65;tr;validation.field.past;Tarih geçmişte olmalıdır;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+66;en;validation.field.past;Date must be in the past;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+67;tr;validation.field.future;Tarih gelecekte olmalıdır;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+68;en;validation.field.future;Date must be in the future;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+69;tr;validation.field.url;Alan geçerli bir URL olmalıdır;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+70;en;validation.field.url;Field must be a valid URL;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+71;tr;validation.field.enum;Enum için geçersiz değer '{value}'. Geçerli değerler: {allowedValues};2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+72;en;validation.field.enum;Invalid enum value '{value}'. Allowed values are: {allowedValues};2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+73;tr;validation.field.ipAddress;Geçersiz IP adresi formatı.;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+74;en;validation.field.ipAddress;Invalid IP address format.;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+75;tr;validation.field.phoneNumber;Geçersiz telefon numarası formatı.;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+76;en;validation.field.phoneNumber;Invalid phone number format.;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+77;tr;validation.field.tckn;Geçersiz TCKN formatı.;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+78;en;validation.field.tckn;Invalid TCKN format.;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+79;tr;validation.field.strongPassword;Şifre en az 8 karakter uzunluğunda olmalı ve en az bir büyük harf, bir küçük harf, bir rakam ve bir özel karakter içermelidir.;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+80;en;validation.field.strongPassword;Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character.;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+81;tr;validation.field.noSpecialCharacters;Alan özel karakterler içermemelidir.;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+82;en;validation.field.noSpecialCharacters;Field must not contain special characters.;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+83;tr;validation.field.alphanumeric;Alan yalnızca alfanumerik karakterler içermelidir;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+84;en;validation.field.alphanumeric;Field must contain only alphanumeric characters;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+85;tr;validation.field.range;Alan {min} ile {max} arasında olmalıdır;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+86;en;validation.field.range;Field must be between {min} and {max};2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+87;tr;validation.field.adult;Yetişkin olmalısınız (18 yaş veya üzeri).;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+88;en;validation.field.adult;You must be an adult (18 years or older).;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+89;tr;validation.field.dateRange;Başlangıç tarihi ({startDate}) bitiş tarihinden ({endDate}) önce olmalıdır.;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+90;en;validation.field.dateRange;The start date ({startDate}) must be before the end date ({endDate}).;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+91;tr;validation.header.mandatory;{headerName} zorunludur;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+92;en;validation.header.mandatory;{headerName} is mandatory;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+93;tr;validation.artist.pattern;Geçersiz sanatçı adı formatı. Sadece harfler, rakamlar, boşluklar ve tireler içerebilir.;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+94;en;validation.artist.pattern;Invalid artist name format. It should contain only letters, numbers, spaces, and hyphens.;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+95;tr;validation.author.pattern;Yazar adı sadece harf, boşluk, tire ve tek tırnak işareti içerebilir.;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+96;en;validation.author.pattern;Author name must contain only letters, spaces, hyphens, and apostrophes.;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+97;tr;validation.genre.pattern;Tür yalnızca alfasayısal karakterler, tireler, alt çizgiler ve boşluklar içerebilir;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+98;en;validation.genre.pattern;Genre must contain only alphanumeric characters, hyphens, underscores, and spaces.;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+99;tr;error.resource.notfound;{resource} {criteria} ile bulunamadı: {value};2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+100;en;error.resource.notfound;The {resource} could not be found with {criteria}: {value};2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+101;tr;error.resource.alreadyexists;{resource} {criteria} zaten mevcut: {value};2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+102;en;error.resource.alreadyexists;The {resource} already exists with {criteria}: {value};2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+103;tr;resource.city;Şehir;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+104;en;resource.city;city;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+105;tr;search.criteria.id;id;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+106;en;search.criteria.id;id;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+107;tr;search.criteria.name;adı;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+108;en;search.criteria.name;name;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+109;tr;api-docs.title;API Dökümantasyonu;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+110;en;api-docs.title;API Documentation;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+111;tr;api-docs.topbar.title;Spring AI API Dökümantasyonu;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+112;en;api-docs.topbar.title;Spring AI API Documentation;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+113;tr;api-docs.language.english;İngilizce;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+114;en;api-docs.language.english;English;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+115;tr;api-docs.language.turkish;Türkçe;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+116;en;api-docs.language.turkish;Turkish;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+117;tr;api-docs.theme.light;Açık Tema;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+118;en;api-docs.theme.light;Light Theme;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+119;tr;api-docs.theme.dark;Koyu Tema;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+120;en;api-docs.theme.dark;Dark Theme;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+121;tr;api-docs.description;Spring AI Örnekleri REST API Dokümantasyonu;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+122;en;api-docs.description;Spring AI Samples REST API Documentation;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+123;tr;api-docs.contact.name;Şuayb Şimşek;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+124;en;api-docs.contact.name;Şuayb Şimşek;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+125;tr;api-docs.contact.email;suaybsimsek58@gmail.com;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+126;en;api-docs.contact.email;suaybsimsek58@gmail.com;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+127;tr;api-docs.contact.url;https://www.susimsek.github.io;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+128;en;api-docs.contact.url;https://www.susimsek.github.io;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+129;tr;api-docs.license.name;Apache 2.0;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+130;en;api-docs.license.name;Apache 2.0;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+131;tr;api-docs.license.url;https://www.apache.org/licenses/LICENSE-2.0;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+132;en;api-docs.license.url;https://www.apache.org/licenses/LICENSE-2.0;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+133;tr;api-docs.api.ai;yapay zeka;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+134;en;api-docs.api.ai;artificial intelligence;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+135;tr;api-docs.api.localization.summary;Dil Desteği Bilgilerini Alın;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+136;en;api-docs.api.localization.summary;Get Localization Information;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+137;tr;api-docs.api.localization.description;### Kullanıcı Sorgularına Göre Desteklenen Dil Desteği İçeriği\n\nBu endpoint, kullanıcı sorgularına göre dil desteği içeriği hakkında bilgi sağlar.;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+138;en;api-docs.api.localization.description;### Get Information About Supported Localizations\n\nThis endpoint provides information about supported localizations based on user queries.;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+139;tr;weatherapi.error.1003;Parametre 'q' sağlanmadı.;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+140;en;weatherapi.error.1003;Parameter 'q' not provided.;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+141;tr;weatherapi.error.1005;API istek url'si geçersiz.;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+142;en;weatherapi.error.1005;API request url is invalid.;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+143;tr;weatherapi.error.1006;Parametre 'q' ile eşleşen konum bulunamadı.;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+144;en;weatherapi.error.1006;No location found matching parameter 'q'.;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+145;tr;weatherapi.error.9000;Toplu isteklerde gönderilen JSON geçersiz. Lütfen geçerli JSON ve utf-8 kodlaması olduğundan emin olun.;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+146;en;weatherapi.error.9000;Json body passed in bulk request is invalid. Please make sure it is valid json with utf-8 encoding.;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+147;tr;weatherapi.error.9001;JSON gövdesi, toplu istek için çok fazla konum içeriyor. Lütfen tek bir istekte 50'den az tutun.;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+148;en;weatherapi.error.9001;Json body contains too many locations for bulk request. Please keep it below 50 in a single request.;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+149;tr;weatherapi.error.9999;İç sunucu hatası.;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system
+150;en;weatherapi.error.9999;Internal application error.;2024-01-01T00:00:00;system;2024-01-01T00:00:00;system

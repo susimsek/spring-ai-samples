@@ -20,7 +20,7 @@ class LocaleConfigTest {
 
         // When
         ResourceBundleMessageSource messageSource =
-            (ResourceBundleMessageSource) localeConfig.messageSource(properties);
+            (ResourceBundleMessageSource) localeConfig.messageSource(properties, null);
 
         // Then
         assertNotNull(messageSource);
@@ -36,7 +36,7 @@ class LocaleConfigTest {
 
         // When
         ResourceBundleMessageSource messageSource =
-            (ResourceBundleMessageSource) localeConfig.messageSource(properties);
+            (ResourceBundleMessageSource) localeConfig.messageSource(properties, null);
 
         // Then
         assertNotNull(messageSource);
@@ -51,7 +51,7 @@ class LocaleConfigTest {
 
         // When
         ResourceBundleMessageSource messageSource =
-            (ResourceBundleMessageSource) localeConfig.messageSource(properties);
+            (ResourceBundleMessageSource) localeConfig.messageSource(properties, null);
 
         // Then
         assertNotNull(messageSource);
@@ -66,7 +66,7 @@ class LocaleConfigTest {
 
         // When
         ResourceBundleMessageSource messageSource =
-            (ResourceBundleMessageSource) localeConfig.messageSource(properties);
+            (ResourceBundleMessageSource) localeConfig.messageSource(properties, null);
 
         // Then
         assertNotNull(messageSource);
@@ -81,7 +81,7 @@ class LocaleConfigTest {
 
         // When
         ResourceBundleMessageSource messageSource =
-            (ResourceBundleMessageSource) localeConfig.messageSource(properties);
+            (ResourceBundleMessageSource) localeConfig.messageSource(properties, null);
 
         // Then
         assertNotNull(messageSource);
@@ -96,7 +96,7 @@ class LocaleConfigTest {
 
         // When
         ResourceBundleMessageSource messageSource =
-            (ResourceBundleMessageSource) localeConfig.messageSource(properties);
+            (ResourceBundleMessageSource) localeConfig.messageSource(properties, null);
 
         // Then
         assertNotNull(messageSource);
@@ -113,7 +113,7 @@ class LocaleConfigTest {
 
         // When
         ResourceBundleMessageSource messageSource =
-            (ResourceBundleMessageSource) localeConfig.messageSource(properties);
+            (ResourceBundleMessageSource) localeConfig.messageSource(properties, null);
 
         // Then
         assertNotNull(messageSource);

@@ -109,6 +109,8 @@ spring:
       - cityEntityCache
       - cityCache
       - citiesCache
+      - messageEntityCache
+      - messagesByLocaleCache
     caches:
       jwksCache:
         ttl: 1h

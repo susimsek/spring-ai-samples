@@ -18,7 +18,7 @@ class NamedParameterMessageSourceTest {
 
     @BeforeEach
     void setUp() {
-        messageSource = new NamedParameterMessageSource();
+        messageSource = new NamedParameterMessageSource(null);
         messageSource.setBasename("i18n/messages");
         messageSource.setDefaultEncoding("UTF-8");
         messageSource.setFallbackToSystemLocale(false);
