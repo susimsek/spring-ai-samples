@@ -1,5 +1,6 @@
 package io.github.susimsek.springaisamples.service;
 
+import io.github.susimsek.springaisamples.constant.CacheName;
 import io.github.susimsek.springaisamples.dto.CityCreateDTO;
 import io.github.susimsek.springaisamples.dto.CityDTO;
 import io.github.susimsek.springaisamples.dto.CityUpdateDTO;
@@ -25,27 +26,27 @@ public class CityService {
     private final CityRepository cityRepository;
     private final CityMapper cityMapper;
 
-    @Cacheable(value = "citiesCache", key = "'page=' + #pageable.pageNumber + ',size=' + #pageable.pageSize")
+    @Cacheable(value = CacheName.CITIES_CACHE, key = "'page=' + #pageable.pageNumber + ',size=' + #pageable.pageSize")
     public Page<CityDTO> getAllCities(Pageable pageable) {
         return cityRepository.findAll(pageable).map(cityMapper::toDto);
     }
 
-    @Cacheable(value = "citiesCache", key = "'all'")
+    @Cacheable(value = CacheName.CITIES_CACHE, key = "'all'")
     public List<CityDTO> getAllCities() {
         return cityRepository.findAll().stream().map(cityMapper::toDto).toList();
     }
 
-    @Cacheable(value = "cityCache", key = "#id")
+    @Cacheable(value = CacheName.CITY_CACHE, key = "#id")
     public CityDTO getCityById(Long id) {
         return cityRepository.findById(id)
             .map(cityMapper::toDto)
             .orElseThrow(() -> new ResourceNotFoundException("City", "id", id));
     }
 
-    @CachePut(value = "cityCache", key = "#result.id")
+    @CachePut(value = CacheName.CITY_CACHE, key = "#result.id")
     @Caching(evict = {
-        @CacheEvict(value = "citiesCache", key = "'all'"),
-        @CacheEvict(value = "citiesCache", allEntries = true)
+        @CacheEvict(value = CacheName.CITIES_CACHE, key = "'all'"),
+        @CacheEvict(value = CacheName.CITIES_CACHE, allEntries = true)
     })
     public CityDTO createCity(CityCreateDTO cityCreateDTO) {
         if (cityRepository.existsByName(cityCreateDTO.getName())) {
@@ -56,10 +57,10 @@ public class CityService {
         return cityMapper.toDto(city);
     }
 
-    @CachePut(value = "cityCache", key = "#id")
+    @CachePut(value = CacheName.CITY_CACHE, key = "#id")
     @Caching(evict = {
-        @CacheEvict(value = "citiesCache", key = "'all'"),
-        @CacheEvict(value = "citiesCache", allEntries = true)
+        @CacheEvict(value = CacheName.CITIES_CACHE, key = "'all'"),
+        @CacheEvict(value = CacheName.CITIES_CACHE, allEntries = true)
     })
     public CityDTO updateCity(Long id, CityUpdateDTO cityUpdateDTO) {
         return cityRepository.findById(id)
@@ -75,9 +76,9 @@ public class CityService {
     }
 
     @Caching(evict = {
-        @CacheEvict(value = "cityCache", key = "#id"),
-        @CacheEvict(value = "citiesCache", key = "'all'"),
-        @CacheEvict(value = "citiesCache", allEntries = true)
+        @CacheEvict(value = CacheName.CITY_CACHE, key = "#id"),
+        @CacheEvict(value = CacheName.CITIES_CACHE, key = "'all'"),
+        @CacheEvict(value = CacheName.CITIES_CACHE, allEntries = true)
     })
     public void deleteCity(Long id) {
         City city = cityRepository.findById(id)

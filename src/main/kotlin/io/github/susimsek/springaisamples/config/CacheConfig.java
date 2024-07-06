@@ -3,6 +3,7 @@ package io.github.susimsek.springaisamples.config;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.jcache.configuration.CaffeineConfiguration;
 import com.github.benmanes.caffeine.jcache.spi.CaffeineCachingProvider;
+import io.github.susimsek.springaisamples.constant.CacheName;
 import java.util.OptionalLong;
 import java.util.concurrent.TimeUnit;
 import javax.cache.Caching;
@@ -58,9 +59,9 @@ public class CacheConfig {
     public JCacheManagerCustomizer cacheManagerCustomizer() {
         var hibernateCacheConfig = cacheProperties.getHibernate();
         return cm -> {
-            createJCache(cm, "default-update-timestamps-region",
+            createJCache(cm, CacheName.DEFAULT_UPDATE_TIMESTAMPS_REGION,
                 hibernateCacheConfig.getDefaultUpdateTimestampsRegion());
-            createJCache(cm, "default-query-results-region",
+            createJCache(cm, CacheName.DEFAULT_QUERY_RESULTS_REGION,
                 hibernateCacheConfig.getDefaultQueryResultsRegion());
             cacheProperties.getCacheNames().forEach(cacheName -> {
                 CacheProperties.CacheConfig config = cacheProperties.getCaches()
