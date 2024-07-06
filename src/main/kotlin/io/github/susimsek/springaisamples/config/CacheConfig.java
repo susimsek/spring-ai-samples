@@ -32,12 +32,6 @@ public class CacheConfig {
         CaffeineCacheManager cacheManager = new CaffeineCacheManager();
         cacheManager.setCaffeine(buildCaffeineConfig(cacheProperties.getDefaultConfig()));
 
-        cacheProperties.getCacheNames().forEach(cacheName -> {
-            CacheProperties.CacheConfig config = cacheProperties.getCaches()
-                .getOrDefault(cacheName, cacheProperties.getDefaultConfig());
-            cacheManager.registerCustomCache(cacheName, buildCaffeineConfig(config).build());
-        });
-
         return cacheManager;
     }
 
@@ -98,8 +92,6 @@ public class CacheConfig {
             .expireAfterWrite(config.getTtl())
             .initialCapacity(config.getInitialCapacity())
             .maximumSize(config.getMaximumSize())
-            .weakKeys()
-            .weakValues()
             .recordStats();
         if (config.getRefreshAfterWrite() != null) {
             caffeineBuilder.refreshAfterWrite(config.getRefreshAfterWrite());
