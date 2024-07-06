@@ -3,7 +3,7 @@
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
-                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd"
+                            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd"
         objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
 
     <changeSet id="1699444800000-1" author="susimsek">
@@ -35,7 +35,20 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="1699444800000-3-data" author="susimsek (generated)" context="faker">
+    <changeSet id="1699444800000-3" author="susimsek">
+        <createIndex indexName="idx_locale" tableName="message">
+            <column name="locale"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="1699444800000-4" author="susimsek">
+        <createIndex indexName="idx_locale_code" tableName="message">
+            <column name="locale"/>
+            <column name="code"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="1699444800000-5-data" author="susimsek (generated)" context="faker">
         <loadData
                 file="config/liquibase/fake-data/message.csv"
                 separator=";"

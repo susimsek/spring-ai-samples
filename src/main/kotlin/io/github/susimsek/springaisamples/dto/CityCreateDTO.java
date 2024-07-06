@@ -21,7 +21,7 @@ import lombok.AllArgsConstructor;
 public class CityCreateDTO {
 
     @NotBlank(message = "{validation.field.notBlank}")
-    @Size(max = 100, message = "{validation.field.size}")
+    @Size(min = 3, max = 100, message = "{validation.field.size}")
     @Pattern(regexp = "^[a-zA-Z0-9\\-\\s]+$", message = "{validation.field.pattern}")
     @Schema(description = "The name of the city", example = "Istanbul")
     private String name;
