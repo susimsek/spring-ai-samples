@@ -28,6 +28,7 @@ import org.springframework.util.CollectionUtils;
 public class NamedParameterMessageSource extends ResourceBundleMessageSource implements ParameterMessageSource {
 
     private final ResourceBundle.Control control;
+
     /**
      * Pattern to match named parameters in the format {paramName}.
      * This pattern matches sequences that conform to Java variable name constraints.
@@ -117,6 +118,14 @@ public class NamedParameterMessageSource extends ResourceBundleMessageSource imp
             .collect(Collectors.toMap(key -> key, key -> getMessage(key, null, locale)));
     }
 
+    /**
+     * Loads the resource bundle for the given basename and locale.
+     *
+     * @param basename the basename of the resource bundle
+     * @param locale   the locale to load the resource bundle for
+     * @return the loaded resource bundle
+     * @throws MissingResourceException if the resource bundle cannot be loaded
+     */
     @NonNull
     @Override
     protected ResourceBundle doGetBundle(@NonNull String basename,
