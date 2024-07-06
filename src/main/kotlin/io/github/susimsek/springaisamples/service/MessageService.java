@@ -19,6 +19,6 @@ public class MessageService {
     public Map<String, String> getMessages(String locale) {
         return messageRepository.findByLocale(locale)
             .stream()
-            .collect(Collectors.toConcurrentMap(Message::getCode, Message::getContent));
+            .collect(Collectors.toMap(Message::getCode, Message::getContent));
     }
 }
