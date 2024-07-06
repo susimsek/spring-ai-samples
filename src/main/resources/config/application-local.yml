@@ -95,13 +95,13 @@ spring:
       maximum-size: 10000
     hibernate:
       default-update-timestamps-region:
-        ttl: 30m
-        initial-capacity: 1000
-        maximum-size: 5000
+        ttl: 1h
+        initial-capacity: 5000
+        maximum-size: 10000
       default-query-results-region:
-        ttl: 15m
-        initial-capacity: 1000
-        maximum-size: 5000
+        ttl: 1h
+        initial-capacity: 5000
+        maximum-size: 10000
     cache-names:
       - jwksCache
       - translationsCache
