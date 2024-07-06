@@ -89,11 +89,27 @@ spring:
         options:
           model: gpt-4o
   cache:
+    default-config:
+      ttl: 1h
+      initial-capacity: 5000
+      maximum-size: 10000
+    hibernate:
+      default-update-timestamps-region:
+        ttl: 30m
+        initial-capacity: 1000
+        maximum-size: 5000
+      default-query-results-region:
+        ttl: 15m
+        initial-capacity: 1000
+        maximum-size: 5000
+    cache-names:
+      - jwksCache
+      - translationsCache
+      - citiesByNameCache
+      - cityEntityCache
+      - cityCache
+      - citiesCache
     caches:
-      default:
-        ttl: 1h
-        initial-capacity: 5000
-        maximum-size: 10000
       jwksCache:
         ttl: 1h
         initial-capacity: 20
@@ -106,19 +122,6 @@ spring:
         ttl: 1h
         initial-capacity: 500
         maximum-size: 2000
-    regions:
-      entityCache:
-        ttl: 1h
-        initial-capacity: 5000
-        maximum-size: 10000
-      default-update-timestamps-region:
-        ttl: 1h
-        initial-capacity: 5000
-        maximum-size: 10000
-      default-query-results-region:
-        ttl: 1h
-        initial-capacity: 5000
-        maximum-size: 10000
 
   devtools:
     restart:

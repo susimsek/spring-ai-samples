@@ -3,7 +3,6 @@ package io.github.susimsek.springaisamples.config;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.jcache.configuration.CaffeineConfiguration;
 import com.github.benmanes.caffeine.jcache.spi.CaffeineCachingProvider;
-import java.util.Map;
 import java.util.OptionalLong;
 import java.util.concurrent.TimeUnit;
 import javax.cache.Caching;
@@ -31,20 +30,14 @@ public class CacheConfig {
     @Bean
     public CacheManager cacheManager() {
         CaffeineCacheManager cacheManager = new CaffeineCacheManager();
-        Map<String, CacheProperties.CacheConfig> caches = cacheProperties.getCaches();
-        caches.forEach((name, config) -> {
-            var caffeine = Caffeine.newBuilder()
-                .expireAfterWrite(config.getTtl())
-                .initialCapacity(config.getInitialCapacity())
-                .maximumSize(config.getMaximumSize())
-                .weakKeys()
-                .weakValues()
-                .recordStats();
-            if (config.getRefreshAfterWrite() != null) {
-                caffeine.refreshAfterWrite(config.getRefreshAfterWrite());
-            }
-            cacheManager.setCaffeine(caffeine);
+        cacheManager.setCaffeine(buildCaffeineConfig(cacheProperties.getDefaultConfig()));
+
+        cacheProperties.getCacheNames().forEach(cacheName -> {
+            CacheProperties.CacheConfig config = cacheProperties.getCaches()
+                .getOrDefault(cacheName, cacheProperties.getDefaultConfig());
+            cacheManager.registerCustomCache(cacheName, buildCaffeineConfig(config).build());
         });
+
         return cacheManager;
     }
 
@@ -63,19 +56,27 @@ public class CacheConfig {
     @ConditionalOnProperty(name = "spring.jpa.properties.hibernate.cache.use_second_level_cache",
         havingValue = "true")
     public HibernatePropertiesCustomizer hibernatePropertiesCustomizer(javax.cache.CacheManager jcacheManager) {
-        return hibernateProperties -> {
-            hibernateProperties.put(ConfigSettings.CACHE_MANAGER, jcacheManager);
-        };
+        return hibernateProperties -> hibernateProperties.put(ConfigSettings.CACHE_MANAGER, jcacheManager);
     }
 
     @Bean
     @ConditionalOnProperty(name = "spring.jpa.properties.hibernate.cache.use_second_level_cache",
         havingValue = "true")
     public JCacheManagerCustomizer cacheManagerCustomizer() {
-        return cm -> cacheProperties.getRegions().forEach((name, config) -> createCache(cm, name, config));
+        return cm -> {
+            createJCache(cm, "default-update-timestamps-region",
+                cacheProperties.getHibernate().getDefaultUpdateTimestampsRegion());
+            createJCache(cm, "default-query-results-region",
+                cacheProperties.getHibernate().getDefaultQueryResultsRegion());
+            cacheProperties.getCacheNames().forEach(cacheName -> {
+                CacheProperties.CacheConfig config = cacheProperties.getCaches()
+                    .getOrDefault(cacheName, cacheProperties.getDefaultConfig());
+                createJCache(cm, cacheName, config);
+            });
+        };
     }
 
-    private void createCache(javax.cache.CacheManager cm,
+    private void createJCache(javax.cache.CacheManager cm,
                              String cacheName, CacheProperties.CacheConfig config) {
         CaffeineConfiguration<Object, Object> caffeineConfiguration = new CaffeineConfiguration<>();
         caffeineConfiguration.setMaximumSize(OptionalLong.of(config.getMaximumSize()));
@@ -92,4 +93,17 @@ public class CacheConfig {
         cm.createCache(cacheName, caffeineConfiguration);
     }
 
+    private Caffeine<Object, Object> buildCaffeineConfig(CacheProperties.CacheConfig config) {
+        var caffeineBuilder = Caffeine.newBuilder()
+            .expireAfterWrite(config.getTtl())
+            .initialCapacity(config.getInitialCapacity())
+            .maximumSize(config.getMaximumSize())
+            .weakKeys()
+            .weakValues()
+            .recordStats();
+        if (config.getRefreshAfterWrite() != null) {
+            caffeineBuilder.refreshAfterWrite(config.getRefreshAfterWrite());
+        }
+        return caffeineBuilder;
+    }
 }

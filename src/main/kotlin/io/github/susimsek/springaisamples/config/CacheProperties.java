@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import java.time.Duration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import lombok.Getter;
 import lombok.Setter;
@@ -15,9 +16,17 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 @ConfigurationProperties(prefix = "spring.cache")
 public class CacheProperties {
+
+    @Valid
+    private CacheConfig defaultConfig;
+
+    private List<String> cacheNames;
+
     @Valid
     private Map<String, CacheConfig> caches = new HashMap<>();
-    private Map<String, CacheConfig> regions = new HashMap<>();
+
+    @Valid
+    private HibernateCacheConfig hibernate;
 
     @Getter
     @Setter
@@ -33,5 +42,15 @@ public class CacheProperties {
 
 
         private Duration refreshAfterWrite;
+    }
+
+    @Getter
+    @Setter
+    public static class HibernateCacheConfig {
+        @Valid
+        private CacheConfig defaultUpdateTimestampsRegion;
+
+        @Valid
+        private CacheConfig defaultQueryResultsRegion;
     }
 }
