@@ -31,7 +31,6 @@ public class CacheConfig {
     public CacheManager cacheManager() {
         CaffeineCacheManager cacheManager = new CaffeineCacheManager();
         cacheManager.setCaffeine(buildCaffeineConfig(cacheProperties.getDefaultConfig()));
-
         return cacheManager;
     }
 
@@ -57,11 +56,12 @@ public class CacheConfig {
     @ConditionalOnProperty(name = "spring.jpa.properties.hibernate.cache.use_second_level_cache",
         havingValue = "true")
     public JCacheManagerCustomizer cacheManagerCustomizer() {
+        var hibernateCacheConfig = cacheProperties.getHibernate();
         return cm -> {
             createJCache(cm, "default-update-timestamps-region",
-                cacheProperties.getHibernate().getDefaultUpdateTimestampsRegion());
+                hibernateCacheConfig.getDefaultUpdateTimestampsRegion());
             createJCache(cm, "default-query-results-region",
-                cacheProperties.getHibernate().getDefaultQueryResultsRegion());
+                hibernateCacheConfig.getDefaultQueryResultsRegion());
             cacheProperties.getCacheNames().forEach(cacheName -> {
                 CacheProperties.CacheConfig config = cacheProperties.getCaches()
                     .getOrDefault(cacheName, cacheProperties.getDefaultConfig());
