@@ -1,12 +1,10 @@
 package io.github.susimsek.springaisamples.controller.simple;
 
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
-
+import io.github.susimsek.springaisamples.assembler.CityModelAssembler;
+import io.github.susimsek.springaisamples.constant.Constants;
 import io.github.susimsek.springaisamples.dto.CityCreateDTO;
 import io.github.susimsek.springaisamples.dto.CityDTO;
 import io.github.susimsek.springaisamples.dto.CityUpdateDTO;
-import io.github.susimsek.springaisamples.openapi.annotation.RequireJwsSignature;
 import io.github.susimsek.springaisamples.service.CityService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -14,7 +12,6 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
@@ -23,8 +20,14 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.IanaLinkRelations;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
@@ -43,10 +46,42 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @Validated
 @Tag(name = "city", description = "City API")
-@SecurityRequirement(name = "bearerAuth")
 public class CityController {
 
     private final CityService cityService;
+    private final CityModelAssembler cityModelAssembler;
+    private final PagedResourcesAssembler<CityDTO> pagedResourcesAssembler;
+
+    @Operation(summary = "Get all cities with pagination",
+        description = "Retrieve a list of all cities with pagination")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Successfully retrieved list",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                schema = @Schema(implementation = CityDTO.class))),
+        @ApiResponse(responseCode = "401", description = "Unauthorized",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                schema = @Schema(implementation = ProblemDetail.class))),
+        @ApiResponse(responseCode = "403", description = "Forbidden",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                schema = @Schema(implementation = ProblemDetail.class))),
+        @ApiResponse(responseCode = "429", description = "Too Many Requests",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                schema = @Schema(implementation = ProblemDetail.class))),
+        @ApiResponse(responseCode = "500", description = "Internal server error",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                schema = @Schema(implementation = ProblemDetail.class)))
+    })
+    @GetMapping("/paged")
+    public ResponseEntity<PagedModel<CityDTO>> getAllCitiesPaged(
+        @ParameterObject Pageable pageable) {
+        Page<CityDTO> cities = cityService.getAllCities(pageable);
+        PagedModel<CityDTO> pagedModel = pagedResourcesAssembler.toModel(cities, cityModelAssembler);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(Constants.TOTAL_COUNT_HEADER_NAME, String.valueOf(cities.getTotalElements()));
+
+        return ResponseEntity.ok().headers(headers).body(pagedModel);
+    }
 
     @Operation(summary = "Get all cities", description = "Retrieve a list of all cities")
     @ApiResponses(value = {
@@ -69,9 +104,7 @@ public class CityController {
     @GetMapping
     public ResponseEntity<CollectionModel<CityDTO>> getAllCities() {
         List<CityDTO> cities = cityService.getAllCities();
-        cities.forEach(this::addHateoasLinks);
-        CollectionModel<CityDTO> cityCollectionModel = CollectionModel.of(cities,
-            linkTo(methodOn(CityController.class).getAllCities()).withSelfRel());
+        CollectionModel<CityDTO> cityCollectionModel = cityModelAssembler.toCollectionModel(cities);
         return ResponseEntity.ok(cityCollectionModel);
     }
 
@@ -104,15 +137,11 @@ public class CityController {
         @Parameter(description = "ID of the city to be retrieved")
         @PathVariable @Min(value = 1, message = "{validation.field.min}")
         @NotNull(message = "{validation.field.notNull}") Long id) {
-        return cityService.getCityById(id)
-            .map(city -> {
-                addHateoasLinks(city);
-                return ResponseEntity.ok(city);
-            })
-            .orElse(ResponseEntity.notFound().build());
+        CityDTO city = cityService.getCityById(id);
+        cityModelAssembler.toModel(city);
+        return ResponseEntity.ok(city);
     }
 
-    @RequireJwsSignature
     @Operation(summary = "Create a new city", description = "Create a new city")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "201", description = "Successfully created city",
@@ -142,13 +171,12 @@ public class CityController {
         @Parameter(description = "Details of the new city to be created")
         @Valid @RequestBody CityCreateDTO cityCreateDTO) throws URISyntaxException {
         CityDTO createdCity = cityService.createCity(cityCreateDTO);
-        addHateoasLinks(createdCity);
+        cityModelAssembler.toModel(createdCity);
         return ResponseEntity
             .created(new URI(createdCity.getRequiredLink(IanaLinkRelations.SELF).getHref()))
             .body(createdCity);
     }
 
-    @RequireJwsSignature
     @Operation(summary = "Update a city", description = "Update an existing city by its ID")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successfully updated city",
@@ -181,7 +209,7 @@ public class CityController {
         @Parameter(description = "Updated details of the city")
         @Valid @RequestBody CityUpdateDTO cityUpdateDTO) {
         CityDTO updatedCity = cityService.updateCity(id, cityUpdateDTO);
-        addHateoasLinks(updatedCity);
+        cityModelAssembler.toModel(updatedCity);
         return ResponseEntity.ok(updatedCity);
     }
 
@@ -214,11 +242,5 @@ public class CityController {
         @NotNull(message = "{validation.field.notNull}") Long id) {
         cityService.deleteCity(id);
         return ResponseEntity.noContent().build();
-    }
-
-    private void addHateoasLinks(CityDTO city) {
-        city.add(linkTo(methodOn(CityController.class).getCityById(city.getId())).withSelfRel());
-        city.add(linkTo(methodOn(CityController.class).updateCity(city.getId(), null)).withRel("update"));
-        city.add(linkTo(methodOn(CityController.class).deleteCity(city.getId())).withRel("delete"));
     }
 }

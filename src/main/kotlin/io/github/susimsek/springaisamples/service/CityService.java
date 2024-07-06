@@ -9,8 +9,9 @@ import io.github.susimsek.springaisamples.exception.ResourceNotFoundException;
 import io.github.susimsek.springaisamples.mapper.CityMapper;
 import io.github.susimsek.springaisamples.repository.CityRepository;
 import java.util.List;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -26,9 +27,14 @@ public class CityService {
             .toList();
     }
 
-    public Optional<CityDTO> getCityById(Long id) {
+    public Page<CityDTO> getAllCities(Pageable pageable) {
+        return cityRepository.findAll(pageable).map(cityMapper::toDto);
+    }
+
+    public CityDTO getCityById(Long id) {
         return cityRepository.findById(id)
-            .map(cityMapper::toDto);
+            .map(cityMapper::toDto)
+            .orElseThrow(() -> new ResourceNotFoundException("City", "id", id));
     }
 
     public CityDTO createCity(CityCreateDTO cityCreateDTO) {

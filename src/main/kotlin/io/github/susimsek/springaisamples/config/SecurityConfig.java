@@ -122,7 +122,7 @@ public class SecurityConfig {
                     .requestMatchers(requestMatchersConfig.tokenPath()).permitAll()
                     .requestMatchers(mvc.pattern("/api/v{version}/locales")).permitAll()
                     .requestMatchers(mvc.pattern("/api/v{version}/ai/**")).hasAuthority(ADMIN)
-                    .requestMatchers(requestMatchersConfig.cityPath()).hasAuthority(ADMIN)
+                    .requestMatchers(requestMatchersConfig.cityPath()).permitAll()
                     .anyRequest().authenticated())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .oauth2ResourceServer(oauth2 -> oauth2
@@ -261,7 +261,7 @@ public class SecurityConfig {
             .requestMatchers(requestMatchersConfig.nonModifyingMethods()).permitAll()
             .requestMatchers(requestMatchersConfig.encryptionPaths()).permitAll()
             .requestMatchers(requestMatchersConfig.signPath()).permitAll()
-            .anyRequest().signed()
+            .anyRequest().permitAll()
             .build();
     }
 
@@ -278,7 +278,7 @@ public class SecurityConfig {
             .requestMatchers(requestMatchersConfig.nonModifyingMethods()).permitAll()
             .requestMatchers(requestMatchersConfig.encryptionPaths()).permitAll()
             .requestMatchers(requestMatchersConfig.signPath()).permitAll()
-            .anyRequest().signed()
+            .anyRequest().permitAll()
             .build();
     }
 
