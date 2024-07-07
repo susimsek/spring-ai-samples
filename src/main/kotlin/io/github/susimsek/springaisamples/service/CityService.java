@@ -5,10 +5,10 @@ import io.github.susimsek.springaisamples.dto.CityCreateDTO;
 import io.github.susimsek.springaisamples.dto.CityDTO;
 import io.github.susimsek.springaisamples.dto.CityUpdateDTO;
 import io.github.susimsek.springaisamples.entity.City;
-import io.github.susimsek.springaisamples.exception.ResourceAlreadyExistsException;
 import io.github.susimsek.springaisamples.exception.ResourceNotFoundException;
 import io.github.susimsek.springaisamples.mapper.CityMapper;
 import io.github.susimsek.springaisamples.repository.CityRepository;
+import io.github.susimsek.springaisamples.validator.CityValidator;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
@@ -25,6 +25,7 @@ public class CityService {
 
     private final CityRepository cityRepository;
     private final CityMapper cityMapper;
+    private final CityValidator cityValidator;
 
     @Cacheable(value = CacheName.CITIES_CACHE, key = "'page=' + #pageable.pageNumber + ',size=' + #pageable.pageSize")
     public Page<CityDTO> getAllCities(Pageable pageable) {
@@ -38,9 +39,8 @@ public class CityService {
 
     @Cacheable(value = CacheName.CITY_CACHE, key = "#id")
     public CityDTO getCityById(Long id) {
-        return cityRepository.findById(id)
-            .map(cityMapper::toDto)
-            .orElseThrow(() -> new ResourceNotFoundException("City", "id", id));
+        City city = findCityById(id);
+        return cityMapper.toDto(city);
     }
 
     @CachePut(value = CacheName.CITY_CACHE, key = "#result.id")
@@ -49,9 +49,7 @@ public class CityService {
         @CacheEvict(value = CacheName.CITIES_CACHE, allEntries = true)
     })
     public CityDTO createCity(CityCreateDTO cityCreateDTO) {
-        if (cityRepository.existsByName(cityCreateDTO.getName())) {
-            throw new ResourceAlreadyExistsException("City", "name", cityCreateDTO.getName());
-        }
+        cityValidator.validateCityNameDoesNotExist(cityCreateDTO.getName());
         City city = cityMapper.toEntity(cityCreateDTO);
         city = cityRepository.save(city);
         return cityMapper.toDto(city);
@@ -63,16 +61,11 @@ public class CityService {
         @CacheEvict(value = CacheName.CITIES_CACHE, allEntries = true)
     })
     public CityDTO updateCity(Long id, CityUpdateDTO cityUpdateDTO) {
-        return cityRepository.findById(id)
-            .map(existingCity -> {
-                if (!existingCity.getName().equals(cityUpdateDTO.getName())
-                    && cityRepository.existsByName(cityUpdateDTO.getName())) {
-                    throw new ResourceAlreadyExistsException("City", "name", cityUpdateDTO.getName());
-                }
-                cityMapper.partialUpdate(existingCity, cityUpdateDTO);
-                return cityMapper.toDto(cityRepository.save(existingCity));
-            })
-            .orElseThrow(() -> new ResourceNotFoundException("City", "id", id));
+        City existingCity = findCityById(id);
+        cityValidator.validateUpdatedCityName(cityUpdateDTO.getName(), existingCity.getName());
+        cityMapper.partialUpdate(existingCity, cityUpdateDTO);
+        City updatedCity = cityRepository.save(existingCity);
+        return cityMapper.toDto(updatedCity);
     }
 
     @Caching(evict = {
@@ -81,8 +74,12 @@ public class CityService {
         @CacheEvict(value = CacheName.CITIES_CACHE, allEntries = true)
     })
     public void deleteCity(Long id) {
-        City city = cityRepository.findById(id)
-            .orElseThrow(() -> new ResourceNotFoundException("City", "id", id));
+        City city = findCityById(id);
         cityRepository.delete(city);
+    }
+
+    private City findCityById(Long id) {
+        return cityRepository.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("City", "id", id));
     }
 }
