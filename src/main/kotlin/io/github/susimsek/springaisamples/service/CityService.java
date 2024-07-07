@@ -29,7 +29,6 @@ public class CityService {
     private final CityRepository cityRepository;
     private final CityMapper cityMapper;
     private final CityValidator cityValidator;
-    private final CitySpecification citySpecification;
 
     @Cacheable(value = CacheName.CITIES_CACHE, key = "'page=' + #pageable.pageNumber "
         + "+ ',size=' + #pageable.pageSize")
@@ -45,13 +44,13 @@ public class CityService {
     @Cacheable(value = CacheName.CITIES_CACHE, key = "'filter=' "
         + "+ #filter.name() + ',page=' + #pageable.pageNumber + ',size=' + #pageable.pageSize")
     public Page<CityDTO> getAllCities(Pageable pageable, CityFilterDTO filter) {
-        Specification<City> spec = citySpecification.createSpecification(filter);
+        Specification<City> spec = CitySpecification.createSpecification(filter);
         return cityRepository.findAll(spec, pageable).map(cityMapper::toDto);
     }
 
     @Cacheable(value = CacheName.CITIES_CACHE, key = "'filter=' + #filter.name()")
     public List<CityDTO> getAllCities(CityFilterDTO filter) {
-        Specification<City> spec = citySpecification.createSpecification(filter);
+        Specification<City> spec = CitySpecification.createSpecification(filter);
         return cityRepository.findAll(spec).stream().map(cityMapper::toDto).toList();
     }
 
