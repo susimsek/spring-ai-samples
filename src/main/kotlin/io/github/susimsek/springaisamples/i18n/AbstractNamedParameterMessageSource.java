@@ -25,7 +25,6 @@ import org.springframework.util.CollectionUtils;
 public abstract class AbstractNamedParameterMessageSource
     extends ResourceBundleMessageSource implements ParameterMessageSource {
 
-
     /**
      * Pattern to match named parameters in the format {paramName}.
      * This pattern matches sequences that conform to Java variable name constraints.
