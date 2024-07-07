@@ -5,6 +5,7 @@ import io.github.susimsek.springaisamples.constant.Constants;
 import io.github.susimsek.springaisamples.dto.CityCreateDTO;
 import io.github.susimsek.springaisamples.dto.CityDTO;
 import io.github.susimsek.springaisamples.dto.CityUpdateDTO;
+import io.github.susimsek.springaisamples.openapi.annotation.Idempotent;
 import io.github.susimsek.springaisamples.service.CityService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -108,6 +109,7 @@ public class CityController {
         return ResponseEntity.ok(cityCollectionModel);
     }
 
+    @Idempotent
     @Operation(summary = "Get city by ID", description = "Retrieve a city by its ID")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successfully retrieved city",

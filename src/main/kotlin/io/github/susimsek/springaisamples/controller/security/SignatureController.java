@@ -1,9 +1,8 @@
 package io.github.susimsek.springaisamples.controller.security;
 
-import io.github.susimsek.springaisamples.logging.annotation.Loggable;
 import io.github.susimsek.springaisamples.dto.SignatureRequest;
 import io.github.susimsek.springaisamples.dto.SignatureResponse;
-import io.github.susimsek.springaisamples.openapi.annotation.Idempotent;
+import io.github.susimsek.springaisamples.logging.annotation.Loggable;
 import io.github.susimsek.springaisamples.service.SignatureService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -31,7 +30,6 @@ public class SignatureController {
     private final SignatureService signatureService;
 
     @Loggable
-    @Idempotent
     @Operation(summary = "Create JWS", description = "Create a JSON Web Signature")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successfully created JWS",

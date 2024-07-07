@@ -15,8 +15,9 @@ import io.github.susimsek.springaisamples.exception.security.SecurityProblemSupp
 import io.github.susimsek.springaisamples.idempotency.IdempotencyFilter;
 import io.github.susimsek.springaisamples.logging.filter.LoggingFilter;
 import io.github.susimsek.springaisamples.ratelimit.RateLimitingFilter;
+import io.github.susimsek.springaisamples.repository.RefreshTokenRepository;
 import io.github.susimsek.springaisamples.security.AuthoritiesConstants;
-import io.github.susimsek.springaisamples.security.InMemoryTokenStore;
+import io.github.susimsek.springaisamples.security.DatabaseTokenStore;
 import io.github.susimsek.springaisamples.security.SecurityProperties;
 import io.github.susimsek.springaisamples.security.TokenProvider;
 import io.github.susimsek.springaisamples.security.TokenStore;
@@ -122,7 +123,7 @@ public class SecurityConfig {
                     .requestMatchers(requestMatchersConfig.tokenPath()).permitAll()
                     .requestMatchers(mvc.pattern("/api/v{version}/locales")).permitAll()
                     .requestMatchers(mvc.pattern("/api/v{version}/ai/**")).hasAuthority(ADMIN)
-                    .requestMatchers(requestMatchersConfig.cityPath()).permitAll()
+                    .requestMatchers(requestMatchersConfig.cityPaths()).permitAll()
                     .anyRequest().authenticated())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .oauth2ResourceServer(oauth2 -> oauth2
@@ -224,8 +225,8 @@ public class SecurityConfig {
     }
 
     @Bean
-    public TokenStore tokenStore() {
-        return new InMemoryTokenStore();
+    public TokenStore tokenStore(RefreshTokenRepository refreshTokenRepository) {
+        return new DatabaseTokenStore(refreshTokenRepository);
     }
 
     @Bean

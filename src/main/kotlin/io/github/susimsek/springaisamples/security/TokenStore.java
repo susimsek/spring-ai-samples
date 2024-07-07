@@ -1,11 +1,11 @@
 package io.github.susimsek.springaisamples.security;
 
-import java.util.Set;
+import java.util.Optional;
 
 public interface TokenStore {
     void storeToken(TokenEntity token);
 
-    Set<TokenEntity> getTokens(String subject);
+    Optional<TokenEntity> getToken(String token);
 
     void invalidateToken(String token);
 

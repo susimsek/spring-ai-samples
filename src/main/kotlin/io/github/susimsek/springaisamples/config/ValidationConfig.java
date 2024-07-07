@@ -27,7 +27,7 @@ public class ValidationConfig {
             .permitAll()
             .requestMatchers(requestMatchersConfig.swaggerPaths()).permitAll()
             .requestMatchers(requestMatchersConfig.actuatorPaths()).permitAll()
-            .requestMatchers(requestMatchersConfig.signPath())
+            .requestMatchers(requestMatchersConfig.cityPath())
             .headerName(IdempotencyConstants.IDEMPOTENCY_HEADER_NAME)
             .notBlank().min(8).max(36).regexp(IDEMPOTENCY_PATTERN_REGEX)
             .validated()

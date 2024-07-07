@@ -29,7 +29,6 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Date;
 import java.util.Objects;
-import java.util.Set;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -285,8 +284,9 @@ public class TokenProvider {
     }
 
     public boolean isValidRefreshToken(String token, String subject) {
-        Set<TokenEntity> tokens = tokenStore.getTokens(subject);
-        return tokens.stream().anyMatch(t -> t.getToken().equals(token));
+        return tokenStore.getToken(token)
+            .map(tokenEntity -> tokenEntity.getSubject().equals(subject))
+            .isPresent();
     }
 
     public void invalidateToken(String token) {
