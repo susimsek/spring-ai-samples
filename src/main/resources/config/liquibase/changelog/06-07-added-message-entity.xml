@@ -41,14 +41,7 @@
         </createIndex>
     </changeSet>
 
-    <changeSet id="1699444800000-4" author="susimsek">
-        <createIndex indexName="idx_locale_code" tableName="message">
-            <column name="locale"/>
-            <column name="code"/>
-        </createIndex>
-    </changeSet>
-
-    <changeSet id="1699444800000-5-data" author="susimsek (generated)" context="faker">
+    <changeSet id="1699444800000-4-data" author="susimsek (generated)" context="faker">
         <loadData
                 file="config/liquibase/fake-data/message.csv"
                 separator=";"
