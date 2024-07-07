@@ -81,7 +81,8 @@ public class CityController {
         @ParameterObject Pageable pageable,
         @RequestParam(required = false)
         @Size(min = 3, max = 100, message = "{validation.field.size}")
-        @Pattern(regexp = "^[a-zA-Z0-9\\-\\s]+$", message = "{validation.field.pattern}") String name) {
+        @Pattern(regexp = "^[a-zA-Z0-9\\-\\s]+$", message = "{validation.field.pattern}")
+        String name) {
         CityFilterDTO filter = new CityFilterDTO(name);
         Page<CityDTO> cities = cityService.getAllCities(pageable, filter);
         PagedModel<CityDTO> pagedModel = pagedResourcesAssembler.toModel(cities, cityModelAssembler);
