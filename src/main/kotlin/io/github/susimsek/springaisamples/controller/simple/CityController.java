@@ -174,9 +174,7 @@ public class CityController {
         @Valid @RequestBody CityCreateDTO cityCreateDTO) throws URISyntaxException {
         CityDTO createdCity = cityService.createCity(cityCreateDTO);
         cityModelAssembler.toModel(createdCity);
-        return ResponseEntity
-            .created(new URI(createdCity.getRequiredLink(IanaLinkRelations.SELF).getHref()))
-            .body(createdCity);
+        return buildCreateResponse(createdCity);
     }
 
     @Operation(summary = "Update a city", description = "Update an existing city by its ID")
@@ -247,5 +245,11 @@ public class CityController {
         @NotNull(message = "{validation.field.notNull}") Long id) {
         cityService.deleteCity(id);
         return ResponseEntity.noContent().build();
+    }
+
+    private ResponseEntity<CityDTO> buildCreateResponse(CityDTO createdCity) throws URISyntaxException {
+        return ResponseEntity
+            .created(new URI(createdCity.getRequiredLink(IanaLinkRelations.SELF).getHref()))
+            .body(createdCity);
     }
 }

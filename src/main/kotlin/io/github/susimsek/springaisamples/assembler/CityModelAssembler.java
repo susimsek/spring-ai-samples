@@ -20,9 +20,12 @@ public class CityModelAssembler extends RepresentationModelAssemblerSupport<City
     @NonNull
     @Override
     public CityDTO toModel(CityDTO city) {
-        city.add(linkTo(methodOn(CityController.class).getCityById(city.getId())).withSelfRel());
-        city.add(linkTo(methodOn(CityController.class).updateCity(city.getId(), null)).withRel("update"));
-        city.add(linkTo(methodOn(CityController.class).deleteCity(city.getId())).withRel("delete"));
+        city.add(linkTo(methodOn(CityController.class)
+            .getCityById(city.getId())).withSelfRel());
+        city.add(linkTo(methodOn(CityController.class)
+            .updateCity(city.getId(), null)).withRel("update"));
+        city.add(linkTo(methodOn(CityController.class)
+            .deleteCity(city.getId())).withRel("delete"));
         return city;
     }
 
