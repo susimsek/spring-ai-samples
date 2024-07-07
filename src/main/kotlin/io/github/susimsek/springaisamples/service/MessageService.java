@@ -5,11 +5,9 @@ import io.github.susimsek.springaisamples.entity.Message;
 import io.github.susimsek.springaisamples.repository.MessageRepository;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -27,11 +25,5 @@ public class MessageService {
         List<Message> messages = messageRepository.findByLocale(locale);
         return messages.stream()
             .collect(Collectors.toConcurrentMap(Message::getCode, Message::getContent));
-    }
-
-    @Cacheable(value = CacheName.MESSAGES_CACHE, key = "#locale")
-    @Async
-    public CompletableFuture<Map<String, String>> preloadMessagesAsync(String locale) {
-        return CompletableFuture.completedFuture(loadMessagesFromDatabase(locale));
     }
 }

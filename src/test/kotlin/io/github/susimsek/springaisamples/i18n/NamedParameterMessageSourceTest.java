@@ -14,11 +14,11 @@ import org.springframework.context.NoSuchMessageException;
 
 class NamedParameterMessageSourceTest {
 
-    private NamedParameterMessageSource messageSource;
+    private AbstractNamedParameterMessageSource messageSource;
 
     @BeforeEach
     void setUp() {
-        messageSource = new NamedParameterMessageSource(null);
+        messageSource = null;
         messageSource.setAlwaysUseMessageFormat(false);
         messageSource.setUseCodeAsDefaultMessage(false);
     }

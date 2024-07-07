@@ -8,11 +8,11 @@ import java.util.Map;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 import java.util.concurrent.ConcurrentHashMap;
-import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.lang.NonNull;
 import org.springframework.util.Assert;
 
-public class DatabaseMessageSource extends ResourceBundleMessageSource {
+
+public class DatabaseMessageSource extends AbstractNamedParameterMessageSource {
 
     private final MessageSourceControl control;
     private long cacheMillis = -1L;

@@ -1,12 +1,12 @@
 package io.github.susimsek.springaisamples.i18n;
 
-import io.github.susimsek.springaisamples.service.MessageService;
 import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -21,7 +21,9 @@ import org.springframework.util.CollectionUtils;
  * from a provided map.
  */
 @Slf4j
-public class NamedParameterMessageSource extends DatabaseMessageSource implements ParameterMessageSource {
+@NoArgsConstructor
+public abstract class AbstractNamedParameterMessageSource
+    extends ResourceBundleMessageSource implements ParameterMessageSource {
 
 
     /**
@@ -29,10 +31,6 @@ public class NamedParameterMessageSource extends DatabaseMessageSource implement
      * This pattern matches sequences that conform to Java variable name constraints.
      */
     private static final Pattern NAMED_PATTERN = Pattern.compile("\\{([a-zA-Z_]\\w*)}");
-
-    public NamedParameterMessageSource(MessageService messageService) {
-        super(messageService);
-    }
 
     /**
      * Replaces named parameters in the message template with their corresponding values.

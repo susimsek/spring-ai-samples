@@ -1,6 +1,6 @@
 package io.github.susimsek.springaisamples.config;
 
-import io.github.susimsek.springaisamples.i18n.NamedParameterMessageSource;
+import io.github.susimsek.springaisamples.i18n.DatabaseMessageSource;
 import io.github.susimsek.springaisamples.i18n.ParameterMessageSource;
 import io.github.susimsek.springaisamples.service.MessageService;
 import jakarta.validation.MessageInterpolator;
@@ -31,7 +31,7 @@ public class LocaleConfig {
     @Bean
     public ParameterMessageSource messageSource(MessageSourceProperties properties,
                                                 MessageService messageService) {
-        NamedParameterMessageSource messageSource = new NamedParameterMessageSource(messageService);
+        DatabaseMessageSource messageSource = new DatabaseMessageSource(messageService);
         if (StringUtils.hasText(properties.getBasename())) {
             messageSource.setBasenames(StringUtils
                 .commaDelimitedListToStringArray(StringUtils.trimAllWhitespace(properties.getBasename())));
