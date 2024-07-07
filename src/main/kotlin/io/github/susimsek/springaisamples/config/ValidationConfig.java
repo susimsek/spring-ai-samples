@@ -12,6 +12,7 @@ import io.github.susimsek.springaisamples.validation.HeaderValidationFilter;
 import jakarta.validation.MessageInterpolator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.web.servlet.util.matcher.MvcRequestMatcher;
 
 @Configuration(proxyBeanMethods = false)
 public class ValidationConfig {
@@ -20,6 +21,7 @@ public class ValidationConfig {
     public HeaderValidationFilter headerValidationFilter(
         RequestMatchersConfig requestMatchersConfig,
         HeaderValidationProblemSupport problemSupport,
+        MvcRequestMatcher.Builder mvc,
         MessageInterpolator messageInterpolator) {
         return HeaderValidationFilter.builder(messageInterpolator, problemSupport)
             .order(FilterOrder.HEADER_VALIDATION.order())
@@ -27,6 +29,7 @@ public class ValidationConfig {
             .permitAll()
             .requestMatchers(requestMatchersConfig.swaggerPaths()).permitAll()
             .requestMatchers(requestMatchersConfig.actuatorPaths()).permitAll()
+            .requestMatchers(mvc.pattern("/api/v{version}/cities/paged")).validated()
             .requestMatchers(requestMatchersConfig.cityPath())
             .headerName(IdempotencyConstants.IDEMPOTENCY_HEADER_NAME)
             .notBlank().min(8).max(36).regexp(IDEMPOTENCY_PATTERN_REGEX)

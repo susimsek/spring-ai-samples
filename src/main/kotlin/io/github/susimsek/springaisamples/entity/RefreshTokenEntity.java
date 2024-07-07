@@ -20,7 +20,7 @@ import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 import org.hibernate.proxy.HibernateProxy;
 
-@Cache(region = "refreshTokenCache", usage = CacheConcurrencyStrategy.READ_WRITE)
+@Cache(region = "refreshTokenEntityCache", usage = CacheConcurrencyStrategy.READ_WRITE)
 @Entity
 @Table(name = "refresh_token")
 @Getter

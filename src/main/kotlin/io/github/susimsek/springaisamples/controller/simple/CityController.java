@@ -4,6 +4,7 @@ import io.github.susimsek.springaisamples.assembler.CityModelAssembler;
 import io.github.susimsek.springaisamples.constant.Constants;
 import io.github.susimsek.springaisamples.dto.CityCreateDTO;
 import io.github.susimsek.springaisamples.dto.CityDTO;
+import io.github.susimsek.springaisamples.dto.CityFilterDTO;
 import io.github.susimsek.springaisamples.dto.CityUpdateDTO;
 import io.github.susimsek.springaisamples.openapi.annotation.Idempotent;
 import io.github.susimsek.springaisamples.service.CityService;
@@ -17,6 +18,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
@@ -40,6 +43,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -74,8 +78,12 @@ public class CityController {
     })
     @GetMapping("/paged")
     public ResponseEntity<PagedModel<CityDTO>> getAllCitiesPaged(
-        @ParameterObject Pageable pageable) {
-        Page<CityDTO> cities = cityService.getAllCities(pageable);
+        @ParameterObject Pageable pageable,
+        @RequestParam(required = false)
+        @Size(min = 3, max = 100, message = "{validation.field.size}")
+        @Pattern(regexp = "^[a-zA-Z0-9\\-\\s]+$", message = "{validation.field.pattern}") String name) {
+        CityFilterDTO filter = new CityFilterDTO(name);
+        Page<CityDTO> cities = cityService.getAllCities(pageable, filter);
         PagedModel<CityDTO> pagedModel = pagedResourcesAssembler.toModel(cities, cityModelAssembler);
 
         HttpHeaders headers = new HttpHeaders();

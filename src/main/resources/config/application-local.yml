@@ -111,6 +111,7 @@ spring:
       - citiesCache
       - messageEntityCache
       - messagesByLocaleCache
+      - refreshTokenEntityCache
     caches:
       jwksCache:
         ttl: 1h
