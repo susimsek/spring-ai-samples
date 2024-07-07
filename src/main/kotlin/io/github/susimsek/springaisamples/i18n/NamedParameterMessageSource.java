@@ -1,19 +1,16 @@
 package io.github.susimsek.springaisamples.i18n;
 
-import java.io.IOException;
+import io.github.susimsek.springaisamples.service.MessageService;
 import java.util.Locale;
 import java.util.Map;
-import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.context.support.ResourceBundleMessageSource;
-import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 
@@ -23,17 +20,19 @@ import org.springframework.util.CollectionUtils;
  * to replace placeholders in the form of {paramName} with their corresponding values
  * from a provided map.
  */
-@RequiredArgsConstructor
 @Slf4j
-public class NamedParameterMessageSource extends ResourceBundleMessageSource implements ParameterMessageSource {
+public class NamedParameterMessageSource extends DatabaseMessageSource implements ParameterMessageSource {
 
-    private final ResourceBundle.Control control;
 
     /**
      * Pattern to match named parameters in the format {paramName}.
      * This pattern matches sequences that conform to Java variable name constraints.
      */
     private static final Pattern NAMED_PATTERN = Pattern.compile("\\{([a-zA-Z_]\\w*)}");
+
+    public NamedParameterMessageSource(MessageService messageService) {
+        super(messageService);
+    }
 
     /**
      * Replaces named parameters in the message template with their corresponding values.
@@ -116,26 +115,5 @@ public class NamedParameterMessageSource extends ResourceBundleMessageSource imp
         return bundle.keySet().stream()
             .filter(key -> key.startsWith(prefix))
             .collect(Collectors.toMap(key -> key, key -> getMessage(key, null, locale)));
-    }
-
-    /**
-     * Loads the resource bundle for the given basename and locale.
-     *
-     * @param basename the basename of the resource bundle
-     * @param locale   the locale to load the resource bundle for
-     * @return the loaded resource bundle
-     * @throws MissingResourceException if the resource bundle cannot be loaded
-     */
-    @NonNull
-    @Override
-    protected ResourceBundle doGetBundle(@NonNull String basename,
-                                         @NonNull Locale locale) {
-        try {
-            return control.newBundle(
-                basename, locale, "java.class", getBundleClassLoader(), false);
-        } catch (IllegalAccessException | InstantiationException | IOException e) {
-            log.error("Failed to load resource bundle for basename: {} and locale: {}", basename, locale, e);
-            throw new MissingResourceException("Failed to load resource bundle", basename, locale.toString());
-        }
     }
 }

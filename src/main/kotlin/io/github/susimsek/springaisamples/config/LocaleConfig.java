@@ -1,8 +1,8 @@
 package io.github.susimsek.springaisamples.config;
 
-import io.github.susimsek.springaisamples.i18n.DatabaseResourceBundleControl;
 import io.github.susimsek.springaisamples.i18n.NamedParameterMessageSource;
 import io.github.susimsek.springaisamples.i18n.ParameterMessageSource;
+import io.github.susimsek.springaisamples.service.MessageService;
 import jakarta.validation.MessageInterpolator;
 import jakarta.validation.Validator;
 import java.time.Duration;
@@ -30,8 +30,8 @@ public class LocaleConfig {
 
     @Bean
     public ParameterMessageSource messageSource(MessageSourceProperties properties,
-                                                DatabaseResourceBundleControl databaseResourceBundleControl) {
-        NamedParameterMessageSource messageSource = new NamedParameterMessageSource(databaseResourceBundleControl);
+                                                MessageService messageService) {
+        NamedParameterMessageSource messageSource = new NamedParameterMessageSource(messageService);
         if (StringUtils.hasText(properties.getBasename())) {
             messageSource.setBasenames(StringUtils
                 .commaDelimitedListToStringArray(StringUtils.trimAllWhitespace(properties.getBasename())));
