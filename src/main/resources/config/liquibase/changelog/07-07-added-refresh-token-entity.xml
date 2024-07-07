@@ -24,6 +24,9 @@
             <column name="expires_at" type="TIMESTAMP">
                 <constraints nullable="false"/>
             </column>
+            <column name="revoked" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
             <column name="created_at" type="DATETIME">
                 <constraints nullable="false"/>
             </column>

@@ -16,6 +16,8 @@ import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 import org.hibernate.proxy.HibernateProxy;
 
 @Cache(region = "refreshTokenCache", usage = CacheConcurrencyStrategy.READ_WRITE)
@@ -27,6 +29,8 @@ import org.hibernate.proxy.HibernateProxy;
 @AllArgsConstructor
 @SuperBuilder
 @ToString
+@SQLDelete(sql = "UPDATE refresh_token SET revoked = true WHERE id = ?")
+@SQLRestriction("revoked = false")
 public class RefreshTokenEntity extends BaseEntity {
 
     @Id
@@ -43,6 +47,9 @@ public class RefreshTokenEntity extends BaseEntity {
 
     @Column(name = "expires_at", nullable = false)
     private Instant expiresAt;
+
+    @Column(name = "revoked", nullable = false)
+    private boolean revoked = false;
 
     @Override
     public final boolean equals(Object obj) {
