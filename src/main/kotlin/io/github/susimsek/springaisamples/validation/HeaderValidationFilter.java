@@ -236,7 +236,7 @@ public class HeaderValidationFilter extends OncePerRequestFilter implements Orde
         private final List<RequestMatcherConfig> requestMatcherConfigs = new ArrayList<>();
         private boolean anyRequestConfigured = false;
         private boolean defaultValidated = true;
-        private int order = FilterOrder.TRACE.order();
+        private int order = FilterOrder.HEADER_VALIDATION.order();
         private int lastIndex = 0;
         private final Map<String, HeaderConfig> defaultHeaderConfigs = new HashMap<>();
         private String headerName = null;

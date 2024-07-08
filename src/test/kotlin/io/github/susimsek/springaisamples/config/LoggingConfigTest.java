@@ -48,7 +48,7 @@ class LoggingConfigTest {
         LogFormatter logFormatterMock = mock(LogFormatter.class);
         Obfuscator obfuscatorMock = mock(Obfuscator.class);
         var loggingHandler = loggingConfig.loggingHandler(
-            logFormatterMock, obfuscatorMock, null);
+            logFormatterMock, obfuscatorMock, null, null);
         assertNotNull(loggingHandler);
         assertEquals(HttpLoggingHandler.class, loggingHandler.getClass());
     }

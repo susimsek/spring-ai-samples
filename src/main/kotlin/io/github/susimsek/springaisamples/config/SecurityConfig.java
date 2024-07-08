@@ -29,7 +29,7 @@ import io.github.susimsek.springaisamples.security.signature.SignatureVerificati
 import io.github.susimsek.springaisamples.security.xss.XssFilter;
 import io.github.susimsek.springaisamples.service.EncryptionService;
 import io.github.susimsek.springaisamples.service.SignatureService;
-import io.github.susimsek.springaisamples.trace.TraceFilter;
+import io.github.susimsek.springaisamples.trace.TracingFilter;
 import io.github.susimsek.springaisamples.utils.JsonUtil;
 import io.github.susimsek.springaisamples.utils.SanitizationUtil;
 import io.github.susimsek.springaisamples.validation.HeaderValidationFilter;
@@ -91,7 +91,7 @@ public class SecurityConfig {
         SignatureVerificationFilter signatureVerificationFilter,
         SignatureFilter signatureFilter,
         XssFilter xssFilter,
-        TraceFilter traceFilter,
+        TracingFilter traceFilter,
         ApiVersionFilter apiVersionFilter,
         HeaderValidationFilter headerValidationFilter,
         IdempotencyFilter idempotencyFilter,
@@ -132,16 +132,15 @@ public class SecurityConfig {
                 .jwt(withDefaults()))
             .addFilterBefore(signatureVerificationFilter, BearerTokenAuthenticationFilter.class)
             .addFilterBefore(decryptionFilter, SignatureVerificationFilter.class)
-            .addFilterBefore(headerValidationFilter, DecryptionFilter.class)
+            .addFilterBefore(traceFilter, DecryptionFilter.class)
+            .addFilterBefore(headerValidationFilter, TracingFilter.class)
             .addFilterBefore(apiVersionFilter, HeaderValidationFilter.class)
             .addFilterBefore(loggingFilter, ApiVersionFilter.class)
-            .addFilterBefore(traceFilter, LoggingFilter.class)
             .addFilterAfter(xssFilter, BearerTokenAuthenticationFilter.class)
             .addFilterAfter(idempotencyFilter, XssFilter.class)
             .addFilterAfter(rateLimitFilter, IdempotencyFilter.class)
             .addFilterAfter(signatureFilter, RateLimitingFilter.class)
-            .addFilterAfter(encryptionFilter, SignatureFilter.class)
-            .addFilterAfter(loggingFilter, EncryptionFilter.class);
+            .addFilterAfter(encryptionFilter, SignatureFilter.class);
         return http.build();
     }
 

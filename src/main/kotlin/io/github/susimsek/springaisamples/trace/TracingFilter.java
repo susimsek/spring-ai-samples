@@ -26,7 +26,7 @@ import org.springframework.util.Assert;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 @RequiredArgsConstructor
-public class TraceFilter extends OncePerRequestFilter implements Ordered {
+public class TracingFilter extends OncePerRequestFilter implements Ordered {
 
     private final Tracer tracer;
     private final List<RequestMatcherConfig> requestMatcherConfigs;
@@ -54,16 +54,7 @@ public class TraceFilter extends OncePerRequestFilter implements Ordered {
         @NonNull FilterChain filterChain)
         throws ServletException, IOException {
         String requestId = request.getHeader(REQUEST_ID_HEADER_NAME);
-        if (!TraceHeaderUtils.isValidRequestId(requestId)) {
-            filterChain.doFilter(request, response);
-            return;
-        }
-
         String correlationId = request.getHeader(CORRELATION_ID_HEADER_NAME);
-        if (!TraceHeaderUtils.isValidCorrelationId(correlationId)) {
-            filterChain.doFilter(request, response);
-            return;
-        }
 
         Span currentSpan = tracer.currentSpan();
         if (currentSpan != null) {
@@ -111,7 +102,7 @@ public class TraceFilter extends OncePerRequestFilter implements Ordered {
 
         AfterRequestMatchersBuilder requestMatchers(RequestMatcher... requestMatchers);
 
-        TraceFilter build();
+        TracingFilter build();
     }
 
     public interface AfterRequestMatchersBuilder {
@@ -204,8 +195,8 @@ public class TraceFilter extends OncePerRequestFilter implements Ordered {
             return this;
         }
 
-        public TraceFilter build() {
-            return new TraceFilter(tracer,
+        public TracingFilter build() {
+            return new TracingFilter(tracer,
                 requestMatcherConfigs, defaultTraced, order);
         }
 

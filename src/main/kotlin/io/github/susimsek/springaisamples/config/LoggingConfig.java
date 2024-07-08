@@ -25,6 +25,7 @@ import io.github.susimsek.springaisamples.logging.strategy.NoOpObfuscationStrate
 import io.github.susimsek.springaisamples.logging.strategy.ObfuscationStrategy;
 import io.github.susimsek.springaisamples.logging.utils.Obfuscator;
 import io.github.susimsek.springaisamples.logging.wrapper.HttpLoggingWrapper;
+import io.micrometer.tracing.Tracer;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
@@ -70,8 +71,9 @@ public class LoggingConfig {
     @Bean
     public LoggingHandler loggingHandler(LogFormatter logFormatter,
                                          Obfuscator obfuscator,
-                                         RequestMatchersConfig requestMatchersConfig) {
-        return HttpLoggingHandler.builder(logFormatter, obfuscator)
+                                         RequestMatchersConfig requestMatchersConfig,
+                                         Tracer tracer) {
+        return HttpLoggingHandler.builder(tracer, logFormatter, obfuscator)
             .httpLogLevel(loggingProperties.getHttp().getLogLevel())
             .methodLogLevel(loggingProperties.getAspect().getLogLevel())
             .order(FilterOrder.LOGGING.order())

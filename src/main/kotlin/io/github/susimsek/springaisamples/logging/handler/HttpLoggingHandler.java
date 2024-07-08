@@ -1,9 +1,7 @@
 package io.github.susimsek.springaisamples.logging.handler;
 
-import static io.github.susimsek.springaisamples.trace.TraceConstants.CORRELATION_ID;
-import static io.github.susimsek.springaisamples.trace.TraceConstants.REQUEST_ID;
-import static io.github.susimsek.springaisamples.trace.TraceConstants.SPAN_ID;
-import static io.github.susimsek.springaisamples.trace.TraceConstants.TRACE_ID;
+import static io.github.susimsek.springaisamples.trace.TraceConstants.CORRELATION_ID_HEADER_NAME;
+import static io.github.susimsek.springaisamples.trace.TraceConstants.REQUEST_ID_HEADER_NAME;
 
 import io.github.susimsek.springaisamples.enums.FilterOrder;
 import io.github.susimsek.springaisamples.logging.enums.HttpLogLevel;
@@ -17,6 +15,9 @@ import io.github.susimsek.springaisamples.logging.model.MethodLog;
 import io.github.susimsek.springaisamples.logging.utils.HttpRequestMatcher;
 import io.github.susimsek.springaisamples.logging.utils.Obfuscator;
 import io.github.susimsek.springaisamples.trace.Trace;
+import io.github.susimsek.springaisamples.trace.TraceConstants;
+import io.micrometer.tracing.Span;
+import io.micrometer.tracing.Tracer;
 import jakarta.servlet.http.HttpServletRequest;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
@@ -26,7 +27,7 @@ import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
-import org.slf4j.MDC;
+import org.jboss.logging.MDC;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRequest;
@@ -38,6 +39,7 @@ import org.springframework.util.Assert;
 @Slf4j
 @RequiredArgsConstructor
 public class HttpLoggingHandler implements LoggingHandler {
+    private final Tracer tracer;
     private final HttpLogLevel httpLogLevel;
     private final MethodLogLevel methodLogLevel;
     private final LogFormatter logFormatter;
@@ -155,21 +157,18 @@ public class HttpLoggingHandler implements LoggingHandler {
 
     private HttpLog.HttpLogBuilder initLogBuilder(HttpLogType type, HttpMethod method, URI uri,
                                                   HttpHeaders headers, Source source) {
-
-        Trace trace = createTrace();
-
         return HttpLog.builder()
             .type(type)
             .method(method)
             .uri(uri)
             .headers(isHttpLogLevel(HttpLogLevel.HEADERS) ? obfuscator.maskHeaders(headers) : new HttpHeaders())
             .source(source)
-            .trace(trace.isComplete() ? trace : null);
+            .trace(type == HttpLogType.REQUEST ? createTrace(headers) : null);
     }
 
     private MethodLog.MethodLogBuilder initMethodLogBuilder(MethodLogType type,
                                                             String className, String methodName) {
-        Trace trace = createTrace();
+        Trace trace = createTrace(null);
 
         return MethodLog.builder()
             .type(type)
@@ -195,12 +194,22 @@ public class HttpLoggingHandler implements LoggingHandler {
         log.info(message, formattedLog);
     }
 
-    private Trace createTrace() {
-        String requestId = MDC.get(REQUEST_ID);
-        String correlationId = MDC.get(CORRELATION_ID);
+    private Trace createTrace(HttpHeaders headers) {
+        Span currentSpan = tracer.currentSpan();
+        String traceId = null;
+        String spanId = null;
+        if (currentSpan != null) {
+            var traceContext = currentSpan.context();
+            traceId = traceContext.traceId();
+            spanId = traceContext.spanId();
+        }
+        String requestId = headers == null ? (String) MDC.get(TraceConstants.REQUEST_ID)
+            : headers.getFirst(REQUEST_ID_HEADER_NAME);
+        String correlationId = headers == null ? (String) MDC.get(TraceConstants.CORRELATION_ID)
+            : headers.getFirst(CORRELATION_ID_HEADER_NAME);
         return Trace.builder()
-            .traceId(MDC.get(TRACE_ID))
-            .spanId(MDC.get(SPAN_ID))
+            .traceId(traceId)
+            .spanId(spanId)
             .requestId(requestId)
             .correlationId(correlationId)
             .build();
@@ -234,14 +243,15 @@ public class HttpLoggingHandler implements LoggingHandler {
         InitialBuilder logged();
     }
 
-    public static InitialBuilder builder(LogFormatter logFormatter,
+    public static InitialBuilder builder(Tracer tracer, LogFormatter logFormatter,
                                          Obfuscator obfuscator) {
-        return new Builder(logFormatter, obfuscator);
+        return new Builder(tracer, logFormatter, obfuscator);
     }
 
     private static class Builder extends AbstractRequestMatcherRegistry<Builder>
         implements InitialBuilder, AfterRequestMatchersBuilder {
 
+        private final Tracer tracer;
         private final LogFormatter logFormatter;
         private final Obfuscator obfuscator;
         private final List<RequestMatcherConfig> requestMatcherConfigs = new ArrayList<>();
@@ -252,8 +262,9 @@ public class HttpLoggingHandler implements LoggingHandler {
         private int order = FilterOrder.LOGGING.order();
         private int lastIndex = 0;
 
-        private Builder(LogFormatter logFormatter,
+        private Builder(Tracer tracer, LogFormatter logFormatter,
                         Obfuscator obfuscator) {
+            this.tracer = tracer;
             this.logFormatter = logFormatter;
             this.obfuscator = obfuscator;
         }
@@ -328,7 +339,7 @@ public class HttpLoggingHandler implements LoggingHandler {
 
         public HttpLoggingHandler build() {
             return new HttpLoggingHandler(
-                httpLogLevel, methodLogLevel, logFormatter, obfuscator,
+                tracer, httpLogLevel, methodLogLevel, logFormatter, obfuscator,
                 requestMatcherConfigs, defaultLogged, order);
         }
 
