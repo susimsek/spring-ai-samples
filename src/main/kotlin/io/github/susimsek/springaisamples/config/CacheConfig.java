@@ -4,10 +4,6 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.jcache.configuration.CaffeineConfiguration;
 import com.github.benmanes.caffeine.jcache.spi.CaffeineCachingProvider;
 import io.github.susimsek.springaisamples.constant.CacheName;
-import java.util.OptionalLong;
-import java.util.concurrent.TimeUnit;
-import javax.cache.Caching;
-import javax.cache.spi.CachingProvider;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.cache.jcache.ConfigSettings;
 import org.springframework.boot.autoconfigure.cache.JCacheManagerCustomizer;
@@ -19,6 +15,11 @@ import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.caffeine.CaffeineCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import javax.cache.Caching;
+import javax.cache.spi.CachingProvider;
+import java.util.OptionalLong;
+import java.util.concurrent.TimeUnit;
 
 @Configuration(proxyBeanMethods = false)
 @EnableCaching
@@ -72,7 +73,7 @@ public class CacheConfig {
     }
 
     private void createJCache(javax.cache.CacheManager cm,
-                             String cacheName, CacheProperties.CacheConfig config) {
+                              String cacheName, CacheProperties.CacheConfig config) {
         CaffeineConfiguration<Object, Object> caffeineConfiguration = new CaffeineConfiguration<>();
         caffeineConfiguration.setMaximumSize(OptionalLong.of(config.getMaximumSize()));
         caffeineConfiguration.setExpireAfterWrite(OptionalLong.of(

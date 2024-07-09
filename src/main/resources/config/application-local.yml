@@ -112,6 +112,7 @@ spring:
       - messageEntityCache
       - messagesByLocaleCache
       - refreshTokenEntityCache
+      - messagesCache
     caches:
       jwksCache:
         ttl: 1h
@@ -125,7 +126,10 @@ spring:
         ttl: 1h
         initial-capacity: 500
         maximum-size: 2000
-
+      messagesCache:
+        ttl: 1h
+        initial-capacity: 500
+        maximum-size: 2000
   devtools:
     restart:
       enabled: true
