@@ -10,6 +10,7 @@ import io.github.susimsek.springaisamples.exception.ResourceNotFoundException;
 import io.github.susimsek.springaisamples.mapper.CityMapper;
 import io.github.susimsek.springaisamples.repository.CityRepository;
 import io.github.susimsek.springaisamples.specification.CitySpecification;
+import io.github.susimsek.springaisamples.validation.EmailValidation;
 import io.github.susimsek.springaisamples.validator.CityValidator;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
