@@ -97,6 +97,7 @@ public class HeaderValidationFilter extends OncePerRequestFilter implements Orde
 
         if (headerConfig.isNotBlank() && !StringUtils.hasText(headerValue)) {
             violations.add(createViolation(
+                "NotBlank",
                 headerConfig.getNotBlankMessage(),
                 headerConfig.getHeaderName(),
                 headerValue,
@@ -109,6 +110,7 @@ public class HeaderValidationFilter extends OncePerRequestFilter implements Orde
             if (headerValue.length() < headerConfig.getMin() || headerValue.length() > headerConfig.getMax()) {
                 Map<String, Object> args = Map.of("min", headerConfig.getMin(), "max", headerConfig.getMax());
                 violations.add(createViolation(
+                    "Size",
                     headerConfig.getSizeMessage(),
                     headerConfig.getHeaderName(),
                     headerValue,
@@ -119,6 +121,7 @@ public class HeaderValidationFilter extends OncePerRequestFilter implements Orde
 
             if (!headerValue.matches(headerConfig.getRegexp())) {
                 violations.add(createViolation(
+                    "Pattern",
                     headerConfig.getPatternMessage(),
                     headerConfig.getHeaderName(),
                     headerValue,
@@ -131,14 +134,20 @@ public class HeaderValidationFilter extends OncePerRequestFilter implements Orde
         return violations;
     }
 
-    private Violation createViolation(String messageTemplate, String headerName, Object invalidValue, Locale locale,
-                                      Map<String, Object> parameters) {
+    private Violation createViolation(
+        String code,
+        String messageTemplate,
+        String headerName,
+        Object invalidValue,
+        Locale locale,
+        Map<String, Object> parameters) {
         MessageContext context = new
             MessageContext(messageTemplate, parameters, invalidValue);
         String localizedMessage = messageInterpolator.interpolate(
             messageTemplate, context, locale);
 
         return new Violation(
+            code,
             null,
             headerName,
             invalidValue,

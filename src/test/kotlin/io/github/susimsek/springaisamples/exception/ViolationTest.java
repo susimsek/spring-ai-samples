@@ -22,7 +22,7 @@ class ViolationTest {
         Object rejectedValue = "testRejectedValue";
         String message = "testMessage";
 
-        Violation violation = new Violation(objectName, field, rejectedValue, message);
+        Violation violation = new Violation("NotBlank", objectName, field, rejectedValue, message);
 
         assertEquals(objectName, violation.objectName());
         assertEquals(field, violation.field());

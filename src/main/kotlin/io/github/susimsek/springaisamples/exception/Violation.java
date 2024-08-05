@@ -2,6 +2,7 @@ package io.github.susimsek.springaisamples.exception;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.github.susimsek.springaisamples.utils.StringUtils;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Path;
@@ -11,6 +12,10 @@ import org.springframework.validation.ObjectError;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record Violation(
+    @Schema(description = "Code.", example = "not_blank")
+    @JsonProperty
+    String code,
+
     @Schema(description = "Object name", example = "chatRequest")
     @JsonProperty("object")
     String objectName,
@@ -28,11 +33,12 @@ public record Violation(
     String message
 ) implements Serializable {
     public Violation(String objectName, String message) {
-        this(objectName, null, null, message);
+        this(null, objectName, null, null, message);
     }
 
     public Violation(FieldError error) {
         this(
+            getCode(error.getCode()),
             error.getObjectName().replaceFirst("DTO$", ""),
             error.getField(),
             error.getRejectedValue(),
@@ -42,6 +48,7 @@ public record Violation(
 
     public Violation(ObjectError error) {
         this(
+            getCode(error.getCode()),
             null,
             error.getObjectName().replaceFirst("DTO$", ""),
             null,
@@ -51,6 +58,8 @@ public record Violation(
 
     public Violation(ConstraintViolation<?> violation) {
         this(
+            getCode(violation.getConstraintDescriptor()
+                .getAnnotation().annotationType().getSimpleName()),
             null,
             getField(violation.getPropertyPath()),
             violation.getInvalidValue(),
@@ -64,5 +73,9 @@ public record Violation(
             fieldName = node.getName();
         }
         return fieldName;
+    }
+
+    private static String getCode(String annotationName) {
+        return StringUtils.toSnakeCase(annotationName);
     }
 }
