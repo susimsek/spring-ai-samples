@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.net.URI;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
@@ -27,7 +27,7 @@ public class WeatherApiErrorHandler implements ResponseErrorHandler {
     @Override
     public void handleError(@NonNull ClientHttpResponse response) throws IOException {
         WeatherApiError error = objectMapper.readValue(response.getBody(), WeatherApiError.class);
-        HttpStatus status = HttpStatus.valueOf(response.getStatusCode().value());
+        HttpStatusCode status = response.getStatusCode();
         String errorKey = "weatherapi.error." + error.code();
         if (status.is4xxClientError()) {
             throw new ClientErrorException(errorKey, status);
